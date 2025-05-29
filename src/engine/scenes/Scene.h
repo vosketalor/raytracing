@@ -48,6 +48,8 @@ public:
     static constexpr double ETA_EMERALD = 1.57;
     static constexpr double ETA_CUBIC_ZIRCONIA = 2.1;
 
+    static constexpr double EPSILON = 1e-6;
+
     Scene() = default;
     virtual ~Scene() = default;
 
@@ -62,4 +64,7 @@ public:
 
     const auto& getShapes() const { return shapes; }
     const auto& getLightSources() const { return lightSources; }
+    const Vector3& getSkyColor() const { return skyColor; }
+    const Vector3& getAmbient() const { return ambient; }
+    const Vector3& getQuadraticAttenuation() const { return quadraticAttenuation; }
 };

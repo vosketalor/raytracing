@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 
+#include "Intersection.h"
 #include "scenes/Scene.h"
 
 class Renderer
@@ -10,15 +11,11 @@ class Renderer
     Scene* scene;
 
 public:
-    Renderer(Scene* scene) : scene(scene) {};
+    explicit Renderer(Scene* scene) : scene(scene) {};
 
-    struct Color
-    {
-        uint8_t r, g, b;
-    };
-
-    void render(int width, int height, std::vector<Color> &frameBuffer);
+    void render(int width, int height, std::vector<Vector3> &frameBuffer);
 
 private:
-    Color getPixelColor(int x, int y, int width, int height);
+    Vector3 getPixelColor(const Vector3& P, const Vector3& v);
+    Intersection findNearestIntersection(const Vector3& P, const Vector3& v) const;
 };

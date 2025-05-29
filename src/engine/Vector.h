@@ -94,6 +94,11 @@ public:
     constexpr auto end() noexcept { return data.end(); }
     constexpr auto begin() const noexcept { return data.begin(); }
     constexpr auto end() const noexcept { return data.end(); }
+    void clamp(double min, double max) noexcept
+    {
+        std::transform(data.begin(), data.end(), data.begin(),
+                       [min, max](const double val) { return std::clamp(val, min, max); });
+    }
 
     // ============== COMPARISON OPERATORS ==============
     bool operator==(const Vector& other) const noexcept {

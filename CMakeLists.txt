@@ -19,4 +19,6 @@ add_executable(Raytracing
         src/engine/shapes/Sphere.h
         src/engine/Intersection.cpp
         src/engine/Intersection.h
+        src/engine/shapes/Plane.cpp
+        src/engine/shapes/Plane.h
 )

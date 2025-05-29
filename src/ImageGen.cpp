@@ -4,13 +4,15 @@
 #include <memory>
 #include "engine/Renderer.h"
 #include "scenes/Scene1.h"
+#include <algorithm> // Pour std::clamp
+#include <iomanip>   // Pour std::setprecision
 
-const Vector3 SKYCOLOR = {235.0/255, 206.0/255, 135.0/255};
+const Vector3 SKYCOLOR = {135.0/255, 206.0/255, 235.0/255};
 
 int main(int argc, char *argv[]) {
     // Paramètres par défaut
-    int width = 1024;
-    int height = 768;
+    int width = 1024/1;
+    int height = 768/1;
     float d = 1.0f;
     Vector3 obs = {0, 0, 0};
     std::string filename = "output.ppm";
@@ -30,10 +32,12 @@ int main(int argc, char *argv[]) {
     auto scene = std::make_unique<Scene1>();
     scene->setSkyColor(SKYCOLOR);
     scene->setAmbient({0.1f, 0.1f, 0.1f});
+    scene->createLights();
+    scene->createShapes();
 
     // Initialisation du rendu
     Renderer renderer(scene.get());
-    std::vector<Renderer::Color> frameBuffer(width * height);
+    std::vector<Vector3> frameBuffer(width * height);
 
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
@@ -50,13 +54,18 @@ int main(int argc, char *argv[]) {
     // En-tête PPM
     image << "P3\n" << width << " " << height << "\n255\n";
 
-    // Écriture des pixels
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const auto& [r, g, b] = frameBuffer[y * width + x];
-            image << static_cast<int>(r * 255) << " "
-                  << static_cast<int>(g * 255) << " "
-                  << static_cast<int>(b * 255) << "\n";
+            Vector3& color = frameBuffer[y * width + x];
+            color.clamp(0.0, 1.0);
+
+            // Clamping et conversion en entier [0-255]
+            int r = static_cast<int>(color[0] * 255);
+            int g = static_cast<int>(color[1] * 255);
+            int b = static_cast<int>(color[2] * 255);
+
+            // Écriture formatée
+            image << r << ' ' << g << ' ' << b << '\n';
         }
     }
 

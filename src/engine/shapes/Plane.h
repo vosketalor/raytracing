@@ -1,0 +1,24 @@
+#pragma once
+#include "Shape.h"
+// #include "BoundingBox.h"
+#include <cmath>
+#include <limits>
+
+class Plane : public Shape {
+private:
+    Vector3 normal;
+    double distance;
+
+public:
+    // Constructors
+    Plane(const Vector3& n, const double d);
+    Plane(const Vector3& P, const Vector3& n);
+    Plane(const Vector3& C, const Vector3& v1, const Vector3& v2);
+
+    // Shape interface implementation
+    Intersection getIntersection(const Vector3& P, const Vector3& v) const override;
+    // void scale(double scale) override;
+    // void rotate(double angle, const Vector3& axis) override;
+    // void setBoundingBox() override;
+    Vector2 getTextureCoordinates(const Vector3& intersection) const override;
+};
