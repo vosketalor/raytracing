@@ -11,8 +11,8 @@ void Renderer::render(const int width, const int height, std::vector<Renderer::C
 
 Renderer::Color Renderer::getPixelColor(const int x, const int y, const int width, const int height)
 {
-    const uint8_t r = (x * 255) / width;
-    const uint8_t g = (y * 255) / height;
-    const uint8_t b = ((x + y) * 255) / (width + height);
+    const uint8_t r = (x) / width;
+    const uint8_t g = (y) / height;
+    const uint8_t b = ((x + y)) / (width + height);
     return {r, g, b};
 }

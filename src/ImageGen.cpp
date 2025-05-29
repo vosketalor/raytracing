@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             const auto& [r, g, b] = frameBuffer[y * width + x];
-            image << static_cast<int>(r) << " "
-                  << static_cast<int>(g) << " "
-                  << static_cast<int>(b) << "\n";
+            image << static_cast<int>(r * 255) << " "
+                  << static_cast<int>(g * 255) << " "
+                  << static_cast<int>(b * 255) << "\n";
         }
     }
 
