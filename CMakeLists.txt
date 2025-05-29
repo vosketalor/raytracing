@@ -10,5 +10,6 @@ add_executable(Raytracing
         src/ImageGen.cpp
         src/engine/Camera.cpp
         src/engine/Renderer.cpp
-        src/engine/Scene.cpp
+        src/engine/scenes/Scene.cpp
+        src/engine/Vector.cpp
 )
