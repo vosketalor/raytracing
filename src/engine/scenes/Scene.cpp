@@ -17,3 +17,36 @@ const Vector3 Scene::ORANGE = Vector3(1, 0.5, 0);
 const Vector3 Scene::PURPLE = Vector3(0.5, 0, 0.5);
 const Vector3 Scene::PINK = Vector3(1, 0.5, 0.75);
 const Vector3 Scene::BROWN = Vector3(0.6, 0.3, 0.1);
+
+
+#include "Scene.h"
+
+// Ajoute une forme (version shared_ptr)
+void Scene::addShape(const std::shared_ptr<Shape>& shape) {
+    shapes.push_back(shape);
+}
+
+// Ajoute une forme (version pointeur brut - conversion automatique en shared_ptr)
+void Scene::addShape(Shape* shape) {
+    shapes.emplace_back(shape);
+}
+
+// Ajoute une lumière (version shared_ptr)
+void Scene::addLightSource(const std::shared_ptr<LightSource>& lightSource) {
+    lightSources.push_back(lightSource);
+}
+
+// Ajoute une lumière (version pointeur brut)
+void Scene::addLightSource(LightSource* lightSource) {
+    lightSources.emplace_back(lightSource);
+}
+
+// Modifie la couleur du ciel
+void Scene::setSkyColor(const Vector3& color) {
+    skyColor = color;
+}
+
+// Modifie l'éclairage ambiant
+void Scene::setAmbient(const Vector3& ambient) {
+    this->ambient = ambient;
+}

@@ -5,12 +5,12 @@
 
 // Forward declarations
 class Shape;
-class Light;
+class LightSource;
 
 class Scene {
 protected:
     std::vector<std::shared_ptr<Shape>> shapes;
-    std::vector<std::shared_ptr<Light>> lights;
+    std::vector<std::shared_ptr<LightSource>> lightSources;
 
     Vector3 ambient = {0.2, 0.2, 0.2};
     Vector3 skyColor = {0.0, 0.0, 0.0};
@@ -54,6 +54,16 @@ public:
     virtual void createShapes() = 0;
     virtual void createLights() = 0;
 
+    void addShape(const std::shared_ptr<Shape>& shape);
+    void addShape(Shape* shape);
+
+    // Gestion des lumières
+    void addLightSource(const std::shared_ptr<LightSource>& lightSource);
+    void addLightSource(LightSource* lightSource);
+
+    // Getters/Setters
+    void setSkyColor(const Vector3& color);
+    void setAmbient(const Vector3& ambient);
     const std::vector<std::shared_ptr<Shape>>& getShapes() const { return shapes; }
-    const std::vector<std::shared_ptr<Light>>& getLights() const { return lights; }
+    const std::vector<std::shared_ptr<LightSource>>& getLightSources() const { return lightSources; }
 };
