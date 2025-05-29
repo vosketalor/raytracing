@@ -18,24 +18,24 @@ protected:
 
 public:
     // ============== COLOR CONSTANTS ==============
-    static const Vector3 BLACK;
-    static const Vector3 WHITE;
-    static const Vector3 GRAY;
-    static const Vector3 DARK_GRAY;
-    static const Vector3 LIGHT_GRAY;
+    inline static constexpr Vector3 BLACK = Vector3(0, 0, 0);
+    inline static constexpr Vector3 WHITE = Vector3(1, 1, 1);
+    inline static constexpr Vector3 GRAY = Vector3(0.5, 0.5, 0.5);
+    inline static constexpr Vector3 DARK_GRAY = Vector3(0.25, 0.25, 0.25);
+    inline static constexpr Vector3 LIGHT_GRAY = Vector3(0.75, 0.75, 0.75);
 
-    static const Vector3 RED;
-    static const Vector3 GREEN;
-    static const Vector3 BLUE;
+    inline static constexpr Vector3 RED = Vector3(1, 0, 0);
+    inline static constexpr Vector3 GREEN = Vector3(0, 1, 0);
+    inline static constexpr Vector3 BLUE = Vector3(0, 0, 1);
 
-    static const Vector3 YELLOW;
-    static const Vector3 CYAN;
-    static const Vector3 MAGENTA;
+    inline static constexpr Vector3 YELLOW = Vector3(1, 1, 0);
+    inline static constexpr Vector3 CYAN = Vector3(0, 1, 1);
+    inline static constexpr Vector3 MAGENTA = Vector3(1, 0, 1);
 
-    static const Vector3 ORANGE;
-    static const Vector3 PURPLE;
-    static const Vector3 PINK;
-    static const Vector3 BROWN;
+    inline static constexpr Vector3 ORANGE = Vector3(1, 0.5, 0);
+    inline static constexpr Vector3 PURPLE = Vector3(0.5, 0, 0.5);
+    inline static constexpr Vector3 PINK = Vector3(1, 0.5, 0.75);
+    inline static constexpr Vector3 BROWN = Vector3(0.6, 0.3, 0.1);
 
     // ============== REFRACTION INDICES ==============
     static constexpr double ETA_AIR = 1.00029;
@@ -48,22 +48,18 @@ public:
     static constexpr double ETA_EMERALD = 1.57;
     static constexpr double ETA_CUBIC_ZIRCONIA = 2.1;
 
-    Scene();
+    Scene() = default;
     virtual ~Scene() = default;
 
     virtual void createShapes() = 0;
     virtual void createLights() = 0;
 
     void addShape(const std::shared_ptr<Shape>& shape);
-    void addShape(Shape* shape);
-
-    // Gestion des lumières
     void addLightSource(const std::shared_ptr<LightSource>& lightSource);
-    void addLightSource(LightSource* lightSource);
 
-    // Getters/Setters
     void setSkyColor(const Vector3& color);
     void setAmbient(const Vector3& ambient);
-    const std::vector<std::shared_ptr<Shape>>& getShapes() const { return shapes; }
-    const std::vector<std::shared_ptr<LightSource>>& getLightSources() const { return lightSources; }
+
+    const auto& getShapes() const { return shapes; }
+    const auto& getLightSources() const { return lightSources; }
 };

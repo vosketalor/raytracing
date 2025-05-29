@@ -3,11 +3,14 @@
 #include <vector>
 #include <cstdint>
 
+#include "scenes/Scene.h"
+
 class Renderer
 {
+    Scene* scene;
 
 public:
-    Renderer() = default;
+    Renderer(Scene* scene) : scene(scene) {};
 
     struct Color
     {

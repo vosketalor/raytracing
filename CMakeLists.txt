@@ -13,5 +13,4 @@ add_executable(Raytracing
         src/engine/scenes/Scene.cpp
         src/engine/Vector.cpp
         src/engine/scenes/Scene1.cpp
-        src/engine/scenes/Scene1.h
 )
