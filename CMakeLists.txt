@@ -15,7 +15,11 @@ include_directories(src/engine)
 include_directories(external/imgui)
 include_directories(external/imgui/backends)
 
-find_package(TBB REQUIRED)
+# TBB only on non-Windows systems
+if(NOT WIN32)
+    find_package(TBB REQUIRED)
+    set(USE_TBB TRUE)
+endif()
 
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
@@ -25,10 +29,10 @@ set(IMGUI_SOURCES
     external/imgui/imgui_demo.cpp
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_opengl3.cpp
-        src/engine/LightSource.cpp
-        src/engine/LightSource.h
-        src/engine/Material.cpp
-        src/engine/Material.h
+    src/engine/LightSource.cpp
+    src/engine/LightSource.h
+    src/engine/Material.cpp
+    src/engine/Material.h
 )
 
 add_executable(Raytracing
@@ -50,4 +54,7 @@ add_executable(Raytracing
 )
 
 target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)
-target_link_libraries(Raytracing PRIVATE TBB::tbb)
+
+if(USE_TBB)
+    target_link_libraries(Raytracing PRIVATE TBB::tbb)
+endif()
