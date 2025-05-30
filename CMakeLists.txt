@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # GLFW
 add_subdirectory(external/glfw)
 include_directories(external/glfw/include)
+cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 
 # ImGui
