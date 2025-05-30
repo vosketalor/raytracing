@@ -1,31 +1,56 @@
 #include "Renderer.h"
-#include "Renderer.h"
-#include <cstdlib>
-
 #include "LightSource.h"
 #include "shapes/Shape.h"
 
-void Renderer::render(const int width, const int height, std::vector<Vector3>& frameBuffer) {
-    // Paramètres de la caméra
-    const Vector3 observer = {0, 0, 0};  // Position de la caméra
-    const double distance = 1.0;         // Distance focale
+#include <cstdlib>
+#include <execution>
 
-    for (int ye = 0; ye < height; ++ye) {
-        for (int xe = 0; xe < width; ++xe) {
-            const double x = (width/2.0 - xe) / height;
-            const double y = (height/2.0 - ye) / height;
+void Renderer::render(const int width, const int height, std::vector<Vector3> &frameBuffer)
+{
+    const Vector3 observer = {0, 0, 0};
+    const double distance = 1.0;
 
-            Vector3 rayDir = Vector3(x,y, -distance).normalized();
+    const int blockSize = 32; // Taille de bloc (peut être ajustée selon tests)
 
-            frameBuffer[ye * width + xe] = getPixelColor(observer, rayDir, 10);
+    // Parcours des blocs en parallèle
+    std::vector<std::pair<int, int>> blocks;
+    for (int by = 0; by < height; by += blockSize)
+    {
+        for (int bx = 0; bx < width; bx += blockSize)
+        {
+            blocks.emplace_back(bx, by);
         }
     }
+
+    std::for_each(
+        std::execution::par,
+        blocks.begin(),
+        blocks.end(),
+        [&](const std::pair<int, int> &block)
+        {
+            int bx = block.first;
+            int by = block.second;
+            int maxY = std::min(by + blockSize, height);
+            int maxX = std::min(bx + blockSize, width);
+
+            for (int y = by; y < maxY; ++y)
+            {
+                for (int x = bx; x < maxX; ++x)
+                {
+                    const double fx = (width / 2.0 - x) / height;
+                    const double fy = (height / 2.0 - y) / height;
+                    Vector3 rayDir = Vector3(fx, fy, -distance).normalized();
+                    frameBuffer[y * width + x] = getPixelColor(observer, rayDir, 10);
+                }
+            }
+        });
 }
 
-Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v, const int& order) const
+Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &order) const
 {
     const Intersection result = findNearestIntersection(P, v);
-    if (!result || result.shape == nullptr) return this->scene->getSkyColor();
+    if (!result || result.shape == nullptr)
+        return this->scene->getSkyColor();
 
     Vector3 intersectionPoint = P + v * result.lambda;
     Vector3 normal = result.normal;
@@ -40,17 +65,18 @@ Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v, const int& o
     return color;
 }
 
-Intersection Renderer::findNearestIntersection(const Vector3& P, const Vector3& v) const
+Intersection Renderer::findNearestIntersection(const Vector3 &P, const Vector3 &v) const
 {
-    //TODO : BVH
+    // TODO : BVH
     Intersection nearestIntersection;
     nearestIntersection.shape = nullptr;
     nearestIntersection.lambda = std::numeric_limits<double>::max();
 
     for (int i = 0; i < scene->getShapes().size(); ++i)
     {
-        const Shape* shape = scene->getShapes()[i].get();
-        if (!shape->isVisible()) continue;
+        const Shape *shape = scene->getShapes()[i].get();
+        if (!shape->isVisible())
+            continue;
 
         Intersection intersection = shape->getIntersection(P, v);
         if (intersection.shape != nullptr && intersection.lambda < nearestIntersection.lambda && intersection.lambda > Scene::EPSILON)
@@ -58,19 +84,19 @@ Intersection Renderer::findNearestIntersection(const Vector3& P, const Vector3& 
             nearestIntersection = intersection;
         }
     }
-    if (nearestIntersection.shape == nullptr) {
+    if (nearestIntersection.shape == nullptr)
+    {
         return Intersection();
     }
     return nearestIntersection;
-
 }
 
-Vector3 Renderer::computeLighting(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape) const
+Vector3 Renderer::computeLighting(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape) const
 {
     Vector3 color = Vector3(0, 0, 0);
     for (int i = 0; i < scene->getLightSources().size(); ++i)
     {
-        const LightSource& lightSource = *scene->getLightSources()[i];
+        const LightSource &lightSource = *scene->getLightSources()[i];
         Vector3 lightVec = lightSource.getPosition() - intersectionPoint;
         Vector3 lightDir = lightVec.normalized();
         Vector3 shadowOrigin = intersectionPoint + lightDir * Scene::EPSILON;
@@ -90,13 +116,13 @@ Vector3 Renderer::computeLighting(const Vector3& P, const Vector3& v, const Vect
     return color;
 }
 
-
-bool Renderer::isInShadow(const Vector3& shadowOrigin, const Vector3& shadowRayDir, const double lightDistance) const
+bool Renderer::isInShadow(const Vector3 &shadowOrigin, const Vector3 &shadowRayDir, const double lightDistance) const
 {
     for (int i = 0; i < scene->getShapes().size(); ++i)
     {
-        const Shape* shape = scene->getShapes()[i].get();
-        if (!shape->isVisible()) continue;
+        const Shape *shape = scene->getShapes()[i].get();
+        if (!shape->isVisible())
+            continue;
 
         Intersection inter = shape->getIntersection(shadowOrigin, shadowRayDir);
         if (inter.shape != nullptr && inter.lambda < lightDistance)
@@ -107,16 +133,15 @@ bool Renderer::isInShadow(const Vector3& shadowOrigin, const Vector3& shadowRayD
     return false;
 }
 
-
-Vector3 Renderer::computeDiffuse(const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape, const LightSource& lightSource, const Vector3& shadowOrigin, const Vector3& shadowRayDir) const
+Vector3 Renderer::computeDiffuse(const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape, const LightSource &lightSource, const Vector3 &shadowOrigin, const Vector3 &shadowRayDir) const
 {
-    //TODO : textures
+    // TODO : textures
     const double diffuseFactor = std::max(0.0, normal.dot(shadowRayDir));
     return shape.getColor() * lightSource.getColorDiffuse() * diffuseFactor;
 }
 
-Vector3 Renderer::computeSpecular(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
-    const Vector3& normal, const Shape& shape, const LightSource& lightSource) const
+Vector3 Renderer::computeSpecular(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
+                                  const Vector3 &normal, const Shape &shape, const LightSource &lightSource) const
 {
     const Vector3 viewDir = (P - intersectionPoint).normalized();
     const Vector3 lightDir = (lightSource.getPosition() - intersectionPoint).normalized();
@@ -126,24 +151,24 @@ Vector3 Renderer::computeSpecular(const Vector3& P, const Vector3& v, const Vect
     return lightSource.getColorSpecular() * lightSource.getIntensity() * std::pow(spec, shape.getShininess());
 }
 
-double Renderer::computeAttenuation(const double& distance) const
+double Renderer::computeAttenuation(const double &distance) const
 {
     Vector3 quadraticAttenuation = scene->getQuadraticAttenuation();
     return 1 / (quadraticAttenuation[0] + quadraticAttenuation[1] * distance + quadraticAttenuation[2] * distance * distance);
 }
 
-Vector3 Renderer::computeReflection(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
-    const Vector3& normal, const Shape& shape, const int& order) const
+Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
+                                    const Vector3 &normal, const Shape &shape, const int &order) const
 {
     if (shape.getReflectivity() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
 
     const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
-    return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getReflectivity();
+    return getPixelColor(intersectionPoint, reflectDir, order - 1) * shape.getReflectivity();
 }
 
-Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
-    const Vector3& normal, const Shape& shape, const int& order) const
+Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
+                                    const Vector3 &normal, const Shape &shape, const int &order) const
 {
     if (shape.getTransparency() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
@@ -161,7 +186,8 @@ Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Ve
     {
         n = -n;
         eta = etaT / etaI;
-    } else
+    }
+    else
     {
         c1 = -c1;
         eta = etaI / etaT;
@@ -183,7 +209,3 @@ Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Ve
     const Vector3 offset = reflectDir * Scene::EPSILON;
     return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getTransparency();
 }
-
-
-
-
