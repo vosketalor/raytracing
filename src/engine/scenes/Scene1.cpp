@@ -7,23 +7,24 @@
 
 void Scene1::createShapes()
 {
+    Material mat = Material(0.2, 0.0, 1000, Scene::ETA_AIR);
     // Plan du sol
     const auto plane = std::make_shared<Plane>(Vector3{0, -1, 0}, Vector3{0, 1, 0});
     plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
-    plane->setReflectivity(0.2f);
+    plane->setMaterial(mat);
     addShape(plane);
 
     // Sphère bleue réfléchissante
     auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
     sphere->setColor(Scene::BLUE);
-    sphere->setReflectivity(0.9f);
+    sphere->setMaterial(Material::Mirror);
     addShape(sphere);
 
     // Sphère rouge transparente
+    mat = Material(0.0, 0.9, 1000, Scene::ETA_AIR);
     sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
     sphere->setColor(Scene::RED);
-    sphere->setTransparency(0.9f);
-    sphere->setEta(Scene::ETA_AIR);
+    sphere->setMaterial(mat);
     addShape(sphere);
     //
     // // Sphère verte simple

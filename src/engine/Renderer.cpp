@@ -123,7 +123,7 @@ Vector3 Renderer::computeSpecular(const Vector3& P, const Vector3& v, const Vect
     const Vector3 halfVector = (viewDir + lightDir).normalized();
     const double spec = std::max(0.0, halfVector.dot(normal));
 
-    return lightSource.getColorSpecular() * lightSource.getIntensity() * std::pow(spec, shape.getShininess());
+    return lightSource.getColorSpecular() * lightSource.getIntensity() * std::pow(spec, shape.getMaterial().getShininess());
 }
 
 double Renderer::computeAttenuation(const double& distance) const
@@ -135,17 +135,17 @@ double Renderer::computeAttenuation(const double& distance) const
 Vector3 Renderer::computeReflection(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
     const Vector3& normal, const Shape& shape, const int& order) const
 {
-    if (shape.getReflectivity() <= 0 || order <= 0)
+    if (shape.getMaterial().getReflectivity() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
 
     const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
-    return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getReflectivity();
+    return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getMaterial().getReflectivity();
 }
 
 Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
     const Vector3& normal, const Shape& shape, const int& order) const
 {
-    if (shape.getTransparency() <= 0 || order <= 0)
+    if (shape.getMaterial().getTransparency() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
 
     const Vector3 i = v.normalized();
@@ -154,7 +154,7 @@ Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Ve
     const bool exiting = c1 >= 0;
 
     const double etaI = Scene::ETA_AIR;
-    const double etaT = shape.getEta();
+    const double etaT = shape.getMaterial().getEta();
     double eta;
 
     if (exiting)
@@ -176,12 +176,12 @@ Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Ve
         const double c2 = std::sqrt(k);
         const Vector3 refractDir = (i * eta + normal * (eta * c1 - c2)).normalized();
         const Vector3 offset = refractDir * Scene::EPSILON;
-        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getTransparency();
+        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getMaterial().getTransparency();
     }
 
     const Vector3 reflectDir = (i - normal * 2 * normal.dot(i)).normalized();
     const Vector3 offset = reflectDir * Scene::EPSILON;
-    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getTransparency();
+    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getMaterial().getTransparency();
 }
 
 

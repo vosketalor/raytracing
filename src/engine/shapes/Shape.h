@@ -3,6 +3,7 @@
 #include <string>
 #include "Vector.h"
 // #include "Texture.h"
+#include "Material.h"
 #include "../Intersection.h"
 
 class BoundingBox;
@@ -12,11 +13,9 @@ class BoundingBox;
  */
 class Shape {
 protected:
-    Vector3 color = {1.0f, 1.0f, 1.0f};  ///< Base color (if no texture)
-    float reflectivity = 0.0f;            ///< [0-1] reflection coefficient
-    float transparency = 0.0f;            ///< [0-1] transparency coefficient
-    float shininess = 100.0f;             ///< Phong shininess factor
-    float eta = 1.0f;                     ///< Refractive index
+
+    Vector3 color_ = {1.0f, 1.0f, 1.0f};  ///< Base color (if no texture)
+    Material material_;
     bool visible = true;                 ///< Visibility flag
     // std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
@@ -28,6 +27,12 @@ public:
     // Core functionality
     virtual Intersection getIntersection(const Vector3& P, const Vector3& v) const = 0;
     virtual Vector2 getTextureCoordinates(const Vector3& intersection) const = 0;
+
+    Vector3 getColor() const { return color_; }
+    void setColor(const Vector3& col) { color_ = col; }
+
+    Material getMaterial() const { return material_; }
+    void setMaterial(const Material& mat) { material_ = mat; }
 
     // Transformations
     // virtual void scale(float scale) = 0;
@@ -41,21 +46,6 @@ public:
     // Getters/Setters
     bool isVisible() const { return visible; }
     void setVisible(const bool isVisible) { visible = isVisible; }
-
-    Vector3 getColor() const { return color; }
-    void setColor(const Vector3& col) { color = col; }
-
-    float getReflectivity() const { return reflectivity; }
-    void setReflectivity(const float refl) { reflectivity = refl; }
-
-    float getTransparency() const { return transparency; }
-    void setTransparency(const float trans) { transparency = trans; }
-
-    float getShininess() const { return shininess; }
-    void setShininess(const float shine) { shininess = shine; }
-
-    float getEta() const { return eta; }
-    void setEta(const float refractiveIndex) { eta = refractiveIndex; }
 
     // std::shared_ptr<Texture> getTexture() const { return texture; }
     // void setTexture(std::shared_ptr<Texture> tex) {

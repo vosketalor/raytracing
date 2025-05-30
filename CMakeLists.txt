@@ -25,6 +25,8 @@ set(IMGUI_SOURCES
     external/imgui/backends/imgui_impl_opengl3.cpp
         src/engine/LightSource.cpp
         src/engine/LightSource.h
+        src/engine/Material.cpp
+        src/engine/Material.h
 )
 
 add_executable(Raytracing
