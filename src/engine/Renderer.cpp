@@ -28,10 +28,10 @@ void Renderer::render(const int width, const int height, std::vector<Vector3> &f
         blocks.end(),
         [&](const std::pair<int, int> &block)
         {
-            int bx = block.first;
-            int by = block.second;
-            int maxY = std::min(by + blockSize, height);
-            int maxX = std::min(bx + blockSize, width);
+            const int bx = block.first;
+            const int by = block.second;
+            const int maxY = std::min(by + blockSize, height);
+            const int maxX = std::min(bx + blockSize, width);
 
             for (int y = by; y < maxY; ++y)
             {

@@ -15,6 +15,8 @@ include_directories(src/engine)
 include_directories(external/imgui)
 include_directories(external/imgui/backends)
 
+find_package(TBB REQUIRED)
+
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
     external/imgui/imgui_draw.cpp
@@ -48,3 +50,4 @@ add_executable(Raytracing
 )
 
 target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)
+target_link_libraries(Raytracing PRIVATE TBB::tbb)
