@@ -1,5 +1,6 @@
 #include "Scene1.h"
 
+#include "LightSource.h"
 #include "shapes/Plane.h"
 #include "shapes/Sphere.h"
 
@@ -51,11 +52,11 @@ void Scene1::createShapes()
 void Scene1::createLights()
 {
     // Source lumineuse principale
-    // auto source = std::make_shared<LightSource>(
-    //     Vector3{0, 5, -3},
-    //     Vector3{0.7f, 0.7f, 0.7f},
-    //     Vector3{1.0f, 1.0f, 1.0f}
-    // );
-    // source->setIntensity(1.0f);
-    // addLightSource(source);
+    const auto source = std::make_shared<LightSource>(
+        Vector3{0, 5, -3},
+        Vector3{0.7f, 0.7f, 0.7f},
+        Vector3{1.0f, 1.0f, 1.0f}
+    );
+    source->setIntensity(1.0f);
+    addLightSource(source);
 }

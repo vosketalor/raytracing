@@ -71,11 +71,67 @@ public:
         return result;
     }
 
-    Vector operator*(double scalar) const noexcept {
+    Vector operator*(const Vector& other) const noexcept {
+        Vector result;
+        if constexpr (k % 4 == 0) {
+            // Version optimisée SIMD pour les vecteurs de taille multiple de 4
+            for (size_t i = 0; i < k; i += 4) {
+                const __m256d a = _mm256_load_pd(&data[i]);
+                const __m256d b = _mm256_load_pd(&other.data[i]);
+                _mm256_store_pd(&result.data[i], _mm256_mul_pd(a, b));
+            }
+        } else {
+            // Version générique
+            std::transform(data.begin(), data.end(), other.data.begin(),
+                          result.data.begin(), std::multiplies<double>());
+        }
+        return result;
+    }
+
+    Vector operator+=(const Vector& other) noexcept {
+        if constexpr (k % 4 == 0) {
+            add_simd(other, *this);
+        } else {
+            std::transform(data.begin(), data.end(), other.data.begin(),
+                          data.begin(), std::plus<double>());
+        }
+        return *this;
+    }
+
+    Vector operator-=(const Vector& other) noexcept {
+        std::transform(data.begin(), data.end(), other.data.begin(),
+                      data.begin(), std::minus<double>());
+    }
+
+    // Version modifiée de la multiplication par scalaire pour éviter l'ambiguïté
+    Vector operator*(const double scalar) const noexcept {
         Vector result;
         std::transform(data.begin(), data.end(), result.data.begin(),
-                      [scalar](double val) { return val * scalar; });
+                      [scalar](const double val) { return val * scalar; });
         return result;
+    }
+
+    Vector operator*=(const double scalar) noexcept {
+        std::transform(data.begin(), data.end(), data.begin(),
+                      [scalar](const double val) { return val * scalar; });
+        return *this;
+    }
+
+    Vector operator*=(const Vector& other) noexcept
+    {
+        if constexpr (k % 4 == 0) {
+            // Version optimisée SIMD pour les vecteurs de taille multiple de 4
+            for (size_t i = 0; i < k; i += 4) {
+                const __m256d a = _mm256_load_pd(&data[i]);
+                const __m256d b = _mm256_load_pd(&other.data[i]);
+                _mm256_store_pd(&this.data[i], _mm256_mul_pd(a, b));
+            }
+        } else {
+            // Version générique
+            std::transform(data.begin(), data.end(), other.data.begin(),
+                          this->data.begin(), std::multiplies<double>());
+        }
+        return *this;
     }
 
     // ============== CROSS PRODUCT (3D ONLY) ==============

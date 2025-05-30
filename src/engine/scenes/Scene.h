@@ -1,11 +1,14 @@
 #pragma once
 #include <vector>
 #include <memory>
+
 #include "Vector.h"
+#include "LightSource.h"
+#include "shapes/Shape.h"
 
 // Forward declarations
-class Shape;
-class LightSource;
+// class Shape;
+// class LightSource;
 
 class Scene {
 protected:
@@ -62,8 +65,8 @@ public:
     void setSkyColor(const Vector3& color);
     void setAmbient(const Vector3& ambient);
 
-    const auto& getShapes() const { return shapes; }
-    const auto& getLightSources() const { return lightSources; }
+    std::vector<std::shared_ptr<Shape>> getShapes() const { return shapes; }
+    std::vector<std::shared_ptr<LightSource>> getLightSources() const { return lightSources; }
     const Vector3& getSkyColor() const { return skyColor; }
     const Vector3& getAmbient() const { return ambient; }
     const Vector3& getQuadraticAttenuation() const { return quadraticAttenuation; }
