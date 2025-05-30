@@ -1,6 +1,6 @@
 #include "Sphere.h"
 
-#include "BoundingBox.h"
+#include "../acceleration/BoundingBox.h"
 
 Sphere::Sphere(const Vector3& P, float radius) 
     : center(P), radius(radius) {

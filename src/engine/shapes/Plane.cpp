@@ -1,6 +1,6 @@
 #include "Plane.h"
 
-#include "BoundingBox.h"
+#include "../acceleration/BoundingBox.h"
 #include "../scenes/Scene.h"
 
 Plane::Plane(const Vector3& n, const double d)

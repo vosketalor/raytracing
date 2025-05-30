@@ -41,8 +41,10 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
+    const Camera camera;
+
     // Rendu de la scène
-    renderer.render(width, height, frameBuffer);
+    renderer.render(width, height, frameBuffer, camera);
 
     // Sauvegarde au format PPM
     std::ofstream image(filename);

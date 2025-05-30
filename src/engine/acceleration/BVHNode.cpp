@@ -1,5 +1,5 @@
 #include "BVHNode.h"
-#include "scenes/Scene.h"
+#include "../scenes/Scene.h"
 #include <limits>
 #include <algorithm>
 

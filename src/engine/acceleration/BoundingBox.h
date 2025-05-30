@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Vector.h"
-#include "Intersection.h"
-#include "scenes/Scene.h"
+#include "../Vector.h"
+#include "../Intersection.h"
+#include "../scenes/Scene.h"
 
 /**
  * Représente une boîte englobante alignée sur les axes (AABB).

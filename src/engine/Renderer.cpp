@@ -5,14 +5,21 @@
 #include <cstdlib>
 #include <execution>
 
-void Renderer::render(const int width, const int height, std::vector<Vector3> &frameBuffer)
+#include "Camera.h"
+
+void Renderer::render(const int width, const int height, std::vector<Vector3>& frameBuffer, const Camera& camera) const
 {
-    const Vector3 observer = {0, 0, 0};
-    const double distance = 1.0;
+    const Vector3 observer = camera.getPosition();
+    const double aspectRatio = static_cast<double>(width) / height;
 
-    const int blockSize = 32; // Taille de bloc (peut être ajustée selon tests)
+    // Calcul de la taille de l'écran virtuel en fonction du FOV (en radians)
+    const double fovRad = camera.getFov() * M_PI / 180.0;
+    const double screenHeight = 2.0 * tan(fovRad / 2.0);
+    const double screenWidth = screenHeight * aspectRatio;
 
-    // Parcours des blocs en parallèle
+    const int blockSize = 32; // Taille des blocs
+
+    // Découpage en blocs pour le parallélisme
     std::vector<std::pair<int, int>> blocks;
     for (int by = 0; by < height; by += blockSize)
     {
@@ -26,7 +33,7 @@ void Renderer::render(const int width, const int height, std::vector<Vector3> &f
         std::execution::par,
         blocks.begin(),
         blocks.end(),
-        [&](const std::pair<int, int> &block)
+        [&](const std::pair<int, int>& block)
         {
             const int bx = block.first;
             const int by = block.second;
@@ -37,14 +44,28 @@ void Renderer::render(const int width, const int height, std::vector<Vector3> &f
             {
                 for (int x = bx; x < maxX; ++x)
                 {
-                    const double fx = (width / 2.0 - x) / height;
-                    const double fy = (height / 2.0 - y) / height;
-                    Vector3 rayDir = Vector3(fx, fy, -distance).normalized();
+                    // Normalisation des coordonnées écran entre -0.5 et 0.5
+                    double u = (x + 0.5) / width - 0.5;
+                    double v = 0.5 - (y + 0.5) / height;
+
+                    // Passage aux dimensions physiques de l'écran virtuel (screen plane)
+                    double px = u * screenWidth;
+                    double py = v * screenHeight;
+
+                    // Calcul des vecteurs de base de la caméra
+                    Vector3 forward = camera.getDirection();       // direction caméra
+                    Vector3 right = camera.getRight();              // vecteur droit
+                    Vector3 up = camera.getUp();                     // vecteur haut
+
+                    // Calcul du vecteur direction du rayon dans l'espace monde
+                    Vector3 rayDir = (forward + px * right + py * up).normalized();
+
                     frameBuffer[y * width + x] = getPixelColor(observer, rayDir, 10);
                 }
             }
         });
 }
+
 
 Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &order) const
 {
@@ -52,8 +73,8 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
     if (!result || result.shape == nullptr)
         return this->scene->getSkyColor();
 
-    Vector3 intersectionPoint = P + v * result.lambda;
-    Vector3 normal = result.normal;
+    const Vector3 intersectionPoint = P + v * result.lambda;
+    const Vector3 normal = result.normal;
 
     Vector3 color = result.shape->getColor();
 

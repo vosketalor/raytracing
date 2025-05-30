@@ -3,9 +3,9 @@
 #include <vector>
 #include <memory>
 #include "BoundingBox.h"
-#include "Vector.h"
-#include "Intersection.h"
-#include "shapes/Shape.h"
+#include "../Vector.h"
+#include "../Intersection.h"
+#include "../shapes/Shape.h"
 
 class BVHNode {
 public:

@@ -18,6 +18,8 @@
 #include "scenes/Scene1.h"
 #include <string>
 
+#include "Camera.h"
+
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
 
 class ImGuiRenderer
@@ -63,15 +65,15 @@ private:
 
 public:
     ImGuiRenderer() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
-                      renderTime(0.0), imageReady(false), shouldRerender(false), isRendering(false),
-                      prevWindowWidth(-1), prevWindowHeight(-1) {}
+                      renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
+                      prevWindowHeight(-1), shouldRerender(false) {}
 
     ~ImGuiRenderer()
     {
         cleanup();
     }
 
-    bool initialize(int windowWidth = 1400, int windowHeight = 900)
+    bool initialize(const int windowWidth = 1400, const int windowHeight = 900)
     {
         // Initialisation GLFW
         if (!glfwInit())
@@ -144,17 +146,17 @@ public:
         imageReady = true;
     }
 
-    void setRenderTime(double time)
+    void setRenderTime(const double time)
     {
         renderTime = time;
     }
 
-    bool needsRerender()
+    bool needsRerender() const
     {
         return shouldRerender;
     }
 
-    void setRendering(bool rendering)
+    void setRendering(const bool rendering)
     {
         isRendering = rendering;
         if (rendering)
@@ -163,17 +165,17 @@ public:
         }
     }
 
-    bool shouldClose()
+    bool shouldClose() const
     {
         return glfwWindowShouldClose(window);
     }
 
-    void saveImage()
+    void saveImage() const
     {
         if (!imageReady)
             return;
 
-        std::string filename = "output_" + std::to_string(std::time(nullptr)) + ".ppm";
+        const std::string filename = "output_" + std::to_string(std::time(nullptr)) + ".ppm";
         std::ofstream image(filename);
         if (!image.is_open())
         {
@@ -188,10 +190,10 @@ public:
         {
             for (int x = 0; x < imageWidth; ++x)
             {
-                int idx = (y * imageWidth + x) * 3;
-                int r = imageData[idx + 0];
-                int g = imageData[idx + 1];
-                int b = imageData[idx + 2];
+                const int idx = (y * imageWidth + x) * 3;
+                const int r = imageData[idx + 0];
+                const int g = imageData[idx + 1];
+                const int b = imageData[idx + 2];
                 image << r << ' ' << g << ' ' << b << '\n';
             }
         }
@@ -205,7 +207,7 @@ public:
         this->shouldRerender = true;
     }
 
-    void cleanup()
+    void cleanup() const
     {
         if (textureID)
         {
@@ -224,13 +226,13 @@ public:
     }
 };
 
-void performRender(ImGuiRenderer &guiRenderer, int width, int height)
+void performRender(ImGuiRenderer &guiRenderer, const int width, const int height)
 {
     guiRenderer.setRendering(true);
 
-    auto startTime = std::chrono::high_resolution_clock::now();
+    const auto startTime = std::chrono::high_resolution_clock::now();
 
-    auto scene = std::make_unique<Scene1>();
+    const auto scene = std::make_unique<Scene1>();
     scene->setSkyColor(SKYCOLOR);
     scene->setAmbient({0.1f, 0.1f, 0.1f});
     scene->createLights();
@@ -239,10 +241,12 @@ void performRender(ImGuiRenderer &guiRenderer, int width, int height)
     Renderer renderer(scene.get());
     std::vector<Vector3> frameBuffer(width * height);
 
-    renderer.render(width, height, frameBuffer);
+    const Camera camera;
 
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
+    renderer.render(width, height, frameBuffer, camera);
+
+    const auto endTime = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
 
     guiRenderer.updateImage(frameBuffer, width, height);
     guiRenderer.setRenderTime(duration);
@@ -290,9 +294,9 @@ int main(const int argc, char *argv[])
         // Fenêtre pour afficher l'image en plein écran
         if (guiRenderer.imageReady)
         {
-            ImGuiIO &io = ImGui::GetIO();
-            float availableWidth = io.DisplaySize.x;
-            float availableHeight = io.DisplaySize.y;
+            const ImGuiIO &io = ImGui::GetIO();
+            const float availableWidth = io.DisplaySize.x;
+            const float availableHeight = io.DisplaySize.y;
 
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImVec2(availableWidth, availableHeight));
@@ -305,8 +309,8 @@ int main(const int argc, char *argv[])
                              ImGuiWindowFlags_NoCollapse |
                              ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-            float imageRatio = (float)guiRenderer.imageWidth / (float)guiRenderer.imageHeight;
-            float windowRatio = availableWidth / availableHeight;
+            const float imageRatio = static_cast<float>(guiRenderer.imageWidth) / static_cast<float>(guiRenderer.imageHeight);
+            const float windowRatio = availableWidth / availableHeight;
 
             ImVec2 imageSize;
             ImVec2 imagePos;
@@ -331,7 +335,7 @@ int main(const int argc, char *argv[])
                                      IM_COL32(0, 0, 0, 255));
 
             ImGui::SetCursorPos(imagePos);
-            ImGui::Image((ImTextureID)(intptr_t)guiRenderer.textureID, imageSize);
+            ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(guiRenderer.textureID)), imageSize);
 
             ImGui::End();
         }
@@ -354,7 +358,7 @@ int main(const int argc, char *argv[])
 
             if (guiRenderer.renderTime > 0)
             {
-                double pixelsPerSecond = (guiRenderer.imageWidth * guiRenderer.imageHeight) / guiRenderer.renderTime;
+                const double pixelsPerSecond = (guiRenderer.imageWidth * guiRenderer.imageHeight) / guiRenderer.renderTime;
                 ImGui::Text("Pixels/second: %.0f", pixelsPerSecond);
             }
         }
@@ -373,7 +377,7 @@ int main(const int argc, char *argv[])
 
         ImGui::End();
 
-        ImGuiIO &io = ImGui::GetIO();
+        const ImGuiIO &io = ImGui::GetIO();
         ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowBgAlpha(0.9f);
 
@@ -387,7 +391,7 @@ int main(const int argc, char *argv[])
         {
             for (int i = 0; i < guiRenderer.resolutionPresets.size(); i++)
             {
-                bool isSelected = (guiRenderer.selectedPreset == i);
+                const bool isSelected = (guiRenderer.selectedPreset == i);
                 if (ImGui::Selectable(guiRenderer.resolutionPresets[i].name, isSelected))
                 {
                     guiRenderer.selectedPreset = i;
