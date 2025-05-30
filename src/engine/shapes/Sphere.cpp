@@ -50,8 +50,8 @@ Vector3 Sphere::getNormal(const Vector3& P) const {
 Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
     Vector3 P = (intersection - center).normalized();
 
-    const double u = 0.5 + std::atan2(P[2], P[0]) / (2.0 * M_PI);
-    const double v = 0.5 - std::asin(P[1]) / M_PI;
+    const double u = 0.5 + std::atan2(P[2], P[0]) / (2.0 * 3.14159265358979323846);
+    const double v = 0.5 - std::asin(P[1]) / 3.14159265358979323846;
 
     return Vector2(u, v);
 }

@@ -10,8 +10,8 @@ void Renderer::render(const int width, const int height, std::vector<Vector3>& f
 
     for (int ye = 0; ye < height; ++ye) {
         for (int xe = 0; xe < width; ++xe) {
-            const double x = (xe - width/2.0) / height;
-            const double y = (ye - height/2.0) / height;
+            const double x = (width/2.0 - xe) / height;
+            const double y = (height/2.0 - ye) / height;
 
             Vector3 rayDir = Vector3(x,y, -distance).normalized();
 

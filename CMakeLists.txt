@@ -4,21 +4,42 @@ project(Raytracing)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# GLFW
+add_subdirectory(external/glfw)
+include_directories(external/glfw/include)
+find_package(OpenGL REQUIRED)
+
+# ImGui
 include_directories(src/engine)
+include_directories(external/imgui)
+include_directories(external/imgui/backends)
+
+set(IMGUI_SOURCES
+    external/imgui/imgui.cpp
+    external/imgui/imgui_draw.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/imgui_demo.cpp
+    external/imgui/backends/imgui_impl_glfw.cpp
+    external/imgui/backends/imgui_impl_opengl3.cpp
+)
 
 add_executable(Raytracing
-        src/ImageGen.cpp
-        src/engine/Camera.cpp
-        src/engine/Renderer.cpp
-        src/engine/scenes/Scene.cpp
-        src/engine/Vector.cpp
-        src/engine/scenes/Scene1.cpp
-        src/engine/shapes/Shape.cpp
-        src/engine/shapes/Shape.h
-        src/engine/shapes/Sphere.cpp
-        src/engine/shapes/Sphere.h
-        src/engine/Intersection.cpp
-        src/engine/Intersection.h
-        src/engine/shapes/Plane.cpp
-        src/engine/shapes/Plane.h
+    src/InteractiveMain.cpp
+    src/engine/Camera.cpp
+    src/engine/Renderer.cpp
+    src/engine/scenes/Scene.cpp
+    src/engine/Vector.cpp
+    src/engine/scenes/Scene1.cpp
+    src/engine/shapes/Shape.cpp
+    src/engine/shapes/Shape.h
+    src/engine/shapes/Sphere.cpp
+    src/engine/shapes/Sphere.h
+    src/engine/Intersection.cpp
+    src/engine/Intersection.h
+    src/engine/shapes/Plane.cpp
+    src/engine/shapes/Plane.h
+    ${IMGUI_SOURCES}
 )
+
+target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)
