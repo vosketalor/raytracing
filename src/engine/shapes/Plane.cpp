@@ -1,14 +1,16 @@
 #include "Plane.h"
+
+#include "BoundingBox.h"
 #include "../scenes/Scene.h"
 
 Plane::Plane(const Vector3& n, const double d)
     : normal(n.normalized()), distance(d) {
-    // setBoundingBox();
+    setBoundingBox();
 }
 
 Plane::Plane(const Vector3& P, const Vector3& n) 
     : normal(n.normalized()), distance(-normal.dot(P)) {
-    // setBoundingBox();
+    setBoundingBox();
 }
 
 Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
@@ -28,6 +30,19 @@ Intersection Plane::getIntersection(const Vector3& P, const Vector3& v) const {
 
     return (lambda >= 0) ? Intersection(lambda, normal, this) : Intersection();
 }
+
+void Plane::setBoundingBox() {
+    const Vector3 min(-std::numeric_limits<double>::max(),
+                -std::numeric_limits<double>::max(),
+                -std::numeric_limits<double>::max());
+
+    const Vector3 max(std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max());
+
+    this->boundingBox = std::make_shared<BoundingBox>(min, max);
+}
+
 
 // void Plane::scale(double /*scale*/) {
 //     // Scaling has no effect on an infinite plane

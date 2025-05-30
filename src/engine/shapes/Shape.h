@@ -17,7 +17,7 @@ protected:
     Vector3 color_ = {1.0f, 1.0f, 1.0f};  ///< Base color (if no texture)
     Material material_;
     bool visible = true;                 ///< Visibility flag
-    // std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
+    std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
     // bool hasTexture = false;               ///< Texture presence flag
 
@@ -40,8 +40,8 @@ public:
     // void rotate(const float angle) { rotate(angle, Vector3{0,1,0}); }
 
     // Bounding volume
-    // virtual void setBoundingBox() = 0;
-    // std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
+    virtual void setBoundingBox() = 0;
+    std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
 
     // Getters/Setters
     bool isVisible() const { return visible; }

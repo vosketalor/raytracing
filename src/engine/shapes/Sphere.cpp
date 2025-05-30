@@ -1,8 +1,10 @@
 #include "Sphere.h"
 
+#include "BoundingBox.h"
+
 Sphere::Sphere(const Vector3& P, float radius) 
     : center(P), radius(radius) {
-    // setBoundingBox();
+    setBoundingBox();
 }
 
 Intersection Sphere::getIntersection(const Vector3& P, const Vector3& v) const {
@@ -41,11 +43,11 @@ Vector3 Sphere::getNormal(const Vector3& P) const {
 //     // Rotation has no effect on a sphere
 // }
 
-// void Sphere::setBoundingBox() {
-//     Vector3 min = center - Vector3(radius, radius, radius);
-//     Vector3 max = center + Vector3(radius, radius, radius);
-//     boundingBox = std::make_shared<BoundingBox>(min, max);
-// }
+void Sphere::setBoundingBox() {
+    Vector3 min = center - Vector3(radius, radius, radius);
+    Vector3 max = center + Vector3(radius, radius, radius);
+    boundingBox = std::make_shared<BoundingBox>(min, max);
+}
 
 Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
     Vector3 P = (intersection - center).normalized();

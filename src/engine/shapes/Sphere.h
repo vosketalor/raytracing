@@ -18,6 +18,6 @@ public:
     // void scale(float scale) override;
     // void rotate(float angle, const Vector3& axis) override;
 
-    // void setBoundingBox() override;
+    void setBoundingBox() override;
     Vector2 getTextureCoordinates(const Vector3& intersection) const override;
 };

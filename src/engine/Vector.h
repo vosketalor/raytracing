@@ -172,6 +172,33 @@ public:
         return !(*this == other);
     }
 
+    // Accesseurs pour x, y, z uniquement si k == 3
+    constexpr double& x() {
+        static_assert(k == 3 || k == 2, "x() is only available for Vector2 and Vector3");
+        return data[0];
+    }
+    constexpr double& y() {
+        static_assert(k == 3 || k == 2, "y() is only available for Vector2 and Vector3");
+        return data[1];
+    }
+    constexpr double& z() {
+        static_assert(k == 3, "z() is only available for Vector3");
+        return data[2];
+    }
+
+    constexpr const double& x() const {
+        static_assert(k == 3 || k == 2, "x() is only available for Vector2 and Vector3");
+        return data[0];
+    }
+    constexpr const double& y() const {
+        static_assert(k == 3 || k == 2, "y() is only available for Vector2 and Vector3");
+        return data[1];
+    }
+    constexpr const double& z() const {
+        static_assert(k == 3, "z() is only available for Vector3");
+        return data[2];
+    }
+
 private:
     // ============== SIMD IMPLEMENTATIONS ==============
     double dot_simd(const Vector& other) const noexcept {

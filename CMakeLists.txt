@@ -33,6 +33,8 @@ set(IMGUI_SOURCES
     src/engine/LightSource.h
     src/engine/Material.cpp
     src/engine/Material.h
+        src/engine/BoundingBox.cpp
+        src/engine/BoundingBox.h
 )
 
 add_executable(Raytracing

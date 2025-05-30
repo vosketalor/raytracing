@@ -154,7 +154,7 @@ Vector3 Renderer::computeSpecular(const Vector3 &P, const Vector3 &v, const Vect
 double Renderer::computeAttenuation(const double &distance) const
 {
     Vector3 quadraticAttenuation = scene->getQuadraticAttenuation();
-    return 1 / (quadraticAttenuation[0] + quadraticAttenuation[1] * distance + quadraticAttenuation[2] * distance * distance);
+    return 1 / (quadraticAttenuation.x() + quadraticAttenuation.y() * distance + quadraticAttenuation.z() * distance * distance);
 }
 
 Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
