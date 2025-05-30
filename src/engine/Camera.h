@@ -2,6 +2,10 @@
 #include "Vector.h"
 #include <cmath>
 
+#ifdef _WIN32
+  #include <corecrt_math_defines.h>
+#endif
+
 class Camera
 {
 protected:

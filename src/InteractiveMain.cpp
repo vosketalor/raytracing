@@ -58,7 +58,7 @@ public:
     int selectedPreset = 0;
     bool customResolution = false;
 
-    bool enableAccumulation = true;
+    bool enableAccumulation = false;
     int maxSamples = 16;
     int currentSample = 0;
     std::vector<Vector3> accumBuffer;
@@ -102,7 +102,7 @@ public:
         }
 
         glfwMakeContextCurrent(window);
-        glfwSwapInterval(1); // Enable vsync
+        glfwSwapInterval(1);
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -420,7 +420,7 @@ int main(const int argc, char *argv[])
         if (guiRenderer.isRendering)
         {
             ImGui::Text("Rendering in progress...");
-            ImGui::ProgressBar(-1.0f * ImGui::GetTime(), ImVec2(200, 0), "");
+            ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(200, 0), "");
         }
         else
         {
