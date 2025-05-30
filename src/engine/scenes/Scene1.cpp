@@ -12,19 +12,19 @@ void Scene1::createShapes()
     plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
     plane->setReflectivity(0.2f);
     addShape(plane);
-    //
+
     // Sphère bleue réfléchissante
     auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
     sphere->setColor(Scene::BLUE);
     sphere->setReflectivity(0.9f);
     addShape(sphere);
-    //
-    // // Sphère rouge transparente
-    // sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
-    // sphere->setColor(Scene::RED);
-    // sphere->setTransparency(0.9f);
-    // sphere->setEta(Scene::ETA_AIR);
-    // addShape(sphere);
+
+    // Sphère rouge transparente
+    sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
+    sphere->setColor(Scene::RED);
+    sphere->setTransparency(0.9f);
+    sphere->setEta(Scene::ETA_AIR);
+    addShape(sphere);
     //
     // // Sphère verte simple
     // sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);

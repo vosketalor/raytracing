@@ -36,6 +36,7 @@ Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v, const int& o
 
     color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
     color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
+    color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order);
     return color;
 }
 
@@ -139,6 +140,48 @@ Vector3 Renderer::computeReflection(const Vector3& P, const Vector3& v, const Ve
 
     const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
     return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getReflectivity();
+}
+
+Vector3 Renderer::computeRefraction(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
+    const Vector3& normal, const Shape& shape, const int& order) const
+{
+    if (shape.getTransparency() <= 0 || order <= 0)
+        return Vector3(0, 0, 0);
+
+    const Vector3 i = v.normalized();
+    Vector3 n = normal.normalized();
+    double c1 = normal.dot(i);
+    const bool exiting = c1 >= 0;
+
+    const double etaI = Scene::ETA_AIR;
+    const double etaT = shape.getEta();
+    double eta;
+
+    if (exiting)
+    {
+        n = -n;
+        eta = etaT / etaI;
+    } else
+    {
+        c1 = -c1;
+        eta = etaI / etaT;
+    }
+
+    const double sin2ThetaI = 1.0 - c1 * c1;
+    const double sin2ThetaT = eta * eta * sin2ThetaI;
+    const double k = 1.0 - sin2ThetaT;
+
+    if (k >= 0)
+    {
+        const double c2 = std::sqrt(k);
+        const Vector3 refractDir = (i * eta + normal * (eta * c1 - c2)).normalized();
+        const Vector3 offset = refractDir * Scene::EPSILON;
+        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getTransparency();
+    }
+
+    const Vector3 reflectDir = (i - normal * 2 * normal.dot(i)).normalized();
+    const Vector3 offset = reflectDir * Scene::EPSILON;
+    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getTransparency();
 }
 
 
