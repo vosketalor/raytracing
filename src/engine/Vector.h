@@ -163,6 +163,21 @@ public:
                        [min, max](const double val) { return std::clamp(val, min, max); });
     }
 
+    Vector min(const Vector& other) const noexcept {
+        Vector result;
+        std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(),
+                       [](double a, double b) { return (a < b) ? a : b; });
+        return result;
+    }
+
+    Vector max(const Vector& other) const noexcept {
+        Vector result;
+        std::transform(data.begin(), data.end(), other.data.begin(), result.data.begin(),
+                       [](double a, double b) { return (a > b) ? a : b; });
+        return result;
+    }
+
+
     // ============== COMPARISON OPERATORS ==============
     bool operator==(const Vector& other) const noexcept {
         return std::equal(data.begin(), data.end(), other.data.begin());
