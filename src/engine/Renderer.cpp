@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <execution>
 
+#include <corecrt_math_defines.h>
+
 void Renderer::render(const int width, const int height, std::vector<Vector3> &frameBuffer)
 {
     const Vector3 observer = {0, 0, 0};
@@ -127,14 +129,50 @@ double Renderer::computeAttenuation(const double &distance) const
     return 1 / (quadraticAttenuation.x() + quadraticAttenuation.y() * distance + quadraticAttenuation.z() * distance * distance);
 }
 
+Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal, double roughness) const
+{
+    if (roughness <= 0.0) return direction;
+    
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 gen(rd());
+    static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    
+    Vector3 tangent1, tangent2;
+    if (std::abs(normal.x()) < 0.9) {
+        tangent1 = Vector3(0, normal.z(), -normal.y()).normalized();
+    } else {
+        tangent1 = Vector3(-normal.z(), 0, normal.x()).normalized();
+    }
+    tangent2 = normal.cross(tangent1).normalized();
+    
+    double angle = dist(gen) * M_PI * 2.0; 
+    double radius = dist(gen) * roughness;
+    
+    // Application de la perturbation
+    Vector3 perturbation = tangent1 * (radius * std::cos(angle)) + 
+                          tangent2 * (radius * std::sin(angle));
+    
+    return (direction + perturbation).normalized();
+}
+
 Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
                                     const Vector3 &normal, const Shape &shape, const int &order) const
 {
     if (shape.getMaterial().getReflectivity() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
 
-    const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
-    return getPixelColor(intersectionPoint, reflectDir, order - 1) *  shape.getMaterial().getReflectivity();
+    Vector3 reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
+    
+    double roughness = shape.getMaterial().getRoughness();
+    if (roughness > 0.0) {
+        reflectDir = perturbVector(reflectDir, normal, roughness);
+        
+        if (reflectDir.dot(normal) < 0) {
+            reflectDir = reflectDir - normal * (2 * reflectDir.dot(normal));
+        }
+    }
+    
+    return getPixelColor(intersectionPoint, reflectDir, order - 1) * shape.getMaterial().getReflectivity();
 }
 
 Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
