@@ -164,7 +164,7 @@ Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Ve
         return Vector3(0, 0, 0);
 
     const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
-    return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getMaterial().getReflectivity();
+    return getPixelColor(intersectionPoint, reflectDir, order - 1) *  shape.getMaterial().getReflectivity();
 }
 
 Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
