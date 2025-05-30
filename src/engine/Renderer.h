@@ -21,4 +21,5 @@ private:
     Vector3 computeLighting(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape) const;
     bool isInShadow(const Vector3& shadowOrigin, const Vector3& shadowRayDir, double lightDistance) const;
     Vector3 computeDiffuse(const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape, const LightSource& lightSource, const Vector3& shadowOrigin, const Vector3& shadowRayDir) const;
+    Vector3 computeSpecular(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape, const LightSource& lightSource) const;
 };

@@ -81,7 +81,8 @@ Vector3 Renderer::computeLighting(const Vector3& P, const Vector3& v, const Vect
         if (!isInShadow(shadowOrigin, shadowRayDir, lightDistance))
         {
             const Vector3 diffuse = computeDiffuse(intersectionPoint, normal, shape, lightSource, shadowOrigin, shadowRayDir);
-            color += diffuse;
+            const Vector3 specular =computeSpecular(P, v, intersectionPoint, normal, shape, lightSource);
+            color += diffuse + specular;
         }
     }
     return color;
@@ -110,6 +111,17 @@ Vector3 Renderer::computeDiffuse(const Vector3& intersectionPoint, const Vector3
     //TODO : textures
     const double diffuseFactor = std::max(0.0, normal.dot(shadowRayDir));
     return shape.getColor() * lightSource.getColorDiffuse() * diffuseFactor;
+}
+
+Vector3 Renderer::computeSpecular(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
+    const Vector3& normal, const Shape& shape, const LightSource& lightSource) const
+{
+    const Vector3 viewDir = (P - intersectionPoint).normalized();
+    const Vector3 lightDir = (lightSource.getPosition() - intersectionPoint).normalized();
+    const Vector3 halfVector = (viewDir + lightDir).normalized();
+    const double spec = std::max(0.0, halfVector.dot(normal));
+
+    return lightSource.getColorSpecular() * lightSource.getIntensity() * std::pow(spec, shape.getShininess());
 }
 
 
