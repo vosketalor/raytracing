@@ -33,18 +33,17 @@ public:
     int prevWindowWidth = -1;
     int prevWindowHeight = -1;
 
-     // Nouveaux membres pour le menu
     int renderWidth = 512;
     int renderHeight = 384;
     bool showResolutionMenu = false;
-    
-    // Presets de résolution
-    struct ResolutionPreset {
-        const char* name;
+
+    struct ResolutionPreset
+    {
+        const char *name;
         int width;
         int height;
     };
-    
+
     std::vector<ResolutionPreset> resolutionPresets = {
         {"512x384", 512, 384},
         {"640x480", 640, 480},
@@ -52,11 +51,17 @@ public:
         {"1024x768", 1024, 768},
         {"1280x720", 1280, 720},
         {"1920x1080", 1920, 1080},
-        {"Custom", 0, 0}
-    };
-    
+        {"Custom", 0, 0}};
+
     int selectedPreset = 0;
     bool customResolution = false;
+
+    bool enableAccumulation = true;
+    int maxSamples = 16;
+    int currentSample = 0;
+    std::vector<Vector3> accumBuffer;
+    std::vector<Vector3> currentBuffer;
+    bool accumulationInProgress = false;
 
 private:
     bool shouldRerender;
@@ -144,6 +149,38 @@ public:
         imageReady = true;
     }
 
+    void accumulateSample(const std::vector<Vector3> &newSample, int width, int height)
+    {
+        if (accumBuffer.empty())
+        {
+            accumBuffer.resize(width * height, Vector3(0, 0, 0));
+            currentSample = 0;
+        }
+
+        currentSample++;
+
+        for (int i = 0; i < width * height; ++i)
+        {
+            accumBuffer[i] = accumBuffer[i] + newSample[i];
+        }
+
+        std::vector<Vector3> displayBuffer(width * height);
+        for (int i = 0; i < width * height; ++i)
+        {
+            displayBuffer[i] = accumBuffer[i] * (1.0 / currentSample);
+        }
+
+        updateImage(displayBuffer, width, height);
+    }
+
+    void resetAccumulation()
+    {
+        accumBuffer.clear();
+        currentBuffer.clear();
+        currentSample = 0;
+        accumulationInProgress = false;
+    }
+
     void setRenderTime(double time)
     {
         renderTime = time;
@@ -154,12 +191,26 @@ public:
         return shouldRerender;
     }
 
+    bool needsContinuousRender()
+    {
+        return enableAccumulation && accumulationInProgress && currentSample < maxSamples;
+    }
+
     void setRendering(bool rendering)
     {
         isRendering = rendering;
         if (rendering)
         {
             shouldRerender = false;
+        }
+    }
+
+    void startAccumulation()
+    {
+        if (enableAccumulation)
+        {
+            resetAccumulation();
+            accumulationInProgress = true;
         }
     }
 
@@ -203,6 +254,10 @@ public:
     void triggerRerender()
     {
         this->shouldRerender = true;
+        if (enableAccumulation)
+        {
+            startAccumulation();
+        }
     }
 
     void cleanup()
@@ -244,7 +299,20 @@ void performRender(ImGuiRenderer &guiRenderer, int width, int height)
     auto endTime = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
 
-    guiRenderer.updateImage(frameBuffer, width, height);
+    if (guiRenderer.enableAccumulation && guiRenderer.accumulationInProgress)
+    {
+        guiRenderer.accumulateSample(frameBuffer, width, height);
+
+        if (guiRenderer.currentSample >= guiRenderer.maxSamples)
+        {
+            guiRenderer.accumulationInProgress = false;
+        }
+    }
+    else
+    {
+        guiRenderer.updateImage(frameBuffer, width, height);
+    }
+
     guiRenderer.setRenderTime(duration);
     guiRenderer.setRendering(false);
 }
@@ -270,12 +338,17 @@ int main(const int argc, char *argv[])
     std::cout << "Starting initial render..." << std::endl;
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
+    guiRenderer.startAccumulation();
     performRender(guiRenderer, width, height);
 
     while (!guiRenderer.shouldClose())
     {
-        // Vérifier si un nouveau rendu est demandé
         if (guiRenderer.needsRerender())
+        {
+            performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
+        }
+
+        if (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering)
         {
             performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
         }
@@ -287,7 +360,6 @@ int main(const int argc, char *argv[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Fenêtre pour afficher l'image en plein écran
         if (guiRenderer.imageReady)
         {
             ImGuiIO &io = ImGui::GetIO();
@@ -359,6 +431,17 @@ int main(const int argc, char *argv[])
             }
         }
 
+        if (guiRenderer.enableAccumulation)
+        {
+            ImGui::Separator();
+            ImGui::Text("Accumulation: %d/%d samples", guiRenderer.currentSample, guiRenderer.maxSamples);
+            if (guiRenderer.accumulationInProgress)
+            {
+                float progress = (float)guiRenderer.currentSample / (float)guiRenderer.maxSamples;
+                ImGui::ProgressBar(progress, ImVec2(200, 0));
+            }
+        }
+
         ImGui::Separator();
 
         if (ImGui::Button("Save Image") && guiRenderer.imageReady && !guiRenderer.isRendering)
@@ -374,6 +457,34 @@ int main(const int argc, char *argv[])
         ImGui::End();
 
         ImGuiIO &io = ImGui::GetIO();
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 320, 10), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowBgAlpha(0.9f);
+
+        ImGui::Begin("Render Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+        ImGui::Text("Noise Reduction");
+        ImGui::Separator();
+
+        bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
+
+        if (guiRenderer.enableAccumulation)
+        {
+            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
+
+            if (ImGui::Button("Reset Accumulation"))
+            {
+                guiRenderer.resetAccumulation();
+            }
+        }
+
+        if (accumulationChanged && !guiRenderer.enableAccumulation)
+        {
+            guiRenderer.resetAccumulation();
+        }
+
+        ImGui::End();
+
+        // Menu Resolution
         ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowBgAlpha(0.9f);
 

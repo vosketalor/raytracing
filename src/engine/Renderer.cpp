@@ -7,6 +7,10 @@
 
 #include <corecrt_math_defines.h>
 
+static thread_local std::random_device rd;
+static thread_local std::mt19937 gen(rd());
+static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
 void Renderer::render(const int width, const int height, std::vector<Vector3> &frameBuffer)
 {
     const Vector3 observer = {0, 0, 0};
@@ -133,10 +137,6 @@ Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal,
 {
     if (roughness <= 0.0) return direction;
     
-    static thread_local std::random_device rd;
-    static thread_local std::mt19937 gen(rd());
-    static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
-    
     Vector3 tangent1, tangent2;
     if (std::abs(normal.x()) < 0.9) {
         tangent1 = Vector3(0, normal.z(), -normal.y()).normalized();
@@ -148,7 +148,6 @@ Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal,
     double angle = dist(gen) * M_PI * 2.0; 
     double radius = dist(gen) * roughness;
     
-    // Application de la perturbation
     Vector3 perturbation = tangent1 * (radius * std::cos(angle)) + 
                           tangent2 * (radius * std::sin(angle));
     
