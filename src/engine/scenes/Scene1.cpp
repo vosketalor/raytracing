@@ -9,7 +9,7 @@ void Scene1::createShapes()
 {
     // Plan du sol
     const auto plane = std::make_shared<Plane>(Vector3{0, -1, 0}, Vector3{0, 1, 0});
-    plane->setColor(Vector3{0.3f, 0.3f, 0.3f});
+    plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
     plane->setReflectivity(0.2f);
     addShape(plane);
     //

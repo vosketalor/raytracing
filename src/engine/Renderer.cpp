@@ -81,8 +81,9 @@ Vector3 Renderer::computeLighting(const Vector3& P, const Vector3& v, const Vect
         if (!isInShadow(shadowOrigin, shadowRayDir, lightDistance))
         {
             const Vector3 diffuse = computeDiffuse(intersectionPoint, normal, shape, lightSource, shadowOrigin, shadowRayDir);
-            const Vector3 specular =computeSpecular(P, v, intersectionPoint, normal, shape, lightSource);
-            color += diffuse + specular;
+            const Vector3 specular = computeSpecular(P, v, intersectionPoint, normal, shape, lightSource);
+            const double attenuation = computeAttenuation(lightDistance);
+            color += (diffuse + specular) * attenuation;
         }
     }
     return color;
@@ -122,6 +123,12 @@ Vector3 Renderer::computeSpecular(const Vector3& P, const Vector3& v, const Vect
     const double spec = std::max(0.0, halfVector.dot(normal));
 
     return lightSource.getColorSpecular() * lightSource.getIntensity() * std::pow(spec, shape.getShininess());
+}
+
+double Renderer::computeAttenuation(const double& distance) const
+{
+    Vector3 quadraticAttenuation = scene->getQuadraticAttenuation();
+    return 1 / (quadraticAttenuation[0] + quadraticAttenuation[1] * distance + quadraticAttenuation[2] * distance * distance);
 }
 
 
