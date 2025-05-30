@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.h"
+#include <random>
 
 class Material {
 protected:
@@ -7,12 +8,15 @@ protected:
     double transparency = 0.0;            ///< [0-1] transparency coefficient
     double shininess = 100.0;             ///< Phong shininess factor
     double eta = 1.0;                     ///< Refractive index
+    double roughness = 0.0;               ///< [0-1] surface roughness (0 = for perfectly smooth surfaces)
 
 public:
     Material() = default;
 
-    Material(const double refl, const double trans, const double shine, const double refractiveIndex)
-        : reflectivity(refl), transparency(trans), shininess(shine), eta(refractiveIndex) {}
+    Material(const double refl, const double trans, const double shine, 
+             const double refractiveIndex, const double rough = 0.0)
+        : reflectivity(refl), transparency(trans), shininess(shine), 
+          eta(refractiveIndex), roughness(rough) {}
 
     virtual ~Material() = default;
 
@@ -27,6 +31,9 @@ public:
 
     double getEta() const { return eta; }
     void setEta(const double refractiveIndex) { eta = refractiveIndex; }
+
+    double getRoughness() const { return roughness; }
+    void setRoughness(const double rough) { roughness = rough; }
 
     static const Material Mirror;
     static const Material Glass;

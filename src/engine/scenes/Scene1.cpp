@@ -7,7 +7,7 @@
 
 void Scene1::createShapes()
 {
-    Material mat = Material(0.2, 0.0, 1000, Scene::ETA_AIR);
+    Material mat = Material(0.2, 0.0, 1000, Scene::ETA_AIR, 0.4);
     // Plan du sol
     const auto plane = std::make_shared<Plane>(Vector3{0, -1, 0}, Vector3{0, 1, 0});
     plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
