@@ -13,7 +13,7 @@ public:
     explicit BVHNode(const std::vector<std::shared_ptr<Shape>>& shapes);
 
     // Intersection d'un rayon avec le nœud BVH
-    Intersection getIntersection(const Vector3& P, const Vector3& d) const;
+    Intersection getIntersection(const Vector3& P, const Vector3& v) const;
 
 private:
     // Calcul du BoundingBox englobant toutes les formes

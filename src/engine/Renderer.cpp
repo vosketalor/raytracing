@@ -67,28 +67,7 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
 
 Intersection Renderer::findNearestIntersection(const Vector3 &P, const Vector3 &v) const
 {
-    // TODO : BVH
-    Intersection nearestIntersection;
-    nearestIntersection.shape = nullptr;
-    nearestIntersection.lambda = std::numeric_limits<double>::max();
-
-    for (int i = 0; i < scene->getShapes().size(); ++i)
-    {
-        const Shape *shape = scene->getShapes()[i].get();
-        if (!shape->isVisible())
-            continue;
-
-        Intersection intersection = shape->getIntersection(P, v);
-        if (intersection.shape != nullptr && intersection.lambda < nearestIntersection.lambda && intersection.lambda > Scene::EPSILON)
-        {
-            nearestIntersection = intersection;
-        }
-    }
-    if (nearestIntersection.shape == nullptr)
-    {
-        return Intersection();
-    }
-    return nearestIntersection;
+    return this->bvh_.getIntersection(P, v);
 }
 
 Vector3 Renderer::computeLighting(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape) const
@@ -118,19 +97,10 @@ Vector3 Renderer::computeLighting(const Vector3 &P, const Vector3 &v, const Vect
 
 bool Renderer::isInShadow(const Vector3 &shadowOrigin, const Vector3 &shadowRayDir, const double lightDistance) const
 {
-    for (int i = 0; i < scene->getShapes().size(); ++i)
-    {
-        const Shape *shape = scene->getShapes()[i].get();
-        if (!shape->isVisible())
-            continue;
-
-        Intersection inter = shape->getIntersection(shadowOrigin, shadowRayDir);
-        if (inter.shape != nullptr && inter.lambda < lightDistance)
-        {
-            return true;
-        }
-    }
-    return false;
+    const Intersection intersection = this->bvh_.getIntersection(shadowOrigin, shadowRayDir);
+    return intersection.lambda > Scene::EPSILON
+        && intersection.shape != nullptr
+        && intersection.lambda < lightDistance;
 }
 
 Vector3 Renderer::computeDiffuse(const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape, const LightSource &lightSource, const Vector3 &shadowOrigin, const Vector3 &shadowRayDir) const

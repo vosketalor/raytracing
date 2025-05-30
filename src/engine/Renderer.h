@@ -3,15 +3,17 @@
 #include <vector>
 #include <cstdint>
 
+#include "BVHNode.h"
 #include "Intersection.h"
 #include "scenes/Scene.h"
 
 class Renderer
 {
     Scene* scene;
+    BVHNode bvh_;
 
 public:
-    explicit Renderer(Scene* scene) : scene(scene) {};
+    explicit Renderer(Scene* scene) : scene(scene), bvh_(scene->getShapes()) {};
 
     void render(int width, int height, std::vector<Vector3> &frameBuffer);
 

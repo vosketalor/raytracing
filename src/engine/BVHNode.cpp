@@ -34,8 +34,8 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<Shape>>& shapes)
     }
 }
 
-Intersection BVHNode::getIntersection(const Vector3& P, const Vector3& d) const {
-    const Intersection boxHit = boundingBox->getIntersection(P, d);
+Intersection BVHNode::getIntersection(const Vector3& P, const Vector3& v) const {
+    const Intersection boxHit = boundingBox->getIntersection(P, v);
     bool inside = boundingBox->contains(P);
 
     if (boxHit.lambda < Scene::EPSILON && !inside) {
@@ -43,15 +43,15 @@ Intersection BVHNode::getIntersection(const Vector3& P, const Vector3& d) const 
     }
 
     if (leafShape != nullptr) {
-        Intersection inter = leafShape->getIntersection(P, d);
+        Intersection inter = leafShape->getIntersection(P, v);
         if (inter.lambda >= Scene::EPSILON) {
             return inter;
         }
         return Intersection();
     }
 
-    const Intersection hitLeft = left->getIntersection(P, d);
-    const Intersection hitRight = right->getIntersection(P, d);
+    const Intersection hitLeft = left->getIntersection(P, v);
+    const Intersection hitRight = right->getIntersection(P, v);
 
     const bool leftHit = hitLeft.lambda >= Scene::EPSILON;
     const bool rightHit = hitRight.lambda >= Scene::EPSILON;
