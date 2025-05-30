@@ -5,7 +5,10 @@
 #include <cstdlib>
 #include <execution>
 
-#include <corecrt_math_defines.h>
+#ifdef _WIN32
+  #include <corecrt_math_defines.h>  // Windows (Visual Studio)
+#endif
+
 
 static thread_local std::random_device rd;
 static thread_local std::mt19937 gen(rd());
@@ -13,7 +16,7 @@ static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
 #include "Camera.h"
 
-void Renderer::render(const int width, const int height, std::vector<Vector3> &frameBuffer, const Camera camera)
+void Renderer::render(const int& width, const int& height, std::vector<Vector3> &frameBuffer, const Camera& camera) const
 {
     const Vector3 observer = camera.getPosition();
     const double aspectRatio = static_cast<double>(width) / height;

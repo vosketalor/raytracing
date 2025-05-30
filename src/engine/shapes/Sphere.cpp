@@ -2,6 +2,10 @@
 
 #include "../acceleration/BoundingBox.h"
 
+#ifdef _WIN32
+  #include <corecrt_math_defines.h>  // Windows (Visual Studio)
+#endif
+
 Sphere::Sphere(const Vector3& P, float radius) 
     : center(P), radius(radius) {
     setBoundingBox();
@@ -52,8 +56,8 @@ void Sphere::setBoundingBox() {
 Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
     Vector3 P = (intersection - center).normalized();
 
-    const double u = 0.5 + std::atan2(P[2], P[0]) / (2.0 * 3.14159265358979323846);
-    const double v = 0.5 - std::asin(P[1]) / 3.14159265358979323846;
+    const double u = 0.5 + std::atan2(P[2], P[0]) / (2.0 * M_PI);
+    const double v = 0.5 - std::asin(P[1]) / M_PI;
 
     return Vector2(u, v);
 }

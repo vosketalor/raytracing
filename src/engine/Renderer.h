@@ -16,7 +16,7 @@ class Renderer
 public:
     explicit Renderer(Scene* scene) : scene(scene), bvh_(scene->getShapes()) {};
 
-    void render(int width, int height, std::vector<Vector3> &frameBuffer, const Camera& camera) const;
+    void render(const int& width, const int& height, std::vector<Vector3> &frameBuffer, const Camera& camera) const;
 
 private:
     Vector3 getPixelColor(const Vector3& P, const Vector3& v, const int& order) const;
