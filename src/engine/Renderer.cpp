@@ -17,12 +17,12 @@ void Renderer::render(const int width, const int height, std::vector<Vector3>& f
 
             Vector3 rayDir = Vector3(x,y, -distance).normalized();
 
-            frameBuffer[ye * width + xe] = getPixelColor(observer, rayDir);
+            frameBuffer[ye * width + xe] = getPixelColor(observer, rayDir, 10);
         }
     }
 }
 
-Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v)
+Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v, const int& order) const
 {
     const Intersection result = findNearestIntersection(P, v);
     if (!result || result.shape == nullptr) return this->scene->getSkyColor();
@@ -35,7 +35,7 @@ Vector3 Renderer::getPixelColor(const Vector3& P, const Vector3& v)
     color *= this->scene->getAmbient();
 
     color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
-
+    color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
     return color;
 }
 
@@ -52,7 +52,7 @@ Intersection Renderer::findNearestIntersection(const Vector3& P, const Vector3& 
         if (!shape->isVisible()) continue;
 
         Intersection intersection = shape->getIntersection(P, v);
-        if (intersection.shape != nullptr && intersection.lambda < nearestIntersection.lambda)
+        if (intersection.shape != nullptr && intersection.lambda < nearestIntersection.lambda && intersection.lambda > Scene::EPSILON)
         {
             nearestIntersection = intersection;
         }
@@ -129,6 +129,16 @@ double Renderer::computeAttenuation(const double& distance) const
 {
     Vector3 quadraticAttenuation = scene->getQuadraticAttenuation();
     return 1 / (quadraticAttenuation[0] + quadraticAttenuation[1] * distance + quadraticAttenuation[2] * distance * distance);
+}
+
+Vector3 Renderer::computeReflection(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint,
+    const Vector3& normal, const Shape& shape, const int& order) const
+{
+    if (shape.getReflectivity() <= 0 || order <= 0)
+        return Vector3(0, 0, 0);
+
+    const Vector reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
+    return getPixelColor(intersectionPoint, reflectDir, order-1) *  shape.getReflectivity();
 }
 
 

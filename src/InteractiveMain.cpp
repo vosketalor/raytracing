@@ -199,7 +199,7 @@ void performRender(ImGuiRenderer& guiRenderer, int width, int height) {
     guiRenderer.setRendering(false);
 }
 
-int main(int argc, char *argv[]) {
+int main(const int argc, char *argv[]) {
     int width = 512;
     int height = 384;
     
