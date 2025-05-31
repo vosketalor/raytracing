@@ -14,6 +14,18 @@ The raytracer simulates light transport to generate realistic images from 3D sce
 - Camera system with adjustable parameters
 - Scene description and rendering pipeline
 - Image output generation
+
+## Possibles extensions
+- GPU
+- Textures
+- Animations
+- Multiple types of maps: https://3dstudio.co/3d-texture-mapping/
+  - Height map
+  - Roughness map
+  - Bump map
+  - Reflection map
+- Selection object by clicking 
+- Wireframe
   
 ## Build Instructions
 

@@ -6,7 +6,8 @@
 *.slo
 *.lo
 *.o
-*.obj
+cmake-build-debug/*.obj
+build/*.obj
 
 # Precompiled Headers
 *.gch
