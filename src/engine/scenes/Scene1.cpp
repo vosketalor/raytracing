@@ -17,22 +17,22 @@ void Scene1::createShapes()
     addShape(plane);
 
     // Sphère bleue réfléchissante
-    // auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
-    // sphere->setColor(Scene::BLUE);
-    // sphere->setMaterial(Material::Mirror);
-    // addShape(sphere);
-    //
-    // // Sphère rouge transparente
-    // mat = Material(0.0, 0.9, 1000, Scene::ETA_AIR);
-    // sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
-    // sphere->setColor(Scene::RED);
-    // sphere->setMaterial(mat);
-    // addShape(sphere);
-    //
-    // // Sphère verte simple
-    // sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
-    // sphere->setColor(Scene::GREEN);
-    // addShape(sphere);
+    auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
+    sphere->setColor(Scene::BLUE);
+    sphere->setMaterial(Material::Mirror);
+    addShape(sphere);
+
+    // Sphère rouge transparente
+    mat = Material(0.0, 0.9, 1000, Scene::ETA_AIR);
+    sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
+    sphere->setColor(Scene::RED);
+    sphere->setMaterial(mat);
+    addShape(sphere);
+    
+    // Sphère verte simple
+    sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
+    sphere->setColor(Scene::GREEN);
+    addShape(sphere);
     //
     // // Sphère texturée
     // sphere = std::make_shared<Sphere>(Vector3{1, -0.75f, -3}, 0.25f);
@@ -55,11 +55,11 @@ void Scene1::createShapes()
     // triangle->setColor(Scene::ORANGE);
     // addShape(triangle);
 
-    const auto teapot = std::make_shared<OBJ>("res/obj/teapot.obj", Vector3(0, 0, -5));
-    teapot->setColor(Scene::ORANGE);
-    teapot->setMaterial(Material(0.0, 0.3, 1000, Scene::ETA_AIR));
-    teapot->update();
-    addShape(teapot);
+    // const auto teapot = std::make_shared<OBJ>("res/obj/teapot.obj", Vector3(0, 0, -5));
+    // teapot->setColor(Scene::ORANGE);
+    // teapot->setMaterial(Material(0.0, 0.3, 1000, Scene::ETA_AIR));
+    // teapot->update();
+    // addShape(teapot);
 }
 
 void Scene1::createLights()

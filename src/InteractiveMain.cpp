@@ -21,6 +21,10 @@
 #include "Camera.h"
 
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
+static bool rightMousePressed = false;
+static double lastMouseX = 0.0;
+static double lastMouseY = 0.0;
+const float mouseSensitivity = 1.0f;
 
 class ImGuiRenderer
 {
@@ -348,6 +352,43 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
     }
 }
 
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            rightMousePressed = true;
+            mouseCaptured = true;
+            glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else if (action == GLFW_RELEASE) {
+            rightMousePressed = false;
+            mouseCaptured = false;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+}
+
+void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+
+    if (rightMousePressed) {
+        double xoffset = xpos - lastMouseX;
+        double yoffset = lastMouseY - ypos;
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        ImGuiRenderer* guiRenderer = static_cast<ImGuiRenderer*>(glfwGetWindowUserPointer(window));
+        guiRenderer->camera.processMouseMovement(xoffset, yoffset);
+        guiRenderer->triggerRerender();
+    }
+}
+
 int main(const int argc, char *argv[])
 {
     int width = 512;
@@ -364,6 +405,9 @@ int main(const int argc, char *argv[])
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
     glfwSetKeyCallback(guiRenderer.window, keyCallback);
+    glfwSetMouseButtonCallback(guiRenderer.window, mouseButtonCallback);
+    glfwSetCursorPosCallback(guiRenderer.window, cursorPosCallback);
+    glfwSetWindowUserPointer(guiRenderer.window, &guiRenderer);
 
     guiRenderer.startAccumulation();
     performRender(guiRenderer, width, height);
@@ -374,6 +418,23 @@ int main(const int argc, char *argv[])
         double deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
+        if (keysPressed[GLFW_KEY_ESCAPE])
+        {
+            glfwSetWindowShouldClose(guiRenderer.window, true);
+        }
+        if (keysPressed[GLFW_KEY_F11])
+        {
+            if (glfwGetWindowMonitor(guiRenderer.window) == nullptr)
+            {
+                GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+                const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(guiRenderer.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            }
+            else
+            {
+                glfwSetWindowMonitor(guiRenderer.window, nullptr, 100, 100, 1400, 900, 0);
+            }
+        }
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
         {
             guiRenderer.camera.moveForward(deltaTime);
@@ -405,26 +466,23 @@ int main(const int argc, char *argv[])
             guiRenderer.shouldRerender = true;
         }
 
-        static Vector3 lastCamPos = guiRenderer.camera.getPosition();
-        static double lastCamPitch = guiRenderer.camera.getPitch();
-        static double lastCamYaw = guiRenderer.camera.getYaw();
+        if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed) {
+            static Vector3 lastCamPos = guiRenderer.camera.getPosition();
+            static double lastCamPitch = guiRenderer.camera.getPitch();
+            static double lastCamYaw = guiRenderer.camera.getYaw();
 
-        if (lastCamPos != guiRenderer.camera.getPosition() ||
-            lastCamPitch != guiRenderer.camera.getPitch() ||
-            lastCamYaw != guiRenderer.camera.getYaw())
-        {
-            guiRenderer.triggerRerender();
-            lastCamPos = guiRenderer.camera.getPosition();
-            lastCamPitch = guiRenderer.camera.getPitch();
-            lastCamYaw = guiRenderer.camera.getYaw();
+            if (lastCamPos != guiRenderer.camera.getPosition() ||
+                lastCamPitch != guiRenderer.camera.getPitch() ||
+                lastCamYaw != guiRenderer.camera.getYaw())
+            {
+                guiRenderer.triggerRerender();
+                lastCamPos = guiRenderer.camera.getPosition();
+                lastCamPitch = guiRenderer.camera.getPitch();
+                lastCamYaw = guiRenderer.camera.getYaw();
+            }
         }
 
-        if (guiRenderer.needsRerender())
-        {
-            performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
-        }
-
-        if (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering)
+        if (guiRenderer.needsRerender() || (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering))
         {
             performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
         }

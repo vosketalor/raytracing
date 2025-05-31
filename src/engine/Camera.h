@@ -37,7 +37,6 @@ public:
 
     ~Camera() = default;
 
-    // Accesseurs
     const Vector3& getPosition() const { return position; }
     double getPitch() const { return pitch; }
     double getYaw() const { return yaw; }
@@ -56,13 +55,10 @@ public:
     void setNearPlane(const double n) { nearPlane = n; }
     void setFarPlane(const double f) { farPlane = f; }
 
-    // Calcule la direction avant de la caméra en fonction du pitch et yaw (en radians)
     Vector3 getDirection() const {
-        // Convertir en radians
         const double pitchRad = pitch * M_PI / 180.0;
         const double yawRad = yaw * M_PI / 180.0;
 
-        // Direction dans l'espace monde
         const double x = cos(pitchRad) * sin(yawRad);
         const double y = sin(pitchRad);
         const double z = -cos(pitchRad) * cos(yawRad);
@@ -70,7 +66,6 @@ public:
         return Vector3{x, y, z}.normalized();
     }
 
-    // Optionnel: calcule le vecteur "right" (à droite) selon yaw et roll
     Vector3 getRight() const {
         const double yawRad = yaw * M_PI / 180.0;
         const double rollRad = roll * M_PI / 180.0;
@@ -114,8 +109,6 @@ public:
     void processMouseMovement(double xoffset, double yoffset, bool constrainPitch = true) {
         xoffset *= mouseSensitivity;
         yoffset *= mouseSensitivity;
-
-        std::cout << "Mouse movement: xoffset = " << xoffset << ", yoffset = " << yoffset << std::endl;
 
         yaw += xoffset;
         pitch += yoffset;
