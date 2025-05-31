@@ -65,7 +65,6 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     guiRenderer.setRendering(false);
 }
 
-
 static double lastFrameTime = 0.0;
 
 static bool keysPressed[512] = {false};
@@ -92,17 +91,22 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
     }
 }
 
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
 
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 
-    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-        if (action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        if (action == GLFW_PRESS)
+        {
             rightMousePressed = true;
             mouseCaptured = true;
             glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        } else if (action == GLFW_RELEASE) {
+        }
+        else if (action == GLFW_RELEASE)
+        {
             rightMousePressed = false;
             mouseCaptured = false;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -110,11 +114,13 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     }
 }
 
-void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
+{
 
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
-    if (rightMousePressed) {
+    if (rightMousePressed)
+    {
         double xoffset = xpos - lastMouseX;
         double yoffset = lastMouseY - ypos;
         lastMouseX = xpos;
@@ -123,7 +129,7 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
         xoffset *= mouseSensitivity;
         yoffset *= mouseSensitivity;
 
-        ImGuiRenderer* guiRenderer = static_cast<ImGuiRenderer*>(glfwGetWindowUserPointer(window));
+        ImGuiRenderer *guiRenderer = static_cast<ImGuiRenderer *>(glfwGetWindowUserPointer(window));
         guiRenderer->camera.processMouseMovement(xoffset, yoffset);
         guiRenderer->triggerRerender();
     }
@@ -178,35 +184,36 @@ int main(const int argc, char *argv[])
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
         {
             guiRenderer.camera.moveForward(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_S])
         {
             guiRenderer.camera.moveBackward(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
         {
             guiRenderer.camera.moveLeft(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_D])
         {
             guiRenderer.camera.moveRight(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_SPACE])
         {
             guiRenderer.camera.moveUp(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_LEFT_SHIFT])
         {
             guiRenderer.camera.moveDown(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
 
-        if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed) {
+        if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed)
+        {
             static Vector3 lastCamPos = guiRenderer.camera.getPosition();
             static double lastCamPitch = guiRenderer.camera.getPitch();
             static double lastCamYaw = guiRenderer.camera.getYaw();
@@ -305,6 +312,26 @@ int main(const int argc, char *argv[])
             }
         }
 
+        ImGui::Separator();
+
+        ImGui::Text("Noise Reduction");
+        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
+
+        if (guiRenderer.enableAccumulation)
+        {
+            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
+        }
+
+        if (accumulationChanged && !guiRenderer.enableAccumulation)
+        {
+            guiRenderer.resetAccumulation();
+        }
+
+        if (accumulationChanged && guiRenderer.enableAccumulation)
+        {
+            guiRenderer.triggerRerender();
+        }
+
         if (guiRenderer.enableAccumulation)
         {
             ImGui::Separator();
@@ -331,33 +358,6 @@ int main(const int argc, char *argv[])
         ImGui::End();
 
         const ImGuiIO &io = ImGui::GetIO();
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 320, 10), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowBgAlpha(0.9f);
-
-        ImGui::Begin("Render Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-        ImGui::Text("Noise Reduction");
-        ImGui::Separator();
-
-        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
-
-        if (guiRenderer.enableAccumulation)
-        {
-            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
-
-            if (ImGui::Button("Reset Accumulation"))
-            {
-                guiRenderer.resetAccumulation();
-            }
-        }
-
-        if (accumulationChanged && !guiRenderer.enableAccumulation)
-        {
-            guiRenderer.resetAccumulation();
-        }
-
-        ImGui::End();
-
         // Menu Resolution
         ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowBgAlpha(0.9f);
