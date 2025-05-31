@@ -27,6 +27,8 @@ public:
 
     void setTextureCoordinates(const Vector3& a, const Vector3& b, const Vector3& c);
 
+    double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const override;
+
 private:
     bool isInside(const Vector3& M) const;
 };

@@ -21,4 +21,6 @@ public:
     // void rotate(double angle, const Vector3& axis) override;
     void setBoundingBox() override;
     Vector2 getTextureCoordinates(const Vector3& intersection) const override;
+
+    double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const override;
 };

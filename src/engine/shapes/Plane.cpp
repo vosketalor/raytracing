@@ -89,3 +89,8 @@ Vector2 Plane::getTextureCoordinates(const Vector3& intersection) const {
 
     return Vector2(u, v);
 }
+
+double Plane::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const
+{
+    return Scene::WIREFRAME_THICKNESS + 1;
+}

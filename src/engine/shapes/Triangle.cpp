@@ -112,3 +112,25 @@ void Triangle::setTextureCoordinates(const Vector3& a, const Vector3& b, const V
     uvC = c;
     hasUV = true;
 }
+
+double distancePointSegment(const Vector3& P, const Vector3& A, const Vector3& B) {
+    const Vector3 AB = B - A;
+    const Vector3 AP = P - A;
+
+    const double ab2 = AB.dot(AB);
+    if (ab2 == 0.0) return (P - A).norm(); // A et B confondus
+
+    double t = AP.dot(AB) / ab2;
+    t = std::clamp(t, 0.0, 1.0); // Limite à l'intérieur du segment
+
+    const Vector3 projection = A + AB * t;
+    return (P - projection).norm();
+}
+
+double Triangle::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const {
+    double d1 = distancePointSegment(P, A, B);
+    double d2 = distancePointSegment(P, B, C);
+    double d3 = distancePointSegment(P, C, A);
+
+    return std::min({d1, d2, d3});
+}

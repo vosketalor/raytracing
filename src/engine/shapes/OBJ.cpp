@@ -172,6 +172,11 @@ void OBJ::update() {
     }
 }
 
+double OBJ::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const
+{
+    throw std::runtime_error("getDistanceNearestEdge should be handled by inner Triangle");
+}
+
 Vector2 OBJ::getTextureCoordinates(const Vector3&) const {
     throw std::runtime_error("TextureCoordinates should be handled by inner Triangle");
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include "Vector.h"
 // #include "Texture.h"
+#include "Camera.h"
 #include "Material.h"
 #include "../Intersection.h"
 
@@ -20,6 +21,7 @@ protected:
     std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
     // bool hasTexture = false;               ///< Texture presence flag
+    bool wireframeEnabled = false;        ///< Wireframe mode flag
 
 public:
     virtual ~Shape() = default;
@@ -57,7 +59,12 @@ public:
     //
     // bool hasTexture() const { return hasTexture; }
 
+    virtual double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const = 0;
+
     virtual std::string toString() const {
         return typeid(*this).name();
     }
+
+    bool isWireframeEnabled() const { return wireframeEnabled; }
+    void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
 };

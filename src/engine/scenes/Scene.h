@@ -52,6 +52,8 @@ public:
     static constexpr double ETA_CUBIC_ZIRCONIA = 2.1;
 
     static constexpr double EPSILON = 1e-6;
+    inline static constexpr Vector3 WIREFRAME_COLOR = GREEN;
+    static constexpr double WIREFRAME_THICKNESS = 0.025;
 
     Scene() = default;
     virtual ~Scene() = default;

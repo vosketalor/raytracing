@@ -295,10 +295,10 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     scene->createLights();
     scene->createShapes();
 
-    Renderer renderer(scene.get());
+    const Renderer renderer(scene.get(), guiRenderer.camera);
     std::vector<Vector3> frameBuffer(width * height);
 
-    renderer.render(width, height, frameBuffer, guiRenderer.camera);
+    renderer.render(width, height, frameBuffer);
 
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;

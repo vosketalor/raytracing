@@ -61,3 +61,24 @@ Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
 
     return Vector2(u, v);
 }
+
+double Sphere::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const
+{
+    // 1. Direction du regard vers la sphère
+    const Vector3 toCenter = center - camera.getPosition();
+    const Vector3 viewDir = toCenter.normalized();
+
+    // 2. Projection de P sur le plan perpendiculaire à viewDir passant par center
+    const Vector3 PC = P - center;
+    const double dot = PC.dot(viewDir);
+    const Vector3 projection = P - viewDir * dot;
+
+    // 3. Distance du point projeté au centre de la sphère
+    const double distanceInPlane = (projection - center).norm();
+
+    // 4. Distance au bord du disque (en 3D)
+    return std::abs(distanceInPlane - radius);
+}
+
+
+

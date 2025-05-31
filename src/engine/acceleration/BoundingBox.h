@@ -26,4 +26,6 @@ public:
     Vector2 getTextureCoordinates(const Vector3& intersection) const override;
 
     bool contains(const Vector3& P) const;
+
+    double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const override;
 };

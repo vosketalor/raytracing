@@ -16,13 +16,13 @@ static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
 #include "Camera.h"
 
-void Renderer::render(const int& width, const int& height, std::vector<Vector3> &frameBuffer, const Camera& camera) const
+void Renderer::render(const int& width, const int& height, std::vector<Vector3> &frameBuffer) const
 {
-    const Vector3 observer = camera.getPosition();
+    const Vector3 observer = this->camera_.getPosition();
     const double aspectRatio = static_cast<double>(width) / height;
 
     // Calcul de la taille de l'écran virtuel en fonction du FOV (en radians)
-    const double fovRad = camera.getFov() * M_PI / 180.0;
+    const double fovRad = this->camera_.getFov() * M_PI / 180.0;
     const double screenHeight = 2.0 * tan(fovRad / 2.0);
     const double screenWidth = screenHeight * aspectRatio;
 
@@ -62,9 +62,9 @@ void Renderer::render(const int& width, const int& height, std::vector<Vector3> 
                     const double py = v * screenHeight;
 
                     // Calcul des vecteurs de base de la caméra
-                    Vector3 forward = camera.getDirection();       // direction caméra
-                    Vector3 right = camera.getRight();              // vecteur droit
-                    Vector3 up = camera.getUp();                     // vecteur haut
+                    Vector3 forward = this->camera_.getDirection();       // direction caméra
+                    Vector3 right = this->camera_.getRight();              // vecteur droit
+                    Vector3 up = this->camera_.getUp();                     // vecteur haut
 
                     // Calcul du vecteur direction du rayon dans l'espace monde
                     Vector3 rayDir = (forward + px * right + py * up).normalized();
@@ -84,6 +84,14 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
 
     const Vector3 intersectionPoint = P + v * result.lambda;
     const Vector3 normal = result.normal;
+
+    if (result.shape->isWireframeEnabled())
+    {
+        const double distance = result.shape->getDistanceNearestEdge(intersectionPoint, this->camera_);
+
+        if (distance < Scene::WIREFRAME_THICKNESS)
+            return Scene::WIREFRAME_COLOR;
+    }
 
     Vector3 color = result.shape->getColor();
 

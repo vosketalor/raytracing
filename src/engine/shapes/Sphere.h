@@ -20,4 +20,6 @@ public:
 
     void setBoundingBox() override;
     Vector2 getTextureCoordinates(const Vector3& intersection) const override;
+
+    double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const override;
 };

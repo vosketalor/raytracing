@@ -55,3 +55,8 @@ bool BoundingBox::contains(const Vector3& P) const {
            (P.y() >= min.y() && P.y() <= max.y()) &&
            (P.z() >= min.z() && P.z() <= max.z());
 }
+
+double BoundingBox::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const
+{
+    return Scene::WIREFRAME_THICKNESS + 1;
+}

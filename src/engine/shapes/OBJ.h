@@ -21,6 +21,8 @@ public:
 
     void update();
 
+    double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const override;
+
 private:
     std::vector<Triangle> triangles;
     BVHNode* bvh;
