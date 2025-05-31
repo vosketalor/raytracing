@@ -1,5 +1,7 @@
 #include "ImGuiRenderer.h"
 
+#include <ctime>
+
 bool ImGuiRenderer::initialize(const int windowWidth, const int windowHeight)
 {
     // Initialisation GLFW
