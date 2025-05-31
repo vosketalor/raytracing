@@ -19,6 +19,9 @@ protected:
     double nearPlane;    // plan proche de clipping
     double farPlane;     // plan lointain de clipping
 
+    double movementSpeed;
+    double mouseSensitivity;
+
 public:
     Camera(const Vector3& position = Vector3{0,0,0},
            const double pitch = 0.0,
@@ -29,7 +32,8 @@ public:
            const double nearPlane = 0.1,
            const double farPlane = 1000.0)
     : position(position), pitch(pitch), yaw(yaw), roll(roll),
-      fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane) {}
+      fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane),
+      movementSpeed(2.5), mouseSensitivity(0.1) {}
 
     ~Camera() = default;
 
@@ -79,8 +83,46 @@ public:
         return right.normalized();
     }
 
-    // Optionnel: calcule le vecteur "up" selon pitch, yaw et roll
     Vector3 getUp() const {
         return getRight().cross(getDirection()).normalized();
+    }
+
+    void moveForward(double deltaTime) {
+        position = position + getDirection() * movementSpeed * deltaTime;
+    }
+
+    void moveBackward(double deltaTime) {
+        position = position - getDirection() * movementSpeed * deltaTime;
+    }
+
+    void moveLeft(double deltaTime) {
+        position = position - getRight() * movementSpeed * deltaTime;
+    }
+
+    void moveRight(double deltaTime) {
+        position = position + getRight() * movementSpeed * deltaTime;
+    }
+
+    void moveUp(double deltaTime) {
+        position.y() += movementSpeed * deltaTime;
+    }
+
+    void moveDown(double deltaTime) {
+        position.y() -= movementSpeed * deltaTime;
+    }
+
+    void processMouseMovement(double xoffset, double yoffset, bool constrainPitch = true) {
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        std::cout << "Mouse movement: xoffset = " << xoffset << ", yoffset = " << yoffset << std::endl;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        if (constrainPitch) {
+            if (pitch > 89.0) pitch = 89.0;
+            if (pitch < -89.0) pitch = -89.0;
+        }
     }
 };

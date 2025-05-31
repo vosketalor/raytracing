@@ -39,6 +39,8 @@ public:
     int renderHeight = 384;
     bool showResolutionMenu = false;
 
+    Camera camera;
+
     struct ResolutionPreset
     {
         const char *name;
@@ -64,10 +66,10 @@ public:
     std::vector<Vector3> accumBuffer;
     std::vector<Vector3> currentBuffer;
     bool accumulationInProgress = false;
-
-private:
     bool shouldRerender;
 
+
+private:
 public:
     ImGuiRenderer() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
                       renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
@@ -296,9 +298,7 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     Renderer renderer(scene.get());
     std::vector<Vector3> frameBuffer(width * height);
 
-    const Camera camera;
-
-    renderer.render(width, height, frameBuffer, camera);
+    renderer.render(width, height, frameBuffer, guiRenderer.camera);
 
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
@@ -321,16 +321,37 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     guiRenderer.setRendering(false);
 }
 
+
+static double lastFrameTime = 0.0;
+
+static bool keysPressed[512] = {false};
+static bool mouseCaptured = false;
+
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (mouseCaptured)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    else
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    if (action == GLFW_PRESS)
+    {
+        keysPressed[key] = true;
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        keysPressed[key] = false;
+    }
+}
+
 int main(const int argc, char *argv[])
 {
     int width = 512;
     int height = 384;
-
-    if (argc >= 3)
-    {
-        width = std::atoi(argv[1]);
-        height = std::atoi(argv[2]);
-    }
 
     ImGuiRenderer guiRenderer;
     if (!guiRenderer.initialize())
@@ -342,11 +363,62 @@ int main(const int argc, char *argv[])
     std::cout << "Starting initial render..." << std::endl;
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
+    glfwSetKeyCallback(guiRenderer.window, keyCallback);
+
     guiRenderer.startAccumulation();
     performRender(guiRenderer, width, height);
 
     while (!guiRenderer.shouldClose())
     {
+        double currentFrameTime = glfwGetTime();
+        double deltaTime = currentFrameTime - lastFrameTime;
+        lastFrameTime = currentFrameTime;
+
+        if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
+        {
+            guiRenderer.camera.moveForward(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+        if (keysPressed[GLFW_KEY_S])
+        {
+            guiRenderer.camera.moveBackward(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+        if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
+        {
+            guiRenderer.camera.moveLeft(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+        if (keysPressed[GLFW_KEY_D])
+        {
+            guiRenderer.camera.moveRight(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+        if (keysPressed[GLFW_KEY_SPACE])
+        {
+            guiRenderer.camera.moveUp(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+        if (keysPressed[GLFW_KEY_LEFT_SHIFT])
+        {
+            guiRenderer.camera.moveDown(deltaTime);
+            guiRenderer.shouldRerender = true;
+        }
+
+        static Vector3 lastCamPos = guiRenderer.camera.getPosition();
+        static double lastCamPitch = guiRenderer.camera.getPitch();
+        static double lastCamYaw = guiRenderer.camera.getYaw();
+
+        if (lastCamPos != guiRenderer.camera.getPosition() ||
+            lastCamPitch != guiRenderer.camera.getPitch() ||
+            lastCamYaw != guiRenderer.camera.getYaw())
+        {
+            guiRenderer.triggerRerender();
+            lastCamPos = guiRenderer.camera.getPosition();
+            lastCamPitch = guiRenderer.camera.getPitch();
+            lastCamYaw = guiRenderer.camera.getYaw();
+        }
+
         if (guiRenderer.needsRerender())
         {
             performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
