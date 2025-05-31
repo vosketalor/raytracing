@@ -64,21 +64,33 @@ Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
 
 double Sphere::getDistanceNearestEdge(const Vector3& P, const Camera& camera) const
 {
-    // 1. Direction du regard vers la sphère
+    // 1. Direction depuis la caméra vers le centre
     const Vector3 toCenter = center - camera.getPosition();
     const Vector3 viewDir = toCenter.normalized();
 
-    // 2. Projection de P sur le plan perpendiculaire à viewDir passant par center
-    const Vector3 PC = P - center;
-    const double dot = PC.dot(viewDir);
-    const Vector3 projection = P - viewDir * dot;
+    // 2. Vecteur du centre vers le point P
+    const Vector3 toPoint = P - center;
 
-    // 3. Distance du point projeté au centre de la sphère
-    const double distanceInPlane = (projection - center).norm();
+    // 3. Projection de P sur le plan orthogonal à viewDir
+    const double distAlongView = toPoint.dot(viewDir);
+    const Vector3 projected = P - viewDir * distAlongView;
 
-    // 4. Distance au bord du disque (en 3D)
-    return std::abs(distanceInPlane - radius);
+    // 4. Rayon apparent dans ce plan
+    const double centerDistance = toCenter.norm();
+    if (centerDistance <= radius)
+        return 0.0; // Caméra à l'intérieur de la sphère : tout est "bord"
+
+    // Calcul du rayon apparent de la sphère dans le plan
+    const double sinTheta = radius / centerDistance;
+    const double apparentRadius = std::sqrt(toCenter.norm()*toCenter.norm() - radius * radius) * sinTheta;
+
+    // 5. Distance dans le plan
+    const double distanceInPlane = (projected - center).norm();
+
+    // 6. Distance au bord visible (disque)
+    return std::abs(distanceInPlane - apparentRadius);
 }
+
 
 
 
