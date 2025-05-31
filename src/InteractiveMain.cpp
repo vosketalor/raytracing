@@ -151,7 +151,7 @@ public:
         imageReady = true;
     }
 
-    void accumulateSample(const std::vector<Vector3> &newSample, int width, int height)
+    void accumulateSample(const std::vector<Vector3> &newSample, const int width, const int height)
     {
         if (accumBuffer.empty())
         {
@@ -183,7 +183,7 @@ public:
         accumulationInProgress = false;
     }
 
-    void setRenderTime(double time)
+    void setRenderTime(const double time)
     {
         renderTime = time;
     }
@@ -193,7 +193,7 @@ public:
         return shouldRerender;
     }
 
-    bool needsContinuousRender()
+    bool needsContinuousRender() const
     {
         return enableAccumulation && accumulationInProgress && currentSample < maxSamples;
     }
@@ -441,7 +441,7 @@ int main(const int argc, char *argv[])
             ImGui::Text("Accumulation: %d/%d samples", guiRenderer.currentSample, guiRenderer.maxSamples);
             if (guiRenderer.accumulationInProgress)
             {
-                const float progress = static_cast<float>(guiRenderer.currentSample) / (float)guiRenderer.maxSamples;
+                const float progress = static_cast<float>(guiRenderer.currentSample) / static_cast<float>(guiRenderer.maxSamples);
                 ImGui::ProgressBar(progress, ImVec2(200, 0));
             }
         }

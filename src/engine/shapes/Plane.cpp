@@ -14,7 +14,7 @@ Plane::Plane(const Vector3& P, const Vector3& n)
 }
 
 Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
-    : Plane(C, v1.cross(v2)) {}
+    : Plane(C, v1.cross(v2).normalized()) {}
 
 Intersection Plane::getIntersection(const Vector3& P, const Vector3& v) const {
     if (!visible) return Intersection();

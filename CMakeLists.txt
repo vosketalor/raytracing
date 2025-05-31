@@ -37,6 +37,8 @@ set(IMGUI_SOURCES
     src/engine/acceleration/BoundingBox.h
     src/engine/acceleration/BVHNode.cpp
     src/engine/acceleration/BVHNode.h
+        src/engine/shapes/Triangle.cpp
+        src/engine/shapes/Triangle.h
 )
 
 add_executable(Raytracing

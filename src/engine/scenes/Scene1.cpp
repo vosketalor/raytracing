@@ -3,6 +3,7 @@
 #include "LightSource.h"
 #include "shapes/Plane.h"
 #include "shapes/Sphere.h"
+#include "shapes/Triangle.h"
 
 
 void Scene1::createShapes()
@@ -43,11 +44,15 @@ void Scene1::createShapes()
     // sphere->setEta(Scene::ETA_WATER);
     // sphere->setColor(Scene::PINK);
     // addShape(sphere);
-    //
-    // // Sphère grise
+
+    // Sphère grise
     // sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, 2}, 0.5f);
     // sphere->setColor(Scene::DARK_GRAY);
     // addShape(sphere);
+
+    const auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
+    triangle->setColor(Scene::ORANGE);
+    addShape(triangle);
 }
 
 void Scene1::createLights()

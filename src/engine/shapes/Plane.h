@@ -5,7 +5,7 @@
 #include <limits>
 
 class Plane : public Shape {
-private:
+protected:
     Vector3 normal;
     double distance;
 
