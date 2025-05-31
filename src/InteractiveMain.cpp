@@ -19,269 +19,13 @@
 #include <string>
 
 #include "Camera.h"
+#include "gui/ImGuiRenderer.h"
 
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
-
-class ImGuiRenderer
-{
-public:
-    GLFWwindow *window;
-    GLuint textureID;
-    int imageWidth, imageHeight;
-    std::vector<unsigned char> imageData;
-    double renderTime;
-    bool imageReady;
-    bool isRendering;
-    int prevWindowWidth = -1;
-    int prevWindowHeight = -1;
-
-    int renderWidth = 512;
-    int renderHeight = 384;
-    bool showResolutionMenu = false;
-
-    Camera camera;
-
-    struct ResolutionPreset
-    {
-        const char *name;
-        int width;
-        int height;
-    };
-
-    std::vector<ResolutionPreset> resolutionPresets = {
-        {"512x384", 512, 384},
-        {"640x480", 640, 480},
-        {"800x600", 800, 600},
-        {"1024x768", 1024, 768},
-        {"1280x720", 1280, 720},
-        {"1920x1080", 1920, 1080},
-        {"Custom", 0, 0}};
-
-    int selectedPreset = 0;
-    bool customResolution = false;
-
-    bool enableAccumulation = false;
-    int maxSamples = 16;
-    int currentSample = 0;
-    std::vector<Vector3> accumBuffer;
-    std::vector<Vector3> currentBuffer;
-    bool accumulationInProgress = false;
-    bool shouldRerender;
-
-
-private:
-public:
-    ImGuiRenderer() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
-                      renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
-                      prevWindowHeight(-1), shouldRerender(false) {}
-
-    ~ImGuiRenderer()
-    {
-        cleanup();
-    }
-
-    bool initialize(const int windowWidth = 1400, const int windowHeight = 900)
-    {
-        // Initialisation GLFW
-        if (!glfwInit())
-        {
-            std::cerr << "Failed to initialize GLFW" << std::endl;
-            return false;
-        }
-
-        // Configuration OpenGL
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        // Création de la fenêtre
-        window = glfwCreateWindow(windowWidth, windowHeight, "Ray Tracer Viewer", nullptr, nullptr);
-        if (!window)
-        {
-            std::cerr << "Failed to create GLFW window" << std::endl;
-            glfwTerminate();
-            return false;
-        }
-
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
-
-        // Setup Dear ImGui context
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
-        (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-
-        // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 330");
-
-        // Générer la texture pour l'image
-        glGenTextures(1, &textureID);
-
-        return true;
-    }
-
-    void updateImage(const std::vector<Vector3> &frameBuffer, int width, int height)
-    {
-        imageWidth = width;
-        imageHeight = height;
-        imageData.resize(width * height * 3);
-
-        // Conversion du frameBuffer en données RGB 8-bit
-        for (int i = 0; i < width * height; ++i)
-        {
-            Vector3 color = frameBuffer[i];
-            color.clamp(0.0, 1.0);
-
-            imageData[i * 3 + 0] = static_cast<unsigned char>(color[0] * 255);
-            imageData[i * 3 + 1] = static_cast<unsigned char>(color[1] * 255);
-            imageData[i * 3 + 2] = static_cast<unsigned char>(color[2] * 255);
-        }
-
-        // Upload texture to GPU
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        imageReady = true;
-    }
-
-    void accumulateSample(const std::vector<Vector3> &newSample, const int width, const int height)
-    {
-        if (accumBuffer.empty())
-        {
-            accumBuffer.resize(width * height, Vector3(0, 0, 0));
-            currentSample = 0;
-        }
-
-        currentSample++;
-
-        for (int i = 0; i < width * height; ++i)
-        {
-            accumBuffer[i] = accumBuffer[i] + newSample[i];
-        }
-
-        std::vector<Vector3> displayBuffer(width * height);
-        for (int i = 0; i < width * height; ++i)
-        {
-            displayBuffer[i] = accumBuffer[i] * (1.0 / currentSample);
-        }
-
-        updateImage(displayBuffer, width, height);
-    }
-
-    void resetAccumulation()
-    {
-        accumBuffer.clear();
-        currentBuffer.clear();
-        currentSample = 0;
-        accumulationInProgress = false;
-    }
-
-    void setRenderTime(const double time)
-    {
-        renderTime = time;
-    }
-
-    bool needsRerender() const
-    {
-        return shouldRerender;
-    }
-
-    bool needsContinuousRender() const
-    {
-        return enableAccumulation && accumulationInProgress && currentSample < maxSamples;
-    }
-
-    void setRendering(const bool rendering)
-    {
-        isRendering = rendering;
-        if (rendering)
-        {
-            shouldRerender = false;
-        }
-    }
-
-    void startAccumulation()
-    {
-        if (enableAccumulation)
-        {
-            resetAccumulation();
-            accumulationInProgress = true;
-        }
-    }
-
-    bool shouldClose() const
-    {
-        return glfwWindowShouldClose(window);
-    }
-
-    void saveImage() const
-    {
-        if (!imageReady)
-            return;
-
-        const std::string filename = "output_" + std::to_string(std::time(nullptr)) + ".ppm";
-        std::ofstream image(filename);
-        if (!image.is_open())
-        {
-            std::cerr << "Error while opening file: " << filename << std::endl;
-            return;
-        }
-
-        image << "P3\n"
-              << imageWidth << " " << imageHeight << "\n255\n";
-
-        for (int y = 0; y < imageHeight; ++y)
-        {
-            for (int x = 0; x < imageWidth; ++x)
-            {
-                const int idx = (y * imageWidth + x) * 3;
-                const int r = imageData[idx + 0];
-                const int g = imageData[idx + 1];
-                const int b = imageData[idx + 2];
-                image << r << ' ' << g << ' ' << b << '\n';
-            }
-        }
-
-        image.close();
-        std::cout << "Image saved: " << filename << std::endl;
-    }
-
-    void triggerRerender()
-    {
-        this->shouldRerender = true;
-        if (enableAccumulation)
-        {
-            startAccumulation();
-        }
-    }
-
-    void cleanup() const
-    {
-        if (textureID)
-        {
-            glDeleteTextures(1, &textureID);
-        }
-
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-
-        if (window)
-        {
-            glfwDestroyWindow(window);
-        }
-        glfwTerminate();
-    }
-};
+static bool rightMousePressed = false;
+static double lastMouseX = 0.0;
+static double lastMouseY = 0.0;
+const float mouseSensitivity = 1.0f;
 
 void performRender(ImGuiRenderer &guiRenderer, const int width, const int height)
 {
@@ -321,7 +65,6 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     guiRenderer.setRendering(false);
 }
 
-
 static double lastFrameTime = 0.0;
 
 static bool keysPressed[512] = {false};
@@ -348,6 +91,50 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
     }
 }
 
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+{
+
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        if (action == GLFW_PRESS)
+        {
+            rightMousePressed = true;
+            mouseCaptured = true;
+            glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            rightMousePressed = false;
+            mouseCaptured = false;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+}
+
+void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
+{
+
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+
+    if (rightMousePressed)
+    {
+        double xoffset = xpos - lastMouseX;
+        double yoffset = lastMouseY - ypos;
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        ImGuiRenderer *guiRenderer = static_cast<ImGuiRenderer *>(glfwGetWindowUserPointer(window));
+        guiRenderer->camera.processMouseMovement(xoffset, yoffset);
+        guiRenderer->triggerRerender();
+    }
+}
+
 int main(const int argc, char *argv[])
 {
     int width = 512;
@@ -364,6 +151,9 @@ int main(const int argc, char *argv[])
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
     glfwSetKeyCallback(guiRenderer.window, keyCallback);
+    glfwSetMouseButtonCallback(guiRenderer.window, mouseButtonCallback);
+    glfwSetCursorPosCallback(guiRenderer.window, cursorPosCallback);
+    glfwSetWindowUserPointer(guiRenderer.window, &guiRenderer);
 
     guiRenderer.startAccumulation();
     performRender(guiRenderer, width, height);
@@ -374,57 +164,72 @@ int main(const int argc, char *argv[])
         double deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
+        if (keysPressed[GLFW_KEY_ESCAPE])
+        {
+            glfwSetWindowShouldClose(guiRenderer.window, true);
+        }
+        if (keysPressed[GLFW_KEY_F11])
+        {
+            if (glfwGetWindowMonitor(guiRenderer.window) == nullptr)
+            {
+                GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+                const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(guiRenderer.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            }
+            else
+            {
+                glfwSetWindowMonitor(guiRenderer.window, nullptr, 100, 100, 1400, 900, 0);
+            }
+        }
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
         {
             guiRenderer.camera.moveForward(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_S])
         {
             guiRenderer.camera.moveBackward(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
         {
             guiRenderer.camera.moveLeft(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_D])
         {
             guiRenderer.camera.moveRight(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_SPACE])
         {
             guiRenderer.camera.moveUp(deltaTime);
-            guiRenderer.shouldRerender = true;
+            guiRenderer.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_LEFT_SHIFT])
         {
             guiRenderer.camera.moveDown(deltaTime);
-            guiRenderer.shouldRerender = true;
-        }
-
-        static Vector3 lastCamPos = guiRenderer.camera.getPosition();
-        static double lastCamPitch = guiRenderer.camera.getPitch();
-        static double lastCamYaw = guiRenderer.camera.getYaw();
-
-        if (lastCamPos != guiRenderer.camera.getPosition() ||
-            lastCamPitch != guiRenderer.camera.getPitch() ||
-            lastCamYaw != guiRenderer.camera.getYaw())
-        {
             guiRenderer.triggerRerender();
-            lastCamPos = guiRenderer.camera.getPosition();
-            lastCamPitch = guiRenderer.camera.getPitch();
-            lastCamYaw = guiRenderer.camera.getYaw();
         }
 
-        if (guiRenderer.needsRerender())
+        if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed)
         {
-            performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
+            static Vector3 lastCamPos = guiRenderer.camera.getPosition();
+            static double lastCamPitch = guiRenderer.camera.getPitch();
+            static double lastCamYaw = guiRenderer.camera.getYaw();
+
+            if (lastCamPos != guiRenderer.camera.getPosition() ||
+                lastCamPitch != guiRenderer.camera.getPitch() ||
+                lastCamYaw != guiRenderer.camera.getYaw())
+            {
+                guiRenderer.triggerRerender();
+                lastCamPos = guiRenderer.camera.getPosition();
+                lastCamPitch = guiRenderer.camera.getPitch();
+                lastCamYaw = guiRenderer.camera.getYaw();
+            }
         }
 
-        if (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering)
+        if (guiRenderer.needsRerender() || (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering))
         {
             performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
         }
@@ -507,6 +312,26 @@ int main(const int argc, char *argv[])
             }
         }
 
+        ImGui::Separator();
+
+        ImGui::Text("Noise Reduction");
+        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
+
+        if (guiRenderer.enableAccumulation)
+        {
+            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
+        }
+
+        if (accumulationChanged && !guiRenderer.enableAccumulation)
+        {
+            guiRenderer.resetAccumulation();
+        }
+
+        if (accumulationChanged && guiRenderer.enableAccumulation)
+        {
+            guiRenderer.triggerRerender();
+        }
+
         if (guiRenderer.enableAccumulation)
         {
             ImGui::Separator();
@@ -533,33 +358,6 @@ int main(const int argc, char *argv[])
         ImGui::End();
 
         const ImGuiIO &io = ImGui::GetIO();
-        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 320, 10), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowBgAlpha(0.9f);
-
-        ImGui::Begin("Render Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-        ImGui::Text("Noise Reduction");
-        ImGui::Separator();
-
-        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
-
-        if (guiRenderer.enableAccumulation)
-        {
-            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
-
-            if (ImGui::Button("Reset Accumulation"))
-            {
-                guiRenderer.resetAccumulation();
-            }
-        }
-
-        if (accumulationChanged && !guiRenderer.enableAccumulation)
-        {
-            guiRenderer.resetAccumulation();
-        }
-
-        ImGui::End();
-
         // Menu Resolution
         ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowBgAlpha(0.9f);

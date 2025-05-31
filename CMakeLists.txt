@@ -41,6 +41,8 @@ set(IMGUI_SOURCES
         src/engine/shapes/Triangle.h
         src/engine/shapes/OBJ.cpp
         src/engine/shapes/OBJ.h
+        src/gui/ImGuiRenderer.cpp
+        src/gui/ImGuiRenderer.h
 )
 
 add_executable(Raytracing
@@ -58,6 +60,8 @@ add_executable(Raytracing
     src/engine/Intersection.h
     src/engine/shapes/Plane.cpp
     src/engine/shapes/Plane.h
+    src/gui/ImGuiRenderer.cpp
+    src/gui/ImGuiRenderer.h
     ${IMGUI_SOURCES}
 )
 
