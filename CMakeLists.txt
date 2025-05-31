@@ -39,6 +39,8 @@ set(IMGUI_SOURCES
     src/engine/acceleration/BVHNode.h
         src/engine/shapes/Triangle.cpp
         src/engine/shapes/Triangle.h
+        src/engine/shapes/OBJ.cpp
+        src/engine/shapes/OBJ.h
 )
 
 add_executable(Raytracing
@@ -64,3 +66,13 @@ target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)
 if(USE_TBB)
     target_link_libraries(Raytracing PRIVATE TBB::tbb)
 endif()
+
+message("CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+
+add_custom_command(TARGET Raytracing POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Copying resources..."
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/res
+        $<TARGET_FILE_DIR:Raytracing>/res)
+
+

@@ -1,6 +1,7 @@
 #include "Scene1.h"
 
 #include "LightSource.h"
+#include "shapes/OBJ.h"
 #include "shapes/Plane.h"
 #include "shapes/Sphere.h"
 #include "shapes/Triangle.h"
@@ -16,17 +17,17 @@ void Scene1::createShapes()
     addShape(plane);
 
     // Sphère bleue réfléchissante
-    auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
-    sphere->setColor(Scene::BLUE);
-    sphere->setMaterial(Material::Mirror);
-    addShape(sphere);
-
-    // Sphère rouge transparente
-    mat = Material(0.0, 0.9, 1000, Scene::ETA_AIR);
-    sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
-    sphere->setColor(Scene::RED);
-    sphere->setMaterial(mat);
-    addShape(sphere);
+    // auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
+    // sphere->setColor(Scene::BLUE);
+    // sphere->setMaterial(Material::Mirror);
+    // addShape(sphere);
+    //
+    // // Sphère rouge transparente
+    // mat = Material(0.0, 0.9, 1000, Scene::ETA_AIR);
+    // sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
+    // sphere->setColor(Scene::RED);
+    // sphere->setMaterial(mat);
+    // addShape(sphere);
     //
     // // Sphère verte simple
     // sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
@@ -50,9 +51,15 @@ void Scene1::createShapes()
     // sphere->setColor(Scene::DARK_GRAY);
     // addShape(sphere);
 
-    const auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
-    triangle->setColor(Scene::ORANGE);
-    addShape(triangle);
+    // const auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
+    // triangle->setColor(Scene::ORANGE);
+    // addShape(triangle);
+
+    const auto teapot = std::make_shared<OBJ>("res/obj/teapot.obj", Vector3(0, 0, -5));
+    teapot->setColor(Scene::ORANGE);
+    teapot->setMaterial(Material(0.0, 0.3, 1000, Scene::ETA_AIR));
+    teapot->update();
+    addShape(teapot);
 }
 
 void Scene1::createLights()
