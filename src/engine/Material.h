@@ -3,6 +3,10 @@
 #include <random>
 #include <cmath>
 
+#ifdef _WIN32
+  #include <corecrt_math_defines.h>  // Windows (Visual Studio)
+#endif
+
 // ====== MODIFICATION DE Material.h ======
 class Material {
 protected:
