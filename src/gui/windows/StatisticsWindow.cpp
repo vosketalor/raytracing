@@ -24,42 +24,6 @@ void StatisticsWindow::render() {
                 ImGui::Text("Pixels/second: %.0f", pixelsPerSecond);
             }
         }
-
-        ImGui::Separator();
-
-        ImGui::Text("Noise Reduction");
-        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &m_renderer.enableAccumulation);
-
-        if (m_renderer.enableAccumulation) {
-            ImGui::SliderInt("Max Samples", &m_renderer.maxSamples, 4, 64);
-        }
-
-        if (accumulationChanged && !m_renderer.enableAccumulation) {
-            m_renderer.resetAccumulation();
-        }
-
-        if (accumulationChanged && m_renderer.enableAccumulation) {
-            m_renderer.triggerRerender();
-        }
-
-        if (m_renderer.enableAccumulation) {
-            ImGui::Separator();
-            ImGui::Text("Accumulation: %d/%d samples", m_renderer.currentSample, m_renderer.maxSamples);
-            if (m_renderer.accumulationInProgress) {
-                const float progress = static_cast<float>(m_renderer.currentSample) / static_cast<float>(m_renderer.maxSamples);
-                ImGui::ProgressBar(progress, ImVec2(200, 0));
-            }
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::Button("Save Image") && m_renderer.imageReady && !m_renderer.isRendering) {
-            m_renderer.saveImage();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Re-render") && !m_renderer.isRendering) {
-            m_renderer.triggerRerender();
-        }
     }
     ImGui::End();
 }

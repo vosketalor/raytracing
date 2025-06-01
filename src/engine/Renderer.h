@@ -17,6 +17,14 @@ class Renderer
 public:
     int width, height;
 
+    bool shadowsEnabled = false;
+    bool softShadowsEnabled = false;
+    int samplesNumber = 1;
+    bool reflectionsEnabled = false;
+    bool refractionsEnabled = false;
+    bool specularEnabled = false;
+    bool attenuationEnabled = false;
+
     explicit Renderer(Scene* scene, const Camera& camera, const int& width, const int& height) :
         scene(scene), bvh_(scene->getShapes()), camera_(camera), width(width), height(height)
     {
