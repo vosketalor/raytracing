@@ -126,8 +126,8 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
     const Vector3 intersectionPoint = P + v * result.lambda;
     const Vector3 normal = result.normal;
 
-    if (result.shape->isWireframeEnabled())
-    {
+    // Wireframe check
+    if (result.shape->isWireframeEnabled()) {
         const double distance = result.shape->getDistanceNearestEdge(intersectionPoint, this->camera_);
         if (distance < Scene::WIREFRAME_THICKNESS)
             return Scene::WIREFRAME_COLOR;
@@ -135,36 +135,44 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
 
     Vector3 color = result.shape->getColor();
     color *= this->scene->getAmbient();
-    color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
 
-    // Calcul des coefficients de Fresnel si l'objet a des propriétés réflectives/réfractives
-    if (order > 0)
-    {
-        double materialReflectivity = result.shape->getMaterial().getReflectivity();
-        double materialTransparency = result.shape->getMaterial().getTransparency();
+    // CHOISIR entre ancien et nouveau modèle d'éclairage
+    const Material& material = result.shape->getMaterial();
 
-        if (materialReflectivity > 0 && materialTransparency > 0)
-        {
-            // Objet avec réflexion ET réfraction -> utiliser Fresnel
-            const double etaI = Scene::ETA_AIR;
-            const double etaT = result.shape->getMaterial().getEta();
+    // Si le matériau a metallic > 0, utiliser microfacettes, sinon ancien modèle
+    if (material.getMetallic() > 0.0 || material.getRoughness() > 0.5) {
+        // Nouveau modèle microfacettes
+        Vector3 microfacetsLight = computeMicrofacetsLighting(P, v, intersectionPoint, normal, *result.shape);
 
-            auto [fresnelR, fresnelT] = computeFresnelCoefficients(v, normal, etaI, etaT);
-
-            Vector3 reflectionColor = computeReflection(P, v, intersectionPoint, normal, *result.shape, order, fresnelR * materialReflectivity);
-            Vector3 refractionColor = computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, fresnelT * materialTransparency);
-
-            color += reflectionColor + refractionColor;
+        // Vérifier que le résultat est valide
+        if (std::isfinite(microfacetsLight.x()) && std::isfinite(microfacetsLight.y()) && std::isfinite(microfacetsLight.z())) {
+            color += microfacetsLight * result.shape->getColor(); // Multiplier par la couleur
+        } else {
+            // Fallback vers l'ancien modèle si problème
+            color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
         }
-        else if (materialReflectivity > 0)
-        {
-            // Objet uniquement réflectif (ex: miroir, métal)
-            color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order, materialReflectivity);
+    } else {
+        // Ancien modèle pour les matériaux simples
+        color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
+    }
+
+    // Réflexions
+    if (order > 0) {
+        if (material.getReflectivity() > 0.0 || material.getMetallic() > 0.0) {
+            Vector3 reflectionColor;
+
+            if (material.getMetallic() > 0.0) {
+                reflectionColor = sampleMicrofacetsReflection(P, v, intersectionPoint, normal, *result.shape, order);
+            } else {
+                reflectionColor = computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
+            }
+
+            color += reflectionColor * std::max(material.getReflectivity(), material.getMetallic());
         }
-        else if (materialTransparency > 0)
-        {
-            // Objet uniquement transparent (cas rare, mais possible)
-            color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, materialTransparency);
+
+        // Réfraction (garder l'ancien pour l'instant)
+        if (material.getTransparency() > 0.0) {
+            color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, material.getTransparency());
         }
     }
 
@@ -444,4 +452,143 @@ Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Ve
     const Vector3 reflectDir = (i - n * 2 * n.dot(i)).normalized();
     const Vector3 offset = reflectDir * computeCurvatureBias(shape, intersectionPoint, reflectDir, v);
     return getPixelColor(intersectionPoint + offset, reflectDir, order - 1);
+}
+
+Vector3 Renderer::computeMicrofacetsBRDF(const Vector3& viewDir, const Vector3& lightDir,
+                                        const Vector3& normal, const Material& material) const
+{
+    Vector3 halfVector = (viewDir + lightDir).normalized();
+
+    double NdotL = std::max(normal.dot(lightDir), 0.0);
+    double NdotV = std::max(normal.dot(viewDir), 0.0);
+    double NdotH = std::max(normal.dot(halfVector), 0.0);
+    double VdotH = std::max(viewDir.dot(halfVector), 0.0);
+
+    // Si pas d'éclairage, retourner noir
+    if (NdotL <= 0.0 || NdotV <= 0.0) {
+        return Vector3(0, 0, 0);
+    }
+
+    double roughness = std::max(0.01, material.getRoughness()); // Éviter rugosité = 0
+    double alpha = roughness * roughness;
+
+    // Distribution normale (D) - GGX
+    double a2 = alpha * alpha;
+    double denom = NdotH * NdotH * (a2 - 1.0) + 1.0;
+    double D = a2 / (M_PI * denom * denom);
+
+    // Fonction de géométrie simplifiée (G)
+    double k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
+    double G1L = NdotL / (NdotL * (1.0 - k) + k);
+    double G1V = NdotV / (NdotV * (1.0 - k) + k);
+    double G = G1L * G1V;
+
+    // Fresnel (F) - Version corrigée
+    Vector3 F0 = material.getF0();
+    if (material.getMetallic() > 0.0) {
+        // Pour les métaux, utiliser la couleur de l'objet comme F0
+        F0 = F0 * (1.0 - material.getMetallic()) +
+             Vector3(1.0, 1.0, 1.0) * material.getMetallic(); // Blanc pour simplicité
+    }
+
+    Vector3 F = F0 + (Vector3(1.0, 1.0, 1.0) - F0) * std::pow(1.0 - VdotH, 5.0);
+
+    // BRDF Cook-Torrance
+    Vector3 numerator = D * G * F;
+    double denominator = 4.0 * NdotV * NdotL + 0.001;
+    Vector3 specular = numerator / denominator;
+
+    // Composante diffuse Lambert
+    Vector3 kS = F;
+    Vector3 kD = Vector3(1.0, 1.0, 1.0) - kS;
+    kD = kD * (1.0 - material.getMetallic()); // Pas de diffuse pour les métaux
+
+    Vector3 diffuse = kD / M_PI;
+
+    return diffuse + specular;
+}
+
+
+Vector3 Renderer::computeMicrofacetsLighting(const Vector3& P, const Vector3& v,
+                                           const Vector3& intersectionPoint,
+                                           const Vector3& normal, const Shape& shape) const
+{
+    Vector3 result(0, 0, 0);
+    Vector3 viewDir = (P - intersectionPoint).normalized();
+
+    // RÉDUIRE le nombre d'échantillons pour débugger
+    const int numSamples = 4;
+
+    for (const auto& lightPtr : scene->getLightSources()) {
+        const LightSource& L = *lightPtr;
+        Vector3 accumLight(0, 0, 0);
+
+        for (int i = 0; i < numSamples; ++i) {
+            Vector3 samplePos = L.samplePointOnArea();
+            Vector3 Lvec = samplePos - intersectionPoint;
+            double Ldist = Lvec.norm();
+            Vector3 Ldir = Lvec / Ldist;
+
+            // Test d'ombre simple
+            Vector3 shadowOrig = intersectionPoint + normal * 0.001; // Offset simple
+            bool inShadow = isInShadow(shadowOrig, Ldir, Ldist);
+
+            if (inShadow) continue;
+
+            // BRDF microfacettes
+            Vector3 brdf = computeMicrofacetsBRDF(viewDir, Ldir, normal, shape.getMaterial());
+
+            // Vérifier que la BRDF n'est pas NaN ou infinie
+            if (!std::isfinite(brdf.x()) || !std::isfinite(brdf.y()) || !std::isfinite(brdf.z())) {
+                continue;
+            }
+
+            double NdotL = std::max(0.0, normal.dot(Ldir));
+            Vector3 radiance = L.getColorDiffuse() * L.getIntensity();
+
+            // Atténuation par distance
+            double attenDist = computeAttenuation(Ldist);
+
+            accumLight += brdf * radiance * NdotL * attenDist;
+        }
+
+        result += accumLight / (double)numSamples;
+    }
+
+    return result;
+}
+
+Vector3 Renderer::sampleMicrofacetsReflection(const Vector3& P, const Vector3& v,
+                                             const Vector3& intersectionPoint,
+                                             const Vector3& normal, const Shape& shape,
+                                             const int& order) const
+{
+    if (order <= 0) return Vector3(0, 0, 0);
+
+    const Material& material = shape.getMaterial();
+
+    // RÉFLEXION SIMPLE pour commencer (comme avant)
+    Vector3 reflectDir = (v - normal * 2.0 * normal.dot(v)).normalized();
+
+    // Ajouter un peu de perturbation basée sur la rugosité
+    double roughness = material.getRoughness();
+    if (roughness > 0.1) {
+        reflectDir = perturbVector(reflectDir, normal, roughness * 0.5);
+    }
+
+    // Vérifier que la direction est correcte
+    if (reflectDir.dot(normal) <= 0.0) {
+        return Vector3(0, 0, 0);
+    }
+
+    Vector3 offset = reflectDir * computeCurvatureBias(shape, intersectionPoint, reflectDir, v);
+    Vector3 reflectedColor = getPixelColor(intersectionPoint + offset, reflectDir, order - 1);
+
+    // Coefficient de réflexion basé sur Fresnel simple
+    Vector3 viewDir = -v;
+    double cosTheta = std::max(0.0, viewDir.dot(normal));
+    Vector3 F0 = material.getF0();
+    Vector3 F = F0 + (Vector3(1.0, 1.0, 1.0) - F0) * std::pow(1.0 - cosTheta, 5.0);
+
+    return reflectedColor * F;
 }

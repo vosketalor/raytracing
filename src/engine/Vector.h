@@ -141,6 +141,13 @@ public:
         return result;
     }
 
+    Vector operator/(const double scalar) const noexcept {
+        Vector result;
+        std::transform(data.begin(), data.end(), result.data.begin(),
+                      [scalar](const double val) { return val / scalar; });
+        return result;
+    }
+
     // ============== CROSS PRODUCT (3D ONLY) ==============
     template<int k2 = k>
     std::enable_if_t<k2 == 3, Vector<3>> cross(const Vector<3>& other) const noexcept {

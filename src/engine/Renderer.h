@@ -49,4 +49,15 @@ private:
 
     Vector3 computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
                              const Vector3 &normal, const Shape &shape, const int &order, double fresnelCoeff = 1.0) const;
+    Vector3 computeMicrofacetsBRDF(const Vector3& viewDir, const Vector3& lightDir,
+                                  const Vector3& normal, const Material& material) const;
+
+    Vector3 computeMicrofacetsLighting(const Vector3& P, const Vector3& v,
+                                      const Vector3& intersectionPoint,
+                                      const Vector3& normal, const Shape& shape) const;
+
+    Vector3 sampleMicrofacetsReflection(const Vector3& P, const Vector3& v,
+                                       const Vector3& intersectionPoint,
+                                       const Vector3& normal, const Shape& shape,
+                                       const int& order) const;
 };

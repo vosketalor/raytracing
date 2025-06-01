@@ -43,6 +43,8 @@ set(IMGUI_SOURCES
     src/engine/shapes/OBJ.h
     src/gui/Application.cpp
     src/gui/Application.h
+        src/engine/scenes/SceneMicrofacets.cpp
+        src/engine/scenes/SceneMicrofacets.h
 )
 
 add_executable(Raytracing

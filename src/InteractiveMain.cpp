@@ -23,6 +23,7 @@
 #include "gui/UIManager.h"
 #include "gui/InputManager.h"
 #include "scenes/SceneFresnel.h"
+#include "scenes/SceneMicrofacets.h"
 
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
 static bool rightMousePressed = false;
@@ -139,7 +140,7 @@ int main(const int argc, char *argv[])
     int width = 512;
     int height = 384;
 
-    const auto scene = std::make_unique<SceneFresnel>();
+    const auto scene = std::make_unique<SceneMicrofacets>();
     scene->setSkyColor(SKYCOLOR);
     scene->setAmbient({0.1f, 0.1f, 0.1f});
     scene->createLights();
