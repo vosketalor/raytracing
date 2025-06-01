@@ -37,12 +37,12 @@ set(IMGUI_SOURCES
     src/engine/acceleration/BoundingBox.h
     src/engine/acceleration/BVHNode.cpp
     src/engine/acceleration/BVHNode.h
-        src/engine/shapes/Triangle.cpp
-        src/engine/shapes/Triangle.h
-        src/engine/shapes/OBJ.cpp
-        src/engine/shapes/OBJ.h
-        src/gui/Application.cpp
-        src/gui/Application.h
+    src/engine/shapes/Triangle.cpp
+    src/engine/shapes/Triangle.h
+    src/engine/shapes/OBJ.cpp
+    src/engine/shapes/OBJ.h
+    src/gui/Application.cpp
+    src/gui/Application.h
 )
 
 add_executable(Raytracing
@@ -70,13 +70,15 @@ add_executable(Raytracing
     src/gui/windows/ResolutionWindow.h
     src/gui/windows/StatisticsWindow.cpp
     src/gui/windows/StatisticsWindow.h
-    src/gui/windows/UiWindow.cpp
-    src/gui/windows/UiWindow.h
+        src/gui/windows/UIWindow.cpp
+        src/gui/windows/UIWindow.h
     src/gui/Window.cpp
     src/gui/Window.h
     src/gui/InputManager.cpp
     src/gui/InputManager.h
+    src/gui/WindowConfig.h
     ${IMGUI_SOURCES}
+
 )
 
 target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)

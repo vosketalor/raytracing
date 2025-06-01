@@ -3,16 +3,10 @@
 #include <functional>
 #include <string>
 
+#include "WindowConfig.h"
+
 class Window {
 public:
-    struct WindowConfig {
-        int width = 1400;
-        int height = 900;
-        std::string title = "Raytracer";
-        bool vsync = true;
-        bool resizable = true;
-    };
-
     // Callbacks types
     using KeyCallback = std::function<void(int key, int scancode, int action, int mods)>;
     using MouseButtonCallback = std::function<void(int button, int action, int mods)>;

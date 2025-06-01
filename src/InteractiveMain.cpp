@@ -32,19 +32,15 @@ const float mouseSensitivity = 1.0f;
 void performRender(Application &application, const int width, const int height)
 {
     application.setRendering(true);
+    application.renderer.width = width;
+    application.renderer.height = height;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
-    const auto scene = std::make_unique<Scene1>();
-    scene->setSkyColor(SKYCOLOR);
-    scene->setAmbient({0.1f, 0.1f, 0.1f});
-    scene->createLights();
-    scene->createShapes();
-
-    const Renderer renderer(scene.get(), application.camera);
+    application.renderer.setCamera(application.camera);
     std::vector<Vector3> frameBuffer(width * height);
 
-    renderer.render(width, height, frameBuffer);
+    application.renderer.render(frameBuffer);
 
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
@@ -142,7 +138,13 @@ int main(const int argc, char *argv[])
     int width = 512;
     int height = 384;
 
-    Application application;
+    const auto scene = std::make_unique<Scene1>();
+    scene->setSkyColor(SKYCOLOR);
+    scene->setAmbient({0.1f, 0.1f, 0.1f});
+    scene->createLights();
+    scene->createShapes();
+
+    Application application(scene.get());
     if (!application.initialize())
     {
         std::cerr << "Failed to initialize ImGui renderer" << std::endl;

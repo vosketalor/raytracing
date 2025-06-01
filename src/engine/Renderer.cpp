@@ -16,7 +16,7 @@ static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
 #include "Camera.h"
 
-void Renderer::render(const int& width, const int& height, std::vector<Vector3> &frameBuffer) const
+void Renderer::render(std::vector<Vector3> &frameBuffer) const
 {
     const Vector3 observer = this->camera_.getPosition();
     const double aspectRatio = static_cast<double>(width) / height;
@@ -73,6 +73,47 @@ void Renderer::render(const int& width, const int& height, std::vector<Vector3> 
                 }
             }
         });
+}
+
+const Shape* Renderer::getShape(const double& x, const double& y)
+{
+    const double aspectRatio = static_cast<double>(width) / height;
+
+    // Calcul de la taille de l'écran virtuel en fonction du FOV
+    const double fovRad = this->camera_.getFov() * M_PI / 180.0;
+    const double screenHeight = 2.0 * tan(fovRad / 2.0);
+    const double screenWidth = screenHeight * aspectRatio;
+
+    // Normalisation des coordonnées écran entre -0.5 et 0.5
+    const double u = (x + 0.5) / width - 0.5;
+    const double v = 0.5 - (y + 0.5) / height;
+
+    // Position sur le plan image
+    const double px = u * screenWidth;
+    const double py = v * screenHeight;
+
+    // Vecteurs de base de la caméra
+    const Vector3 forward = this->camera_.getDirection();
+    const Vector3 right = this->camera_.getRight();
+    const Vector3 up = this->camera_.getUp();
+
+    // Direction du rayon
+    const Vector3 rayDir = (forward + px * right + py * up).normalized();
+
+    // Lancement du rayon
+    const Vector3 origin = this->camera_.getPosition();
+    const Intersection result = findNearestIntersection(origin, rayDir);
+
+    // Renvoi de la forme touchée
+    if (!result || result.shape == nullptr)
+        return nullptr;
+
+    return result.shape;
+}
+
+void Renderer::setCamera(const Camera& camera)
+{
+    this->camera_ = camera;
 }
 
 

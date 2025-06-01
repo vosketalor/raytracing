@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 
+#include "Renderer.h"
 #include "../engine/Camera.h"
 #include "InputManager.h"
 
@@ -34,6 +35,7 @@ public:
     bool showResolutionMenu = false;
 
     Camera camera;
+    Renderer renderer;
 
     struct ResolutionPreset
     {
@@ -65,9 +67,9 @@ public:
 
 private:
 public:
-    Application() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
+    Application(Scene* scene) : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
                       renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
-                      prevWindowHeight(-1), shouldRerender(false) {}
+                      prevWindowHeight(-1), renderer(scene, camera, 0, 0), shouldRerender(false) {}
 
     ~Application()
     {

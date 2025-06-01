@@ -12,12 +12,21 @@ class Renderer
 {
     Scene* scene;
     BVHNode bvh_;
-    const Camera camera_;
+    Camera camera_;
 
 public:
-    explicit Renderer(Scene* scene, const Camera& camera) : scene(scene), bvh_(scene->getShapes()), camera_(camera) {};
+    int width, height;
 
-    void render(const int& width, const int& height, std::vector<Vector3> &frameBuffer) const;
+    explicit Renderer(Scene* scene, const Camera& camera, const int& width, const int& height) :
+        scene(scene), bvh_(scene->getShapes()), camera_(camera), width(width), height(height)
+    {
+    };
+
+    void render(std::vector<Vector3> &frameBuffer) const;
+
+    const Shape* getShape(const double& x, const double& y);
+
+    void setCamera(const Camera& camera);
 
 private:
     Vector3 getPixelColor(const Vector3& P, const Vector3& v, const int& order) const;
