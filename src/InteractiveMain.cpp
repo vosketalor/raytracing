@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <string>
 
 // ImGui includes
 #include "imgui.h"
@@ -16,10 +17,11 @@
 
 #include "engine/Renderer.h"
 #include "scenes/Scene1.h"
-#include <string>
 
 #include "Camera.h"
-#include "gui/ImGuiRenderer.h"
+#include "gui/Application.h"
+#include "gui/UIManager.h"
+#include "gui/InputManager.h"
 
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
 static bool rightMousePressed = false;
@@ -27,9 +29,9 @@ static double lastMouseX = 0.0;
 static double lastMouseY = 0.0;
 const float mouseSensitivity = 1.0f;
 
-void performRender(ImGuiRenderer &guiRenderer, const int width, const int height)
+void performRender(Application &application, const int width, const int height)
 {
-    guiRenderer.setRendering(true);
+    application.setRendering(true);
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -39,7 +41,7 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     scene->createLights();
     scene->createShapes();
 
-    const Renderer renderer(scene.get(), guiRenderer.camera);
+    const Renderer renderer(scene.get(), application.camera);
     std::vector<Vector3> frameBuffer(width * height);
 
     renderer.render(width, height, frameBuffer);
@@ -47,22 +49,22 @@ void performRender(ImGuiRenderer &guiRenderer, const int width, const int height
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
 
-    if (guiRenderer.enableAccumulation && guiRenderer.accumulationInProgress)
+    if (application.enableAccumulation && application.accumulationInProgress)
     {
-        guiRenderer.accumulateSample(frameBuffer, width, height);
+        application.accumulateSample(frameBuffer, width, height);
 
-        if (guiRenderer.currentSample >= guiRenderer.maxSamples)
+        if (application.currentSample >= application.maxSamples)
         {
-            guiRenderer.accumulationInProgress = false;
+            application.accumulationInProgress = false;
         }
     }
     else
     {
-        guiRenderer.updateImage(frameBuffer, width, height);
+        application.updateImage(frameBuffer, width, height);
     }
 
-    guiRenderer.setRenderTime(duration);
-    guiRenderer.setRendering(false);
+    application.setRenderTime(duration);
+    application.setRendering(false);
 }
 
 static double lastFrameTime = 0.0;
@@ -129,9 +131,9 @@ void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
         xoffset *= mouseSensitivity;
         yoffset *= mouseSensitivity;
 
-        ImGuiRenderer *guiRenderer = static_cast<ImGuiRenderer *>(glfwGetWindowUserPointer(window));
-        guiRenderer->camera.processMouseMovement(xoffset, yoffset);
-        guiRenderer->triggerRerender();
+        Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
+        application->camera.processMouseMovement(xoffset, yoffset);
+        application->triggerRerender();
     }
 }
 
@@ -140,25 +142,28 @@ int main(const int argc, char *argv[])
     int width = 512;
     int height = 384;
 
-    ImGuiRenderer guiRenderer;
-    if (!guiRenderer.initialize())
+    Application application;
+    if (!application.initialize())
     {
         std::cerr << "Failed to initialize ImGui renderer" << std::endl;
         return 1;
     }
 
+    UIManager uiManager(application);
+    uiManager.initialize();
+
     std::cout << "Starting initial render..." << std::endl;
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
-    glfwSetKeyCallback(guiRenderer.window, keyCallback);
-    glfwSetMouseButtonCallback(guiRenderer.window, mouseButtonCallback);
-    glfwSetCursorPosCallback(guiRenderer.window, cursorPosCallback);
-    glfwSetWindowUserPointer(guiRenderer.window, &guiRenderer);
+    glfwSetKeyCallback(application.window, keyCallback);
+    glfwSetMouseButtonCallback(application.window, mouseButtonCallback);
+    glfwSetCursorPosCallback(application.window, cursorPosCallback);
+    glfwSetWindowUserPointer(application.window, &application);
 
-    guiRenderer.startAccumulation();
-    performRender(guiRenderer, width, height);
+    application.startAccumulation();
+    performRender(application, width, height);
 
-    while (!guiRenderer.shouldClose())
+    while (!application.shouldClose())
     {
         double currentFrameTime = glfwGetTime();
         double deltaTime = currentFrameTime - lastFrameTime;
@@ -166,72 +171,72 @@ int main(const int argc, char *argv[])
 
         if (keysPressed[GLFW_KEY_ESCAPE])
         {
-            glfwSetWindowShouldClose(guiRenderer.window, true);
+            glfwSetWindowShouldClose(application.window, true);
         }
         if (keysPressed[GLFW_KEY_F11])
         {
-            if (glfwGetWindowMonitor(guiRenderer.window) == nullptr)
+            if (glfwGetWindowMonitor(application.window) == nullptr)
             {
                 GLFWmonitor *monitor = glfwGetPrimaryMonitor();
                 const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-                glfwSetWindowMonitor(guiRenderer.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+                glfwSetWindowMonitor(application.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
             }
             else
             {
-                glfwSetWindowMonitor(guiRenderer.window, nullptr, 100, 100, 1400, 900, 0);
+                glfwSetWindowMonitor(application.window, nullptr, 100, 100, 1400, 900, 0);
             }
         }
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
         {
-            guiRenderer.camera.moveForward(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveForward(deltaTime);
+            application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_S])
         {
-            guiRenderer.camera.moveBackward(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveBackward(deltaTime);
+            application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
         {
-            guiRenderer.camera.moveLeft(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveLeft(deltaTime);
+            application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_D])
         {
-            guiRenderer.camera.moveRight(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveRight(deltaTime);
+            application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_SPACE])
         {
-            guiRenderer.camera.moveUp(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveUp(deltaTime);
+            application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_LEFT_SHIFT])
         {
-            guiRenderer.camera.moveDown(deltaTime);
-            guiRenderer.triggerRerender();
+            application.camera.moveDown(deltaTime);
+            application.triggerRerender();
         }
 
         if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed)
         {
-            static Vector3 lastCamPos = guiRenderer.camera.getPosition();
-            static double lastCamPitch = guiRenderer.camera.getPitch();
-            static double lastCamYaw = guiRenderer.camera.getYaw();
+            static Vector3 lastCamPos = application.camera.getPosition();
+            static double lastCamPitch = application.camera.getPitch();
+            static double lastCamYaw = application.camera.getYaw();
 
-            if (lastCamPos != guiRenderer.camera.getPosition() ||
-                lastCamPitch != guiRenderer.camera.getPitch() ||
-                lastCamYaw != guiRenderer.camera.getYaw())
+            if (lastCamPos != application.camera.getPosition() ||
+                lastCamPitch != application.camera.getPitch() ||
+                lastCamYaw != application.camera.getYaw())
             {
-                guiRenderer.triggerRerender();
-                lastCamPos = guiRenderer.camera.getPosition();
-                lastCamPitch = guiRenderer.camera.getPitch();
-                lastCamYaw = guiRenderer.camera.getYaw();
+                application.triggerRerender();
+                lastCamPos = application.camera.getPosition();
+                lastCamPitch = application.camera.getPitch();
+                lastCamYaw = application.camera.getYaw();
             }
         }
 
-        if (guiRenderer.needsRerender() || (guiRenderer.needsContinuousRender() && !guiRenderer.isRendering))
+        if (application.needsRerender() || (application.needsContinuousRender() && !application.isRendering))
         {
-            performRender(guiRenderer, guiRenderer.renderWidth, guiRenderer.renderHeight);
+            performRender(application, application.renderWidth, application.renderHeight);
         }
 
         glfwPollEvents();
@@ -241,183 +246,19 @@ int main(const int argc, char *argv[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (guiRenderer.imageReady)
-        {
-            const ImGuiIO &io = ImGui::GetIO();
-            const float availableWidth = io.DisplaySize.x;
-            const float availableHeight = io.DisplaySize.y;
-
-            ImGui::SetNextWindowPos(ImVec2(0, 0));
-            ImGui::SetNextWindowSize(ImVec2(availableWidth, availableHeight));
-
-            ImGui::Begin("Rendered Image", nullptr,
-                         ImGuiWindowFlags_NoTitleBar |
-                             ImGuiWindowFlags_NoResize |
-                             ImGuiWindowFlags_NoMove |
-                             ImGuiWindowFlags_NoScrollbar |
-                             ImGuiWindowFlags_NoCollapse |
-                             ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-            const float imageRatio = static_cast<float>(guiRenderer.imageWidth) / static_cast<float>(guiRenderer.imageHeight);
-            const float windowRatio = availableWidth / availableHeight;
-
-            ImVec2 imageSize;
-            ImVec2 imagePos;
-
-            if (imageRatio > windowRatio)
-            {
-                imageSize.x = availableWidth;
-                imageSize.y = availableWidth / imageRatio;
-                imagePos.x = 0;
-                imagePos.y = (availableHeight - imageSize.y) * 0.5f;
-            }
-            else
-            {
-                imageSize.x = availableHeight * imageRatio;
-                imageSize.y = availableHeight;
-                imagePos.x = (availableWidth - imageSize.x) * 0.5f;
-                imagePos.y = 0;
-            }
-
-            ImDrawList *draw_list = ImGui::GetWindowDrawList();
-            draw_list->AddRectFilled(ImVec2(0, 0), ImVec2(availableWidth, availableHeight),
-                                     IM_COL32(0, 0, 0, 255));
-
-            ImGui::SetCursorPos(imagePos);
-            ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(guiRenderer.textureID)), imageSize);
-
-            ImGui::End();
-        }
-
-        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowBgAlpha(0.8f);
-
-        ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
-        if (guiRenderer.isRendering)
-        {
-            ImGui::Text("Rendering in progress...");
-            ImGui::ProgressBar(-1.0f * (float)ImGui::GetTime(), ImVec2(200, 0), "");
-        }
-        else
-        {
-            ImGui::Text("Render Time: %.3f seconds", guiRenderer.renderTime);
-            ImGui::Text("Resolution: %dx%d", guiRenderer.imageWidth, guiRenderer.imageHeight);
-            ImGui::Text("Total Pixels: %d", guiRenderer.imageWidth * guiRenderer.imageHeight);
-
-            if (guiRenderer.renderTime > 0)
-            {
-                const double pixelsPerSecond = (guiRenderer.imageWidth * guiRenderer.imageHeight) / guiRenderer.renderTime;
-                ImGui::Text("Pixels/second: %.0f", pixelsPerSecond);
-            }
-        }
-
-        ImGui::Separator();
-
-        ImGui::Text("Noise Reduction");
-        const bool accumulationChanged = ImGui::Checkbox("Enable Accumulation", &guiRenderer.enableAccumulation);
-
-        if (guiRenderer.enableAccumulation)
-        {
-            ImGui::SliderInt("Max Samples", &guiRenderer.maxSamples, 4, 64);
-        }
-
-        if (accumulationChanged && !guiRenderer.enableAccumulation)
-        {
-            guiRenderer.resetAccumulation();
-        }
-
-        if (accumulationChanged && guiRenderer.enableAccumulation)
-        {
-            guiRenderer.triggerRerender();
-        }
-
-        if (guiRenderer.enableAccumulation)
-        {
-            ImGui::Separator();
-            ImGui::Text("Accumulation: %d/%d samples", guiRenderer.currentSample, guiRenderer.maxSamples);
-            if (guiRenderer.accumulationInProgress)
-            {
-                const float progress = static_cast<float>(guiRenderer.currentSample) / static_cast<float>(guiRenderer.maxSamples);
-                ImGui::ProgressBar(progress, ImVec2(200, 0));
-            }
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::Button("Save Image") && guiRenderer.imageReady && !guiRenderer.isRendering)
-        {
-            guiRenderer.saveImage();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Re-render") && !guiRenderer.isRendering)
-        {
-            guiRenderer.triggerRerender();
-        }
-
-        ImGui::End();
-
-        const ImGuiIO &io = ImGui::GetIO();
-        // Menu Resolution
-        ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowBgAlpha(0.9f);
-
-        ImGui::Begin("Resolution Settings", nullptr,
-                     ImGuiWindowFlags_AlwaysAutoResize);
-
-        ImGui::Text("Render Resolution");
-        ImGui::Separator();
-
-        if (ImGui::BeginCombo("Preset", guiRenderer.resolutionPresets[guiRenderer.selectedPreset].name))
-        {
-            for (int i = 0; i < guiRenderer.resolutionPresets.size(); i++)
-            {
-                const bool isSelected = (guiRenderer.selectedPreset == i);
-                if (ImGui::Selectable(guiRenderer.resolutionPresets[i].name, isSelected))
-                {
-                    guiRenderer.selectedPreset = i;
-                    if (i < guiRenderer.resolutionPresets.size() - 1)
-                    {
-                        guiRenderer.renderWidth = guiRenderer.resolutionPresets[i].width;
-                        guiRenderer.renderHeight = guiRenderer.resolutionPresets[i].height;
-                        guiRenderer.customResolution = false;
-                    }
-                    else
-                    {
-                        guiRenderer.customResolution = true;
-                    }
-                }
-                if (isSelected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-
-        if (guiRenderer.customResolution)
-        {
-            ImGui::InputInt("Width", &guiRenderer.renderWidth);
-            ImGui::InputInt("Height", &guiRenderer.renderHeight);
-        }
-
-        ImGui::Text("Current: %dx%d", guiRenderer.renderWidth, guiRenderer.renderHeight);
-
-        if (ImGui::Button("Apply & Render") && !guiRenderer.isRendering)
-        {
-            guiRenderer.triggerRerender();
-        }
-
-        ImGui::End();
+        uiManager.render();
+        uiManager.update(static_cast<float>(deltaTime));
 
         // Rendering
         ImGui::Render();
         int display_w, display_h;
-        glfwGetFramebufferSize(guiRenderer.window, &display_w, &display_h);
+        glfwGetFramebufferSize(application.window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.0f, 0.0f, 0.0f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(guiRenderer.window);
+        glfwSwapBuffers(application.window);
     }
 
     return 0;

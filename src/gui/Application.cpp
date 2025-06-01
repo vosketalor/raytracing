@@ -1,8 +1,8 @@
-#include "ImGuiRenderer.h"
+#include "Application.h"
 
 #include <ctime>
 
-bool ImGuiRenderer::initialize(const int windowWidth, const int windowHeight)
+bool Application::initialize(const int windowWidth, const int windowHeight)
 {
     // Initialisation GLFW
     if (!glfwInit())
@@ -48,7 +48,7 @@ bool ImGuiRenderer::initialize(const int windowWidth, const int windowHeight)
     return true;
 }
 
-void ImGuiRenderer::updateImage(const std::vector<Vector3> &frameBuffer, int width, int height)
+void Application::updateImage(const std::vector<Vector3> &frameBuffer, int width, int height)
 {
     imageWidth = width;
     imageHeight = height;
@@ -75,7 +75,7 @@ void ImGuiRenderer::updateImage(const std::vector<Vector3> &frameBuffer, int wid
     imageReady = true;
 }
 
-void ImGuiRenderer::accumulateSample(const std::vector<Vector3> &newSample, const int width, const int height)
+void Application::accumulateSample(const std::vector<Vector3> &newSample, const int width, const int height)
 {
     if (accumBuffer.empty())
     {
@@ -99,7 +99,7 @@ void ImGuiRenderer::accumulateSample(const std::vector<Vector3> &newSample, cons
     updateImage(displayBuffer, width, height);
 }
 
-void ImGuiRenderer::resetAccumulation()
+void Application::resetAccumulation()
 {
     accumBuffer.clear();
     currentBuffer.clear();
@@ -107,22 +107,22 @@ void ImGuiRenderer::resetAccumulation()
     accumulationInProgress = false;
 }
 
-void ImGuiRenderer::setRenderTime(const double time)
+void Application::setRenderTime(const double time)
 {
     renderTime = time;
 }
 
-bool ImGuiRenderer::needsRerender() const
+bool Application::needsRerender() const
 {
     return shouldRerender;
 }
 
-bool ImGuiRenderer::needsContinuousRender() const
+bool Application::needsContinuousRender() const
 {
     return enableAccumulation && accumulationInProgress && currentSample < maxSamples;
 }
 
-void ImGuiRenderer::setRendering(const bool rendering)
+void Application::setRendering(const bool rendering)
 {
     isRendering = rendering;
     if (rendering)
@@ -131,7 +131,7 @@ void ImGuiRenderer::setRendering(const bool rendering)
     }
 }
 
-void ImGuiRenderer::startAccumulation()
+void Application::startAccumulation()
 {
     if (enableAccumulation)
     {
@@ -140,12 +140,12 @@ void ImGuiRenderer::startAccumulation()
     }
 }
 
-bool ImGuiRenderer::shouldClose() const
+bool Application::shouldClose() const
 {
     return glfwWindowShouldClose(window);
 }
 
-void ImGuiRenderer::saveImage() const
+void Application::saveImage() const
 {
     if (!imageReady)
         return;
@@ -177,7 +177,7 @@ void ImGuiRenderer::saveImage() const
     std::cout << "Image saved: " << filename << std::endl;
 }
 
-void ImGuiRenderer::triggerRerender()
+void Application::triggerRerender()
 {
     this->shouldRerender = true;
     if (enableAccumulation)
@@ -186,7 +186,7 @@ void ImGuiRenderer::triggerRerender()
     }
 }
 
-void ImGuiRenderer::cleanup() const
+void Application::cleanup() const
 {
     if (textureID)
     {

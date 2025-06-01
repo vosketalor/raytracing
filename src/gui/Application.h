@@ -14,8 +14,9 @@
 #include <string>
 
 #include "../engine/Camera.h"
+#include "InputManager.h"
 
-class ImGuiRenderer
+class Application
 {
 public:
     GLFWwindow *window;
@@ -64,11 +65,11 @@ public:
 
 private:
 public:
-    ImGuiRenderer() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
+    Application() : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
                       renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
                       prevWindowHeight(-1), shouldRerender(false) {}
 
-    ~ImGuiRenderer()
+    ~Application()
     {
         cleanup();
     }
