@@ -78,6 +78,8 @@ add_executable(Raytracing
     src/gui/InputManager.h
     src/gui/WindowConfig.h
     ${IMGUI_SOURCES}
+        src/engine/scenes/SceneFresnel.cpp
+        src/engine/scenes/SceneFresnel.h
 
 )
 

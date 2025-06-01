@@ -129,18 +129,45 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
     if (result.shape->isWireframeEnabled())
     {
         const double distance = result.shape->getDistanceNearestEdge(intersectionPoint, this->camera_);
-
         if (distance < Scene::WIREFRAME_THICKNESS)
             return Scene::WIREFRAME_COLOR;
     }
 
     Vector3 color = result.shape->getColor();
-
     color *= this->scene->getAmbient();
-
     color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
-    color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
-    color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order);
+
+    // Calcul des coefficients de Fresnel si l'objet a des propriétés réflectives/réfractives
+    if (order > 0)
+    {
+        double materialReflectivity = result.shape->getMaterial().getReflectivity();
+        double materialTransparency = result.shape->getMaterial().getTransparency();
+
+        if (materialReflectivity > 0 && materialTransparency > 0)
+        {
+            // Objet avec réflexion ET réfraction -> utiliser Fresnel
+            const double etaI = Scene::ETA_AIR;
+            const double etaT = result.shape->getMaterial().getEta();
+
+            auto [fresnelR, fresnelT] = computeFresnelCoefficients(v, normal, etaI, etaT);
+
+            Vector3 reflectionColor = computeReflection(P, v, intersectionPoint, normal, *result.shape, order, fresnelR * materialReflectivity);
+            Vector3 refractionColor = computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, fresnelT * materialTransparency);
+
+            color += reflectionColor + refractionColor;
+        }
+        else if (materialReflectivity > 0)
+        {
+            // Objet uniquement réflectif (ex: miroir, métal)
+            color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order, materialReflectivity);
+        }
+        else if (materialTransparency > 0)
+        {
+            // Objet uniquement transparent (cas rare, mais possible)
+            color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, materialTransparency);
+        }
+    }
+
     return color;
 }
 
@@ -311,10 +338,52 @@ Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal,
     return (direction + perturbation).normalized();
 }
 
-Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
-                                    const Vector3 &normal, const Shape &shape, const int &order) const
+std::pair<double, double> Renderer::computeFresnelCoefficients(const Vector3& incident,
+                                                              const Vector3& normal,
+                                                              double etaI,
+                                                              double etaT) const
 {
-    if (shape.getMaterial().getReflectivity() <= 0 || order <= 0)
+    Vector3 i = incident.normalized();
+    Vector3 n = normal.normalized();
+
+    double cosI = -n.dot(i);
+    bool entering = cosI > 0;
+
+    if (!entering) {
+        // Rayon sortant de l'objet
+        std::swap(etaI, etaT);
+        cosI = -cosI;
+        n = -n;
+    }
+
+    double eta = etaI / etaT;
+    double sinT2 = eta * eta * (1.0 - cosI * cosI);
+
+    // Réflexion totale interne
+    if (sinT2 > 1.0) {
+        return {1.0, 0.0}; // {réflexion, transmission}
+    }
+
+    double cosT = sqrt(1.0 - sinT2);
+
+    // Équations de Fresnel
+    double Rs = ((etaI * cosI - etaT * cosT) / (etaI * cosI + etaT * cosT));
+    Rs = Rs * Rs;
+
+    double Rp = ((etaT * cosI - etaI * cosT) / (etaT * cosI + etaI * cosT));
+    Rp = Rp * Rp;
+
+    double R = (Rs + Rp) * 0.5; // Coefficient de réflexion moyen
+    double T = 1.0 - R;         // Coefficient de transmission
+
+    return {R, T};
+}
+
+// Modification de computeReflection pour prendre un coefficient
+Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
+                                    const Vector3 &normal, const Shape &shape, const int &order, double fresnelR) const
+{
+    if (fresnelR <= 0.0)
         return Vector3(0, 0, 0);
 
     Vector3 reflectDir = (v - normal * 2 * normal.dot(v)).normalized();
@@ -328,13 +397,15 @@ Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Ve
         }
     }
 
-    return getPixelColor(intersectionPoint, reflectDir, order - 1) * shape.getMaterial().getReflectivity();
+    Vector3 offset = reflectDir * computeCurvatureBias(shape, intersectionPoint, reflectDir, v);
+    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * fresnelR;
 }
 
+// Modification de computeRefraction pour prendre un coefficient
 Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
-                                    const Vector3 &normal, const Shape &shape, const int &order) const
+                                    const Vector3 &normal, const Shape &shape, const int &order, double fresnelT) const
 {
-    if (shape.getMaterial().getTransparency() <= 0 || order <= 0)
+    if (fresnelT <= 0.0)
         return Vector3(0, 0, 0);
 
     const Vector3 i = v.normalized();
@@ -364,12 +435,13 @@ Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Ve
     if (k >= 0)
     {
         const double c2 = std::sqrt(k);
-        const Vector3 refractDir = (i * eta + normal * (eta * c1 - c2)).normalized();
+        const Vector3 refractDir = (i * eta + n * (eta * c1 - c2)).normalized();
         const Vector3 offset = refractDir * computeCurvatureBias(shape, intersectionPoint, refractDir, v);
-        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getMaterial().getTransparency();
+        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * fresnelT;
     }
 
-    const Vector3 reflectDir = (i - normal * 2 * normal.dot(i)).normalized();
+    // Réflexion totale interne - on utilise la réflexion
+    const Vector3 reflectDir = (i - n * 2 * n.dot(i)).normalized();
     const Vector3 offset = reflectDir * computeCurvatureBias(shape, intersectionPoint, reflectDir, v);
-    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getMaterial().getTransparency();
+    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1);
 }

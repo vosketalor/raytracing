@@ -29,9 +29,9 @@ void Scene1::createShapes()
     // addShape(sphere);
     //
     // // Sphère verte simple
-    // sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
-    // sphere->setColor(Scene::GREEN);
-    // addShape(sphere);
+    sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
+    sphere->setColor(Scene::GREEN);
+    addShape(sphere);
     //
     // // Sphère texturée
     // sphere = std::make_shared<Sphere>(Vector3{1, -0.75f, -3}, 0.25f);
