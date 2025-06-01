@@ -22,6 +22,10 @@ protected:
     double movementSpeed;
     double mouseSensitivity;
 
+    double aperture = 0.05;         // diamètre de l'ouverture (petit = profondeur de champ plus grande)
+    double focusDistance = 5.0;     // distance de mise au point
+    int dofSamples = 8;             // nombre de rayons tirés pour chaque pixel
+
 public:
     Camera(const Vector3& position = Vector3{0,0,0},
            const double pitch = 0.0,
@@ -45,6 +49,11 @@ public:
     double getAspectRatio() const { return aspectRatio; }
     double getNearPlane() const { return nearPlane; }
     double getFarPlane() const { return farPlane; }
+    double getAperture() const { return aperture; }
+    double getFocusDistance() const { return focusDistance; }
+    int getDofSamples() const { return dofSamples; }
+    double getMovementSpeed() const { return movementSpeed; }
+    double getMouseSensitivity() const { return mouseSensitivity; }
 
     void setPosition(const Vector3& pos) { position = pos; }
     void setPitch(const double p) { pitch = p; }
@@ -54,6 +63,11 @@ public:
     void setAspectRatio(const double a) { aspectRatio = a; }
     void setNearPlane(const double n) { nearPlane = n; }
     void setFarPlane(const double f) { farPlane = f; }
+    void setAperture(const double a) { aperture = a; }
+    void setFocusDistance(const double f) { focusDistance = f; }
+    void setDofSamples(const int s) { dofSamples = s; }
+    void setMovementSpeed(const double s) { movementSpeed = s; }
+    void setMouseSensitivity(const double s) { mouseSensitivity = s; }
 
     Vector3 getDirection() const {
         const double pitchRad = pitch * M_PI / 180.0;

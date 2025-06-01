@@ -9,70 +9,70 @@
   #include <corecrt_math_defines.h>  // Windows (Visual Studio)
 #endif
 
-
-static thread_local std::random_device rd;
-static thread_local std::mt19937 gen(rd());
-static thread_local std::uniform_real_distribution<double> dist(-1.0, 1.0);
-
 #include "Camera.h"
 
 void Renderer::render(std::vector<Vector3> &frameBuffer) const
 {
     const Vector3 observer = this->camera_.getPosition();
     const double aspectRatio = static_cast<double>(width) / height;
-
-    // Calcul de la taille de l'écran virtuel en fonction du FOV (en radians)
     const double fovRad = this->camera_.getFov() * M_PI / 180.0;
     const double screenHeight = 2.0 * tan(fovRad / 2.0);
     const double screenWidth = screenHeight * aspectRatio;
 
-    const int blockSize = 32; // Taille des blocs
+    const int dofSamples = camera_.getDofSamples();
+    const int w = width;
+    const int h = height;
 
-    // Découpage en blocs pour le parallélisme
-    std::vector<std::pair<int, int>> blocks;
-    for (int by = 0; by < height; by += blockSize)
+    Vector3* frameBuffer_ptr = frameBuffer.data();
+    #pragma acc data copy(frameBuffer_ptr[0:w*h])
     {
-        for (int bx = 0; bx < width; bx += blockSize)
+        #pragma acc parallel loop independent collapse(2) default(present)
+        for (int y = 0; y < h; ++y)
         {
-            blocks.emplace_back(bx, by);
+            for (int x = 0; x < w; ++x)
+            {
+                unsigned int seed = (y * w + x) * 2654435761u;
+                auto rand_double = [&seed](const double min, const double max) -> double {
+                    seed = (seed * 1664525u + 1013904223u);
+                    const double normalized = (seed & 0xFFFFFF) / 16777216.0;
+                    return min + normalized * (max - min);
+                };
+
+                const double u = (x + 0.5) / w - 0.5;
+                const double v = 0.5 - (y + 0.5) / h;
+                const double px = u * screenWidth;
+                const double py = v * screenHeight;
+
+                Vector3 forward = this->camera_.getDirection();
+                Vector3 right = this->camera_.getRight();
+                Vector3 up = this->camera_.getUp();
+
+                Vector3 colorSum(0, 0, 0);
+
+                for (int i = 0; i < dofSamples; ++i) {
+                    Vector3 rayDir = (forward + px * right + py * up).normalized();
+                    Vector3 focusPoint = observer + rayDir * camera_.getFocusDistance();
+
+                    Vector3 offset2D;
+                    while (true) {
+                        double x_rand = rand_double(-1.0, 1.0);
+                        double y_rand = rand_double(-1.0, 1.0);
+                        if (x_rand*x_rand + y_rand*y_rand >= 1.0) continue;
+                        offset2D = Vector3(x_rand, y_rand, 0);
+                        break;
+                    }
+
+                    Vector3 offset = offset2D.x() * right + offset2D.y() * up;
+                    Vector3 rayOrigin = observer + offset * (camera_.getAperture() * 0.5);
+                    Vector3 newDir = (focusPoint - rayOrigin).normalized();
+
+                    // Calcul de la couleur avec propagation du seed
+                    colorSum += getPixelColor(rayOrigin, newDir, 10, &seed);
+                }
+                frameBuffer[y * w + x] = colorSum * (1.0 / static_cast<double>(dofSamples));
+            }
         }
     }
-
-    std::for_each(
-        std::execution::par,
-        blocks.begin(),
-        blocks.end(),
-        [&](const std::pair<int, int>& block)
-        {
-            const int bx = block.first;
-            const int by = block.second;
-            const int maxY = std::min(by + blockSize, height);
-            const int maxX = std::min(bx + blockSize, width);
-
-            for (int y = by; y < maxY; ++y)
-            {
-                for (int x = bx; x < maxX; ++x)
-                {
-                    // Normalisation des coordonnées écran entre -0.5 et 0.5
-                    const double u = (x + 0.5) / width - 0.5;
-                    const double v = 0.5 - (y + 0.5) / height;
-
-                    // Passage aux dimensions physiques de l'écran virtuel (screen plane)
-                    const double px = u * screenWidth;
-                    const double py = v * screenHeight;
-
-                    // Calcul des vecteurs de base de la caméra
-                    Vector3 forward = this->camera_.getDirection();       // direction caméra
-                    Vector3 right = this->camera_.getRight();              // vecteur droit
-                    Vector3 up = this->camera_.getUp();                     // vecteur haut
-
-                    // Calcul du vecteur direction du rayon dans l'espace monde
-                    Vector3 rayDir = (forward + px * right + py * up).normalized();
-
-                    frameBuffer[y * width + x] = getPixelColor(observer, rayDir, 10);
-                }
-            }
-        });
 }
 
 const Shape* Renderer::getShape(const double& x, const double& y)
@@ -117,7 +117,7 @@ void Renderer::setCamera(const Camera& camera)
 }
 
 
-Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &order) const
+Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &order, unsigned int* seed) const
 {
     const Intersection result = findNearestIntersection(P, v);
     if (!result || result.shape == nullptr)
@@ -138,9 +138,9 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
 
     color *= this->scene->getAmbient();
 
-    color += computeLighting(P, v, intersectionPoint, normal, *result.shape);
-    color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
-    color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order);
+    color += computeLighting(P, v, intersectionPoint, normal, *result.shape, seed);
+    color += computeReflection(P, v, intersectionPoint, normal, *result.shape, order, seed);
+    color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, seed);
     return color;
 }
 
@@ -153,7 +153,8 @@ Vector3 Renderer::computeLighting(const Vector3 &P,
                                   const Vector3 &v,
                                   const Vector3 &intersectionPoint,
                                   const Vector3 &normal,
-                                  const Shape &shape) const
+                                  const Shape &shape,
+                                  unsigned int* seed) const
 {
     Vector3 result(0, 0, 0);
 
@@ -274,8 +275,17 @@ double Renderer::computeAttenuation(const double &distance) const
     return 1 / (quadraticAttenuation.x() + quadraticAttenuation.y() * distance + quadraticAttenuation.z() * distance * distance);
 }
 
-Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal, double roughness) const
+Vector3 Renderer::perturbVector(const Vector3 &direction,
+                               const Vector3 &normal,
+                               double roughness,
+                               unsigned int* seed) const
 {
+    auto rand_double = [&seed](const double min, const double max) -> double {
+        *seed = (*seed * 1664525u + 1013904223u);
+        const double normalized = (*seed & 0xFFFFFF) / 16777216.0;
+        return min + normalized * (max - min);
+    };
+
     if (roughness <= 0.0) return direction;
 
     Vector3 tangent1;
@@ -284,19 +294,19 @@ Vector3 Renderer::perturbVector(const Vector3 &direction, const Vector3 &normal,
     } else {
         tangent1 = Vector3(-normal.z(), 0, normal.x()).normalized();
     }
-    const Vector3 tangent2 = normal.cross(tangent1).normalized();
+    Vector3 tangent2 = normal.cross(tangent1).normalized();
 
-    const double angle = dist(gen) * M_PI * 2.0;
-    const double radius = dist(gen) * roughness;
+    double angle = rand_double(0.0, M_PI * 2.0);
+    double r = rand_double(0.0, roughness);
 
-    const Vector3 perturbation = tangent1 * (radius * std::cos(angle)) +
-                          tangent2 * (radius * std::sin(angle));
+    Vector3 perturbation = tangent1 * (r * cos(angle)) +
+                           tangent2 * (r * sin(angle));
 
     return (direction + perturbation).normalized();
 }
 
 Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
-                                    const Vector3 &normal, const Shape &shape, const int &order) const
+                                    const Vector3 &normal, const Shape &shape, const int &order, unsigned int* seed) const
 {
     if (shape.getMaterial().getReflectivity() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
@@ -305,18 +315,18 @@ Vector3 Renderer::computeReflection(const Vector3 &P, const Vector3 &v, const Ve
 
     const double roughness = shape.getMaterial().getRoughness();
     if (roughness > 0.0) {
-        reflectDir = perturbVector(reflectDir, normal, roughness);
+        reflectDir = perturbVector(reflectDir, normal, roughness, seed);
 
         if (reflectDir.dot(normal) < 0) {
             reflectDir = reflectDir - normal * (2 * reflectDir.dot(normal));
         }
     }
 
-    return getPixelColor(intersectionPoint, reflectDir, order - 1) * shape.getMaterial().getReflectivity();
+    return getPixelColor(intersectionPoint, reflectDir, order - 1, seed) * shape.getMaterial().getReflectivity();
 }
 
 Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint,
-                                    const Vector3 &normal, const Shape &shape, const int &order) const
+                                    const Vector3 &normal, const Shape &shape, const int &order, unsigned int* seed) const
 {
     if (shape.getMaterial().getTransparency() <= 0 || order <= 0)
         return Vector3(0, 0, 0);
@@ -350,10 +360,10 @@ Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Ve
         const double c2 = std::sqrt(k);
         const Vector3 refractDir = (i * eta + normal * (eta * c1 - c2)).normalized();
         const Vector3 offset = refractDir * Scene::EPSILON;
-        return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getMaterial().getTransparency();
+        return getPixelColor(intersectionPoint + offset, refractDir, order - 1, seed) * shape.getMaterial().getTransparency();
     }
 
     const Vector3 reflectDir = (i - normal * 2 * normal.dot(i)).normalized();
     const Vector3 offset = reflectDir * Scene::EPSILON;
-    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getMaterial().getTransparency();
+    return getPixelColor(intersectionPoint + offset, reflectDir, order - 1, seed) * shape.getMaterial().getTransparency();
 }
