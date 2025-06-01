@@ -34,6 +34,8 @@ public:
     int renderHeight = 384;
     bool showResolutionMenu = false;
 
+    bool softShadowsEnabled = false;
+
     Camera camera;
     Renderer renderer;
 

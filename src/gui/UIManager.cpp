@@ -2,8 +2,11 @@
 #include "windows/StatisticsWindow.h"
 #include "windows/ResolutionWindow.h"
 #include "windows/MainViewport.h"
+#include "windows/RendererWindow.h"
+
 #include "Application.h"
 #include <algorithm>
+
 
 UIManager::UIManager(Application& renderer) : m_renderer(renderer) {}
 
@@ -11,6 +14,7 @@ void UIManager::initialize() {
     addWindow(std::make_unique<MainViewport>(m_renderer));
     addWindow(std::make_unique<StatisticsWindow>(m_renderer));
     addWindow(std::make_unique<ResolutionWindow>(m_renderer));
+    addWindow(std::make_unique<RendererWindow>(m_renderer));
 }
 
 void UIManager::render() {

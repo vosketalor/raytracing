@@ -45,6 +45,8 @@ set(IMGUI_SOURCES
     src/gui/Application.h
         src/engine/scenes/SceneMicrofacets.cpp
         src/engine/scenes/SceneMicrofacets.h
+        src/gui/windows/RendererWindow.cpp
+        src/gui/windows/RendererWindow.h
 )
 
 add_executable(Raytracing
