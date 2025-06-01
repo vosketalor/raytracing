@@ -82,6 +82,8 @@ add_executable(Raytracing
     ${IMGUI_SOURCES}
         src/engine/scenes/SceneFresnel.cpp
         src/engine/scenes/SceneFresnel.h
+        src/engine/Texture.cpp
+        src/engine/Texture.h
 
 )
 

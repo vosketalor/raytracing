@@ -13,6 +13,7 @@ void Scene1::createShapes()
     auto plane = std::make_shared<Plane>(Vector3{0, -1, 0}, Vector3{0, 1, 0});
     plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
     plane->setMaterial(Material(0.2, 0.0, 1000, Scene::ETA_AIR, 0.4));
+    plane->setTexture(std::make_shared<Texture>("res/textures/damier.jpg"));
     addShape(plane);
 
     // Sphère bleue réfléchissante
@@ -34,9 +35,9 @@ void Scene1::createShapes()
     addShape(sphere);
     //
     // // Sphère texturée
-    // sphere = std::make_shared<Sphere>(Vector3{1, -0.75f, -3}, 0.25f);
-    // sphere->setTexture(std::make_shared<Texture>("textures/beachball.jpg"));
-    // addShape(sphere);
+    sphere = std::make_shared<Sphere>(Vector3{1, -0.75f, -3}, 0.25f);
+    sphere->setTexture(std::make_shared<Texture>("res/textures/beachball.jpg"));
+    addShape(sphere);
     //
     // // Sphère rose transparente (eau)
     // sphere = std::make_shared<Sphere>(Vector3{-1.5f, 0, -5.5f}, 1.0f);

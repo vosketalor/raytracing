@@ -133,7 +133,16 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
             return Scene::WIREFRAME_COLOR;
     }
 
-    Vector3 color = result.shape->getColor();
+    Vector3 color;
+    if (result.shape->hasTexture())
+    {
+        Vector2 texCoords = result.shape->getTextureCoordinates(intersectionPoint);
+        texCoords.clamp(0, 1);
+        color = result.shape->getTexture()->getTextureColor(texCoords);
+    } else
+    {
+        color = result.shape->getColor();
+    }
     color *= this->scene->getAmbient();
 
     // CHOISIR entre ancien et nouveau modèle d'éclairage
@@ -303,8 +312,13 @@ Vector3 Renderer::computeShadowAttenuation(const Vector3& origin, const Vector3&
 
 Vector3 Renderer::computeDiffuse(const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape, const LightSource &lightSource, const Vector3 &shadowOrigin, const Vector3 &shadowRayDir) const
 {
-    // TODO : textures
     const double diffuseFactor = std::max(0.0, normal.dot(shadowRayDir));
+    if (shape.hasTexture())
+    {
+        Vector2 texCoords = shape.getTextureCoordinates(intersectionPoint);
+        Vector3 texColor = shape.getTexture()->getTextureColor(texCoords);
+        return texColor * lightSource.getColorDiffuse() * diffuseFactor;
+    }
     return shape.getColor() * lightSource.getColorDiffuse() * diffuseFactor;
 }
 
