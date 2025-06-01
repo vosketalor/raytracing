@@ -9,6 +9,7 @@ public:
     using KeyCallback = std::function<void(int key, int action, int mods)>;
     
     struct MouseState {
+        bool leftHandled = true;
         bool rightPressed = false;
         double lastX = 0.0;
         double lastY = 0.0;

@@ -23,15 +23,15 @@ void Scene1::createShapes()
     addShape(sphere);
     //
     // // Sphère rouge transparente
-    sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
-    sphere->setColor(Scene::RED);
-    sphere->setMaterial(Material(0.0, 0.9, 1000, Scene::ETA_AIR));
-    addShape(sphere);
+    // sphere = std::make_shared<Sphere>(Vector3{-0.5f, -0.5f, -3}, 0.5f);
+    // sphere->setColor(Scene::RED);
+    // sphere->setMaterial(Material(0.0, 0.9, 1000, Scene::ETA_AIR));
+    // addShape(sphere);
     //
     // // Sphère verte simple
-    sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
-    sphere->setColor(Scene::GREEN);
-    addShape(sphere);
+    // sphere = std::make_shared<Sphere>(Vector3{1, 0, -6}, 1.0f);
+    // sphere->setColor(Scene::GREEN);
+    // addShape(sphere);
     //
     // // Sphère texturée
     // sphere = std::make_shared<Sphere>(Vector3{1, -0.75f, -3}, 0.25f);
@@ -39,20 +39,20 @@ void Scene1::createShapes()
     // addShape(sphere);
     //
     // // Sphère rose transparente (eau)
-    sphere = std::make_shared<Sphere>(Vector3{-1.5f, 0, -5.5f}, 1.0f);
-    sphere->setColor(Scene::PINK);
-    sphere->setMaterial(Material(0.0, 0.6, 1000, Scene::ETA_WATER));
-    addShape(sphere);
+    // sphere = std::make_shared<Sphere>(Vector3{-1.5f, 0, -5.5f}, 1.0f);
+    // sphere->setColor(Scene::PINK);
+    // sphere->setMaterial(Material(0.0, 0.6, 1000, Scene::ETA_WATER));
+    // addShape(sphere);
 
     // Sphère grise
-    sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, 2}, 0.5f);
-    sphere->setColor(Scene::DARK_GRAY);
-    addShape(sphere);
+    // sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, 2}, 0.5f);
+    // sphere->setColor(Scene::DARK_GRAY);
+    // addShape(sphere);
 
-    auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
-    triangle->setColor(Scene::ORANGE);
-    // triangle->setWireframeEnabled(true);
-    addShape(triangle);
+    // auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
+    // triangle->setColor(Scene::ORANGE);
+    // // triangle->setWireframeEnabled(true);
+    // addShape(triangle);
 
     // auto teapot = std::make_shared<OBJ>("res/obj/teapot.obj", Vector3(0, 0, -5));
     // teapot->setColor(Scene::ORANGE);
@@ -74,7 +74,7 @@ void Scene1::createLights()
     Vector3 colorDiffuse  {1.0, 1.0, 1.0};
     Vector3 colorSpecular {1.0, 1.0, 1.0};
 
-    const auto source = std::make_shared<LightSource>(
+    auto source = std::make_shared<LightSource>(
         position,
         uDir,
         vDir,
@@ -82,6 +82,8 @@ void Scene1::createLights()
         height,
         colorDiffuse,
         colorSpecular);
+
+    // auto source = std::make_shared<LightSource>(position, colorDiffuse, colorSpecular);
 
     source->setIntensity(2.0);
 

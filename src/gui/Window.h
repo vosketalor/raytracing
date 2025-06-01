@@ -18,6 +18,7 @@ public:
     ~Window();
 
     bool initialize(const WindowConfig& config = WindowConfig{});
+    void destroy() const;
     void shutdown();
 
     bool shouldClose() const;

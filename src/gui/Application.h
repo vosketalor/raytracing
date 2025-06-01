@@ -16,11 +16,12 @@
 #include "Renderer.h"
 #include "../engine/Camera.h"
 #include "InputManager.h"
+#include "Window.h"
 
 class Application
 {
 public:
-    GLFWwindow *window;
+    Window window;
     GLuint textureID;
     int imageWidth, imageHeight;
     std::vector<unsigned char> imageData;
@@ -64,12 +65,15 @@ public:
     bool accumulationInProgress = false;
     bool shouldRerender;
 
+    InputManager inputManager; // Ajouter InputManager
+
 
 private:
 public:
-    Application(Scene* scene) : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
-                      renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
-                      prevWindowHeight(-1), renderer(scene, camera, 0, 0), shouldRerender(false) {}
+    Application(Scene* scene) : window(), textureID(0), imageWidth(0), imageHeight(0),
+                  renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
+                  prevWindowHeight(-1), renderer(scene, camera, 0, 0), shouldRerender(false),
+                  inputManager(window) {}
 
     ~Application()
     {
@@ -89,4 +93,6 @@ public:
     void saveImage() const;
     void triggerRerender();
     void cleanup() const;
+    void handleInput(float deltaTime);
+    void handleMouse();
 };

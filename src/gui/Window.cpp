@@ -1,6 +1,9 @@
 #include "Window.h"
 #include <iostream>
 
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 Window::~Window() {
     shutdown();
 }
@@ -48,12 +51,25 @@ bool Window::initialize(const WindowConfig& config) {
     return true;
 }
 
+void Window::destroy() const
+{
+    if (m_window) {
+        glfwDestroyWindow(m_window);
+    }
+    // Ne pas appeler glfwTerminate() ici car d'autres instances pourraient l'utiliser
+}
+
 void Window::shutdown() {
     if (m_window) {
         glfwDestroyWindow(m_window);
         m_window = nullptr;
     }
-    glfwTerminate();
+    // Appeler glfwTerminate() seulement lors de la destruction finale
+    static bool terminated = false;
+    if (!terminated) {
+        glfwTerminate();
+        terminated = true;
+    }
 }
 
 bool Window::shouldClose() const {

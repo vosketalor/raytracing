@@ -24,27 +24,52 @@
 #include "gui/InputManager.h"
 
 const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
-static bool rightMousePressed = false;
-static double lastMouseX = 0.0;
-static double lastMouseY = 0.0;
-const float mouseSensitivity = 1.0f;
 
 void performRender(Application &application, const int width, const int height)
 {
+    std::cout << "DEBUG: performRender() called with " << width << "x" << height << std::endl;
+
+    // Vérifications de sécurité
+    if (width <= 0 || height <= 0) {
+        std::cerr << "ERROR: Invalid dimensions in performRender: " << width << "x" << height << std::endl;
+        return;
+    }
+
+    std::cout << "DEBUG: Setting rendering state..." << std::endl;
     application.setRendering(true);
     application.renderer.width = width;
     application.renderer.height = height;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 
+    std::cout << "DEBUG: Setting camera..." << std::endl;
     application.renderer.setCamera(application.camera);
-    std::vector<Vector3> frameBuffer(width * height);
 
-    application.renderer.render(frameBuffer);
+    std::cout << "DEBUG: Creating framebuffer with size: " << (width * height) << std::endl;
+    std::vector<Vector3> frameBuffer;
+    try {
+        frameBuffer.resize(width * height);
+        std::cout << "DEBUG: Framebuffer created successfully" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Failed to create framebuffer: " << e.what() << std::endl;
+        application.setRendering(false);
+        return;
+    }
+
+    std::cout << "DEBUG: Starting render..." << std::endl;
+    try {
+        application.renderer.render(frameBuffer);
+        std::cout << "DEBUG: Render completed successfully" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Render failed: " << e.what() << std::endl;
+        application.setRendering(false);
+        return;
+    }
 
     const auto endTime = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.0;
 
+    std::cout << "DEBUG: Processing accumulation..." << std::endl;
     if (application.enableAccumulation && application.accumulationInProgress)
     {
         application.accumulateSample(frameBuffer, width, height);
@@ -56,212 +81,134 @@ void performRender(Application &application, const int width, const int height)
     }
     else
     {
+        std::cout << "DEBUG: Updating image..." << std::endl;
         application.updateImage(frameBuffer, width, height);
     }
 
     application.setRenderTime(duration);
     application.setRendering(false);
+    std::cout << "DEBUG: performRender() completed" << std::endl;
 }
 
 static double lastFrameTime = 0.0;
 
-static bool keysPressed[512] = {false};
-static bool mouseCaptured = false;
-
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    if (mouseCaptured)
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-    else
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-
-    if (action == GLFW_PRESS)
-    {
-        keysPressed[key] = true;
-    }
-    else if (action == GLFW_RELEASE)
-    {
-        keysPressed[key] = false;
-    }
-}
-
-void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
-{
-
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-
-    if (button == GLFW_MOUSE_BUTTON_RIGHT)
-    {
-        if (action == GLFW_PRESS)
-        {
-            rightMousePressed = true;
-            mouseCaptured = true;
-            glfwGetCursorPos(window, &lastMouseX, &lastMouseY);
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
-        else if (action == GLFW_RELEASE)
-        {
-            rightMousePressed = false;
-            mouseCaptured = false;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
-    }
-}
-
-void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
-{
-
-    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-
-    if (rightMousePressed)
-    {
-        double xoffset = xpos - lastMouseX;
-        double yoffset = lastMouseY - ypos;
-        lastMouseX = xpos;
-        lastMouseY = ypos;
-
-        xoffset *= mouseSensitivity;
-        yoffset *= mouseSensitivity;
-
-        Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        application->camera.processMouseMovement(xoffset, yoffset);
-        application->triggerRerender();
-    }
-}
-
 int main(const int argc, char *argv[])
 {
+    std::cout << "DEBUG: Starting main()" << std::endl;
+
     int width = 512;
     int height = 384;
 
+    std::cout << "DEBUG: Creating scene..." << std::endl;
     const auto scene = std::make_unique<Scene1>();
-    scene->setSkyColor(SKYCOLOR);
-    scene->setAmbient({0.1f, 0.1f, 0.1f});
-    scene->createLights();
-    scene->createShapes();
-
-    Application application(scene.get());
-    if (!application.initialize())
-    {
-        std::cerr << "Failed to initialize ImGui renderer" << std::endl;
+    if (!scene) {
+        std::cerr << "ERROR: Failed to create scene" << std::endl;
         return 1;
     }
 
+    std::cout << "DEBUG: Configuring scene..." << std::endl;
+    try {
+        scene->setSkyColor(SKYCOLOR);
+        scene->setAmbient({0.1f, 0.1f, 0.1f});
+        std::cout << "DEBUG: Creating lights..." << std::endl;
+        scene->createLights();
+        std::cout << "DEBUG: Creating shapes..." << std::endl;
+        scene->createShapes();
+        std::cout << "DEBUG: Scene configuration completed" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Scene configuration failed: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "DEBUG: Creating application..." << std::endl;
+    Application application(scene.get());
+
+    std::cout << "DEBUG: Initializing application..." << std::endl;
+    if (!application.initialize())
+    {
+        std::cerr << "ERROR: Failed to initialize application" << std::endl;
+        return 1;
+    }
+    std::cout << "DEBUG: Application initialized successfully" << std::endl;
+
+    std::cout << "DEBUG: Creating UI manager..." << std::endl;
     UIManager uiManager(application);
-    uiManager.initialize();
+    try {
+        uiManager.initialize();
+        std::cout << "DEBUG: UI manager initialized successfully" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: UI manager initialization failed: " << e.what() << std::endl;
+        return 1;
+    }
 
     std::cout << "Starting initial render..." << std::endl;
     std::cout << "Resolution: " << width << "x" << height << std::endl;
 
-    glfwSetKeyCallback(application.window, keyCallback);
-    glfwSetMouseButtonCallback(application.window, mouseButtonCallback);
-    glfwSetCursorPosCallback(application.window, cursorPosCallback);
-    glfwSetWindowUserPointer(application.window, &application);
-
+    std::cout << "DEBUG: Starting accumulation..." << std::endl;
     application.startAccumulation();
-    performRender(application, width, height);
 
+    std::cout << "DEBUG: About to call performRender()..." << std::endl;
+    std::flush(std::cout); // Force l'affichage avant le crash potentiel
+
+    try {
+        performRender(application, width, height);
+        std::cout << "DEBUG: Initial render completed successfully" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Initial render failed: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "DEBUG: Entering main loop..." << std::endl;
     while (!application.shouldClose())
     {
+        // Poll events first
+        glfwPollEvents();
+
         double currentFrameTime = glfwGetTime();
         double deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
-        if (keysPressed[GLFW_KEY_ESCAPE])
-        {
-            glfwSetWindowShouldClose(application.window, true);
-        }
-        if (keysPressed[GLFW_KEY_F11])
-        {
-            if (glfwGetWindowMonitor(application.window) == nullptr)
-            {
-                GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-                const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-                glfwSetWindowMonitor(application.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        try {
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            // Handle input only if ImGui doesn't want to capture it
+            if (!ImGui::GetIO().WantCaptureKeyboard) {
+                application.handleInput(static_cast<float>(deltaTime));
             }
-            else
-            {
-                glfwSetWindowMonitor(application.window, nullptr, 100, 100, 1400, 900, 0);
+
+            if (!ImGui::GetIO().WantCaptureMouse) {
+                application.handleMouse();
             }
-        }
-        if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
-        {
-            application.camera.moveForward(deltaTime);
-            application.triggerRerender();
-        }
-        if (keysPressed[GLFW_KEY_S])
-        {
-            application.camera.moveBackward(deltaTime);
-            application.triggerRerender();
-        }
-        if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
-        {
-            application.camera.moveLeft(deltaTime);
-            application.triggerRerender();
-        }
-        if (keysPressed[GLFW_KEY_D])
-        {
-            application.camera.moveRight(deltaTime);
-            application.triggerRerender();
-        }
-        if (keysPressed[GLFW_KEY_SPACE])
-        {
-            application.camera.moveUp(deltaTime);
-            application.triggerRerender();
-        }
-        if (keysPressed[GLFW_KEY_LEFT_SHIFT])
-        {
-            application.camera.moveDown(deltaTime);
-            application.triggerRerender();
-        }
 
-        if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed)
-        {
-            static Vector3 lastCamPos = application.camera.getPosition();
-            static double lastCamPitch = application.camera.getPitch();
-            static double lastCamYaw = application.camera.getYaw();
-
-            if (lastCamPos != application.camera.getPosition() ||
-                lastCamPitch != application.camera.getPitch() ||
-                lastCamYaw != application.camera.getYaw())
-            {
-                application.triggerRerender();
-                lastCamPos = application.camera.getPosition();
-                lastCamPitch = application.camera.getPitch();
-                lastCamYaw = application.camera.getYaw();
+            // Check if we need to render
+            if (application.needsRerender() || (application.needsContinuousRender() && !application.isRendering)) {
+                performRender(application, application.renderWidth, application.renderHeight);
             }
+
+            // Update and render UI
+            uiManager.render();
+            uiManager.update(static_cast<float>(deltaTime));
+
+            // Rendering
+            ImGui::Render();
+            int display_w, display_h;
+            glfwGetFramebufferSize(application.window.getHandle(), &display_w, &display_h);
+            glViewport(0, 0, display_w, display_h);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.00f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            application.window.swapBuffers();
+
+        } catch (const std::exception& e) {
+            std::cerr << "ERROR in main loop: " << e.what() << std::endl;
+            break;
         }
-
-        if (application.needsRerender() || (application.needsContinuousRender() && !application.isRendering))
-        {
-            performRender(application, application.renderWidth, application.renderHeight);
-        }
-
-        glfwPollEvents();
-
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        uiManager.render();
-        uiManager.update(static_cast<float>(deltaTime));
-
-        // Rendering
-        ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(application.window, &display_w, &display_h);
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.00f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        glfwSwapBuffers(application.window);
     }
 
+    std::cout << "DEBUG: Exiting main()" << std::endl;
     return 0;
 }
