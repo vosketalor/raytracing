@@ -12,14 +12,14 @@ void Scene1::createShapes()
     // Plan du sol
     const auto plane = std::make_shared<Plane>(Vector3{0, -1, 0}, Vector3{0, 1, 0});
     plane->setColor(Vector3{0.9f, 0.9f, 0.9f});
-    plane->setMaterial(Material(0.2, 0.0, 1000, Scene::ETA_AIR, 0.4));
+    plane->setMaterial(Material(0.2, 0.0, 1000, Scene::ETA_AIR, 0));
     addShape(plane);
 
     // Sphère bleue réfléchissante
     auto sphere = std::make_shared<Sphere>(Vector3{0, -0.5f, -4}, 0.5f);
     sphere->setColor(Scene::BLUE);
     sphere->setMaterial(Material::Mirror);
-    sphere->setWireframeEnabled(true);
+    // sphere->setWireframeEnabled(true);
     addShape(sphere);
     //
     // // Sphère rouge transparente
@@ -51,7 +51,7 @@ void Scene1::createShapes()
 
     const auto triangle = std::make_shared<Triangle>(Vector3{0, 0, -5}, Vector3{-1, 1, -6}, Vector3{1, 0, -5});
     triangle->setColor(Scene::ORANGE);
-    triangle->setWireframeEnabled(true);
+    // triangle->setWireframeEnabled(true);
     addShape(triangle);
 
     // const auto teapot = std::make_shared<OBJ>("res/obj/teapot.obj", Vector3(0, 0, -5));
@@ -63,12 +63,27 @@ void Scene1::createShapes()
 
 void Scene1::createLights()
 {
-    // Source lumineuse principale
+    Vector3 position{0, 6, 2};
+
+    Vector3 uDir{1, 0, 0};
+    Vector3 vDir{0, 0, 1};
+
+    double width  = 5.0;
+    double height = 5.0;
+
+    Vector3 colorDiffuse  {1.0, 1.0, 1.0};
+    Vector3 colorSpecular {1.0, 1.0, 1.0};
+
     const auto source = std::make_shared<LightSource>(
-        Vector3{0, 5, -3},
-        Vector3{0.7f, 0.7f, 0.7f},
-        Vector3{1.0f, 1.0f, 1.0f}
-    );
-    source->setIntensity(1.0f);
+        position,
+        uDir,
+        vDir,
+        width,
+        height,
+        colorDiffuse,
+        colorSpecular);
+
+    source->setIntensity(2.0);
+
     addLightSource(source);
 }

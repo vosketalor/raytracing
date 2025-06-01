@@ -108,29 +108,61 @@ Intersection Renderer::findNearestIntersection(const Vector3 &P, const Vector3 &
     return this->bvh_.getIntersection(P, v);
 }
 
-Vector3 Renderer::computeLighting(const Vector3 &P, const Vector3 &v, const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape) const
+Vector3 Renderer::computeLighting(const Vector3 &P,
+                                  const Vector3 &v,
+                                  const Vector3 &intersectionPoint,
+                                  const Vector3 &normal,
+                                  const Shape &shape) const
 {
-    Vector3 color = Vector3(0, 0, 0);
-    for (int i = 0; i < scene->getLightSources().size(); ++i)
+    Vector3 result(0, 0, 0);
+
+    // Nombre d'échantillons pour l’area light (1 = point light pur)
+    const int numSamples = 16;
+
+    for (const auto& lightPtr : scene->getLightSources())
     {
-        const LightSource &lightSource = *scene->getLightSources()[i];
-        Vector3 lightVec = lightSource.getPosition() - intersectionPoint;
-        Vector3 lightDir = lightVec.normalized();
-        Vector3 shadowOrigin = intersectionPoint + lightDir * Scene::EPSILON;
+        const LightSource &L = *lightPtr;
+        Vector3 accumLight(0, 0, 0);
 
-        Vector3 toLight = lightSource.getPosition() - shadowOrigin;
-        const double lightDistance = toLight.norm();
-        Vector3 shadowRayDir = toLight.normalized();
-
-        if (!isInShadow(shadowOrigin, shadowRayDir, lightDistance))
+        // Pour chaque échantillon sur l’area light
+        for (int i = 0; i < numSamples; ++i)
         {
-            const Vector3 diffuse = computeDiffuse(intersectionPoint, normal, shape, lightSource, shadowOrigin, shadowRayDir);
-            const Vector3 specular = computeSpecular(P, v, intersectionPoint, normal, shape, lightSource);
-            const double attenuation = computeAttenuation(lightDistance);
-            color += (diffuse + specular) * attenuation;
+            // 1) On prélève un point aléatoire sur l’area light
+            Vector3 samplePos = L.samplePointOnArea();
+            Vector3 Lvec     = samplePos - intersectionPoint;
+            double  Ldist    = Lvec.norm();
+            Vector3 Ldir     = Lvec * (1 / Ldist);
+            Vector3 shadowOrig = intersectionPoint + Ldir * Scene::EPSILON;
+
+            // 2) On calcule l’atténuation d’ombre colorée
+            Vector3 attenShadow = computeShadowAttenuation(shadowOrig, Ldir, Ldist);
+            if (attenShadow.x() <= 0.0 && attenShadow.y() <= 0.0 && attenShadow.z() <= 0.0)
+                continue; // entièrement bloqué
+
+            // 3) Diffuse
+            double NdotL = std::max(0.0, normal.dot(Ldir));
+            Vector3 diffuse = shape.getColor() * L.getColorDiffuse() * NdotL;
+
+            // 4) Spéculaire (on recalculera la demi‐vector pour ce Ldir)
+            Vector3 viewDir = (P - intersectionPoint).normalized();
+            Vector3 halfVec = (viewDir + Ldir).normalized();
+            double specAngle = std::max(0.0, normal.dot(halfVec));
+            Vector3 specular = L.getColorSpecular()
+                             * L.getIntensity()
+                             * std::pow(specAngle, shape.getMaterial().getShininess());
+
+            // 5) Atténuation par distance
+            double attenDist = computeAttenuation(Ldist);
+
+            // 6) On cumule ce que voit ce sample
+            accumLight += (diffuse + specular) * attenDist * attenShadow;
         }
+
+        // 7) Moyenne sur tous les échantillons
+        result += accumLight * (1.0 / (double)numSamples);
     }
-    return color;
+
+    return result;
 }
 
 bool Renderer::isInShadow(const Vector3 &shadowOrigin, const Vector3 &shadowRayDir, const double lightDistance) const
@@ -139,6 +171,42 @@ bool Renderer::isInShadow(const Vector3 &shadowOrigin, const Vector3 &shadowRayD
     return intersection.lambda > Scene::EPSILON
         && intersection.shape != nullptr
         && intersection.lambda < lightDistance;
+}
+
+Vector3 Renderer::computeShadowAttenuation(const Vector3& origin, const Vector3& dir, double lightDist) const
+{
+    Vector3 attenuation(1, 1, 1);
+    Vector3 currOrig = origin;
+    Vector3 currDir = dir;
+
+    while (true)
+    {
+        Intersection hit = this->bvh_.getIntersection(currOrig, currDir);
+        // si pas d'intersection ou intersection au-delà de la lumière, on s'arrête
+        if (!hit || hit.lambda >= lightDist)
+            break;
+
+        const Shape* sh = hit.shape;
+        const Material& m = sh->getMaterial();
+        double t = m.getTransparency();         // [0,1]
+        Vector3 col = sh->getColor();           // couleur de l’objet
+        // on filtre l’atténuation : la lumière est multipliée par t * col
+        attenuation = attenuation * (t * col);
+        // si l’objet est totalement opaque, on coupe tout
+        if (t <= 0.0)
+            return {0, 0, 0};
+
+        // avancer l’origine juste après l’intersection
+        Vector3 hitPt = currOrig + currDir * hit.lambda;
+        currOrig = hitPt + currDir * Scene::EPSILON;
+
+        // réduire la distance restante jusqu’à la lumière
+        lightDist -= hit.lambda + Scene::EPSILON;
+        if (attenuation.x() <= 1e-3 && attenuation.y() <= 1e-3 && attenuation.z() <= 1e-3)
+            return {0, 0, 0};
+    }
+
+    return attenuation;
 }
 
 Vector3 Renderer::computeDiffuse(const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape, const LightSource &lightSource, const Vector3 &shadowOrigin, const Vector3 &shadowRayDir) const
