@@ -40,4 +40,5 @@ private:
     Vector3 perturbVector(const Vector3 &direction, const Vector3 &normal, double roughness) const;
     Vector3 computeReflection(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape, const int& order) const;
     Vector3 computeRefraction(const Vector3& P, const Vector3& v, const Vector3& intersectionPoint, const Vector3& normal, const Shape& shape, const int& order) const;
+    double computeCurvatureBias(const Shape& shape, const Vector3& intersectionPoint, const Vector3& normal, const Vector3& rayDir) const;
 };

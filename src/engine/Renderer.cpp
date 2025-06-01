@@ -149,6 +149,22 @@ Intersection Renderer::findNearestIntersection(const Vector3 &P, const Vector3 &
     return this->bvh_.getIntersection(P, v);
 }
 
+double Renderer::computeCurvatureBias(const Shape& shape,
+                                     const Vector3& intersectionPoint,
+                                     const Vector3& normal,
+                                     const Vector3& rayDir) const {
+    // 1. Composante distance-dépendante (évite les artefacts à grande distance)
+    const double distanceBias = 1e-4 * std::max(1.0, intersectionPoint.norm());
+
+    // 2. Composante courbure-dépendante (plus grand biais pour les angles rasant)
+    const double cosTheta = std::abs(normal.dot(rayDir));
+    const double curvatureBias = 1e-3 * (1.0 - cosTheta); // Ajustez 1e-3 selon vos besoins
+
+    const double edgeDistance = shape.getDistanceNearestEdge(intersectionPoint, camera_);
+    const double edgeBias = 1e-4 * std::max(0.0, 1.0 - edgeDistance / Scene::WIREFRAME_THICKNESS);
+    return distanceBias + curvatureBias + edgeBias;
+}
+
 Vector3 Renderer::computeLighting(const Vector3 &P,
                                   const Vector3 &v,
                                   const Vector3 &intersectionPoint,
@@ -173,7 +189,7 @@ Vector3 Renderer::computeLighting(const Vector3 &P,
             Vector3 Lvec     = samplePos - intersectionPoint;
             double  Ldist    = Lvec.norm();
             Vector3 Ldir     = Lvec * (1 / Ldist);
-            Vector3 shadowOrig = intersectionPoint + Ldir * Scene::EPSILON;
+            Vector3 shadowOrig = intersectionPoint + Ldir * computeCurvatureBias(shape, intersectionPoint, Ldir, v);
 
             // 2) On calcule l’atténuation d’ombre colorée
             Vector3 attenShadow = computeShadowAttenuation(shadowOrig, Ldir, Ldist);
@@ -349,11 +365,11 @@ Vector3 Renderer::computeRefraction(const Vector3 &P, const Vector3 &v, const Ve
     {
         const double c2 = std::sqrt(k);
         const Vector3 refractDir = (i * eta + normal * (eta * c1 - c2)).normalized();
-        const Vector3 offset = refractDir * Scene::EPSILON;
+        const Vector3 offset = refractDir * computeCurvatureBias(shape, intersectionPoint, refractDir, v);
         return getPixelColor(intersectionPoint + offset, refractDir, order - 1) * shape.getMaterial().getTransparency();
     }
 
     const Vector3 reflectDir = (i - normal * 2 * normal.dot(i)).normalized();
-    const Vector3 offset = reflectDir * Scene::EPSILON;
+    const Vector3 offset = reflectDir * computeCurvatureBias(shape, intersectionPoint, reflectDir, v);
     return getPixelColor(intersectionPoint + offset, reflectDir, order - 1) * shape.getMaterial().getTransparency();
 }
