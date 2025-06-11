@@ -5,7 +5,7 @@ StatisticsWindow::StatisticsWindow(Application& renderer)
     : UIWindow("Statistics"), m_renderer(renderer) {}
 
 void StatisticsWindow::render() {
-    if (!m_visible) return;
+    if (!m_visible || !m_renderer.enabledWindows.statisticsWindow) return;
     
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowBgAlpha(0.8f);

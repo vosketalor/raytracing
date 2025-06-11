@@ -36,6 +36,14 @@ public:
 
     bool softShadowsEnabled = false;
 
+    struct EnabledWindows {
+        bool rendererWindow = true;
+        bool resolutionWindow = true;
+        bool statisticsWindow = true;
+    };
+
+    EnabledWindows enabledWindows;
+
     Camera camera;
     Renderer renderer;
 

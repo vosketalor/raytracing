@@ -5,7 +5,7 @@ ResolutionWindow::ResolutionWindow(Application& renderer)
     : UIWindow("Resolution Settings"), m_renderer(renderer) {}
 
 void ResolutionWindow::render() {
-    if (!m_visible) return;
+    if (!m_visible || !m_renderer.enabledWindows.resolutionWindow) return;
     
     const ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y - 210), ImGuiCond_FirstUseEver);

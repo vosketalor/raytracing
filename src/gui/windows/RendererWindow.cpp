@@ -56,7 +56,7 @@ void accumulation(Application& m_renderer) {
 }
 
 void RendererWindow::render() {
-    if (!m_visible) return;
+    if (!m_visible || !m_renderer.enabledWindows.rendererWindow) return;
 
     const ImGuiIO& io = ImGui::GetIO();
     ImGui::SetNextWindowPos(ImVec2(10, io.DisplaySize.y / 2), ImGuiCond_FirstUseEver);
