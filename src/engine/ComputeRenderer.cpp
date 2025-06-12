@@ -19,6 +19,8 @@ std::string ComputeRenderer::loadShaderSource(const std::string& filepath) {
 
     std::stringstream buffer;
     buffer << file.rdbuf();
+    file.close();
+
     return buffer.str();
 }
 
@@ -33,7 +35,7 @@ bool ComputeRenderer::initialize() {
         return false;
     }
 
-    std::string shaderSource = loadShaderSource("res/shaders/simple_shader.glsl");
+    std::string shaderSource = loadShaderSource("res/shaders/shader.glsl");
     if (shaderSource.empty()) {
         return false;
     }
@@ -147,6 +149,42 @@ void ComputeRenderer::updateSceneData() {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightDataSSBO);
 }
 
+void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform3f(loc, x, y, z);
+    }
+}
+
+void setUniform1f(GLuint program, const char* name, float value) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform1f(loc, value);
+    }
+}
+
+void setUniform1i(GLuint program, const char* name, int value) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform1i(loc, value);
+    }
+}
+
+void setUniform2i(GLuint program, const char* name, int x, int y) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform2i(loc, x, y);
+    }
+}
+
 void ComputeRenderer::updateCameraUniforms() {
     glUseProgram(shaderProgram);
 
@@ -155,30 +193,21 @@ void ComputeRenderer::updateCameraUniforms() {
     Vector3 right = camera_.getRight();
     Vector3 up = camera_.getUp();
 
-    glUniform3f(glGetUniformLocation(shaderProgram, "cameraPos"), pos.x(), pos.y(), pos.z());
-    glUniform3f(glGetUniformLocation(shaderProgram, "cameraDir"), dir.x(), dir.y(), dir.z());
-    glUniform3f(glGetUniformLocation(shaderProgram, "cameraRight"), right.x(), right.y(), right.z());
-    glUniform3f(glGetUniformLocation(shaderProgram, "cameraUp"), up.x(), up.y(), up.z());
-    glUniform1f(glGetUniformLocation(shaderProgram, "fov"), camera_.getFov());
-    glUniform1f(glGetUniformLocation(shaderProgram, "aspectRatio"), (float)width / height);
+    setUniform3f(shaderProgram, "cameraPos", pos.x(), pos.y(), pos.z());
+    setUniform3f(shaderProgram, "cameraDir", dir.x(), dir.y(), dir.z());
+    setUniform3f(shaderProgram, "cameraRight", right.x(), right.y(), right.z());
+    setUniform3f(shaderProgram, "cameraUp", up.x(), up.y(), up.z());
+    setUniform1f(shaderProgram, "fov", camera_.getFov());
+    setUniform1f(shaderProgram, "aspectRatio", (float)width / height);
+    setUniform2i(shaderProgram, "resolution", width, height);
 
-    GLint loc = glGetUniformLocation(shaderProgram, "resolution");
-    if (loc == -1) {
-        std::cerr << "Uniform 'resolution' not found!" << std::endl;
-    } else
-    {
-        glUniform2i(loc, width, height);
-    }
-
-    // glUniform2i(glGetUniformLocation(shaderProgram, "resolution"), width, height);
-
-    glUniform1i(glGetUniformLocation(shaderProgram, "numShapes"), scene->getShapes().size());
-    glUniform1i(glGetUniformLocation(shaderProgram, "numLights"), scene->getLightSources().size());
+    setUniform1i(shaderProgram, "numShapes", scene->getShapes().size());
+    setUniform1i(shaderProgram, "numLights", scene->getLightSources().size());
 
     Vector3 skyColor = scene->getSkyColor();
     Vector3 ambient = scene->getAmbient();
-    glUniform3f(glGetUniformLocation(shaderProgram, "skyColor"), skyColor.x(), skyColor.y(), skyColor.z());
-    glUniform3f(glGetUniformLocation(shaderProgram, "ambientColor"), ambient.x(), ambient.y(), ambient.z());
+    setUniform3f(shaderProgram, "skyColor", skyColor.x(), skyColor.y(), skyColor.z());
+    setUniform3f(shaderProgram, "ambientColor", ambient.x(), ambient.y(), ambient.z());
 }
 
 void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {

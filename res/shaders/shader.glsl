@@ -9,7 +9,35 @@ uniform vec3 cameraRight;
 uniform vec3 cameraUp;
 uniform float fov;
 uniform float aspectRatio;
-uniform vec2 resolution;
+uniform ivec2 resolution;
+
+struct GPUShape {
+    vec3 center;      // float[3]
+    float radius;
+    vec3 color;
+    int type;         // int (32 bits)
+    vec4 material;    // float[4]
+    mat4 transform;   // float[16]
+};
+
+struct GPULight {
+    vec3 position;
+    float intensity;
+    vec3 colorDiffuse;
+    float pad1;       // padding pour alignement
+    vec3 colorSpecular;
+    float pad2;       // padding
+    vec2 area;
+    vec2 pad3;        // padding
+};
+
+struct GPUMaterial {
+    float shininess;
+    float eta;
+    vec3 f0;
+    float pad;        // padding
+};
+
 
 layout(std430, binding = 1) buffer SceneData {
     GPUShape shapes[];
@@ -81,7 +109,9 @@ HitInfo findNearestIntersection(Ray ray) {
         bool intersected = false;
 
         if (shapes[i].type == 0) {
-            vec3 center = vec3(shapes[i].center[0], shapes[i].center[1], shapes[i].center[2]);
+//            vec3 center = vec3(shapes[i].center[0], shapes[i].center[1], shapes[i].center[2]);
+            vec3 center = shapes[i].center;
+
             intersected = intersectSphere(ray, center, shapes[i].radius, t);
 
             if (intersected && t < hit.t) {
@@ -131,36 +161,42 @@ vec3 computeLighting(vec3 point, vec3 normal, vec3 viewDir, vec3 color, int shap
     return result;
 }
 
-vec3 traceRay(Ray ray, int depth) {
-    if (depth >= MAX_BOUNCES) return skyColor;
+vec3 traceRay(Ray ray) {
+    vec3 finalColor = vec3(0.0);
+    vec3 attenuation = vec3(1.0);
 
-    HitInfo hit = findNearestIntersection(ray);
-    if (!hit.hit) return skyColor;
+    for (int depth = 0; depth < MAX_BOUNCES; ++depth) {
+        HitInfo hit = findNearestIntersection(ray);
+        if (!hit.hit) {
+            finalColor += attenuation * skyColor;
+            break;
+        }
 
-    vec3 viewDir = -ray.direction;
-    vec3 color = computeLighting(hit.point, hit.normal, viewDir, hit.color, hit.shapeIndex);
+        vec3 viewDir = -ray.direction;
+        vec3 localColor = computeLighting(hit.point, hit.normal, viewDir, hit.color, hit.shapeIndex);
+        finalColor += attenuation * localColor;
 
-    float reflectivity = shapes[hit.shapeIndex].material[3];
-    if (reflectivity > 0.0 && depth < MAX_BOUNCES - 1) {
+        float reflectivity = shapes[hit.shapeIndex].material.w;
+        if (reflectivity <= 0.0) {
+            break;
+        }
+
         vec3 reflectDir = reflect(ray.direction, hit.normal);
-        Ray reflectRay;
-        reflectRay.origin = hit.point + hit.normal * EPSILON;
-        reflectRay.direction = reflectDir;
-
-        vec3 reflectColor = traceRay(reflectRay, depth + 1);
-        color = mix(color, reflectColor, reflectivity);
+        ray.origin = hit.point + hit.normal * EPSILON;
+        ray.direction = reflectDir;
+        attenuation *= reflectivity;
     }
 
-    return color;
+    return finalColor;
 }
 
 void main() {
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
-    if (pixelCoord.x >= int(resolution.x) || pixelCoord.y >= int(resolution.y)) {
+    if (pixelCoord.x >= resolution.x || pixelCoord.y >= resolution.y) {
         return;
     }
 
-    vec2 uv = (vec2(pixelCoord) + 0.5) / resolution;
+    vec2 uv = (vec2(pixelCoord) + 0.5) / vec2(resolution);
     vec2 ndc = uv * 2.0 - 1.0;
     ndc.x *= aspectRatio;
 
@@ -176,7 +212,7 @@ void main() {
     ray.origin = cameraPos;
     ray.direction = rayDir;
 
-    vec3 color = traceRay(ray, 0);
+    vec3 color = traceRay(ray);
 
     imageStore(outputImage, pixelCoord, vec4(color, 1.0));
 }
