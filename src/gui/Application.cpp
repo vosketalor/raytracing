@@ -51,6 +51,8 @@ bool Application::initialize(const int windowWidth, const int windowHeight)
     // Générer la texture pour l'image
     glGenTextures(1, &textureID);
 
+    renderer.initialize();
+
     return true;
 }
 

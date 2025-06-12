@@ -33,7 +33,7 @@ bool ComputeRenderer::initialize() {
         return false;
     }
 
-    std::string shaderSource = loadShaderSource("shaders/shader.glsl");
+    std::string shaderSource = loadShaderSource("res/shaders/simple_shader.glsl");
     if (shaderSource.empty()) {
         return false;
     }
