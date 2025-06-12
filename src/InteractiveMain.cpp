@@ -33,8 +33,8 @@ const float mouseSensitivity = 1.0f;
 void performRender(Application &application, const int width, const int height)
 {
     application.setRendering(true);
-    // application.renderer.width = width;
-    // application.renderer.height = height;
+    application.renderer.width = width;
+    application.renderer.height = height;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 

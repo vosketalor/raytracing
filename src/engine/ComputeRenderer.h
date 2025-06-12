@@ -28,7 +28,7 @@ private:
     GLuint lightDataSSBO;
     GLuint materialDataSSBO;
 
-    int width, height;
+
     Scene* scene;
     Camera camera_;
 
@@ -60,6 +60,7 @@ private:
     };
 
 public:
+    int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();
 
