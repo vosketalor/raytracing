@@ -64,7 +64,7 @@ std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath,
             } else {
                 throw std::runtime_error("Invalid #include directive: " + line);
             }
-        } else {
+        } else if (!trimmedLine.empty() && trimmedLine.find("//") != 0) {
             output << line << '\n';
         }
     }
@@ -73,6 +73,14 @@ std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath,
     return output.str();
 }
 
+void saveShaderToFile(const std::string& shaderSource, const std::string& filename) {
+    std::ofstream outFile(filename);
+    if (!outFile.is_open()) {
+        throw std::runtime_error("Impossible d'ouvrir le fichier pour écriture : " + filename);
+    }
+    outFile << shaderSource;
+    outFile.close();
+}
 
 
 bool ComputeRenderer::initialize() {
@@ -87,13 +95,11 @@ bool ComputeRenderer::initialize() {
     }
 
     std::string shaderSource = loadShaderWithIncludes("shader.glsl");
+    saveShaderToFile(shaderSource, "whole_shader.glsl");
 
     if (shaderSource.empty()) {
         return false;
     }
-
-    std::cout << "Shader : " << std::endl;
-    std::cout << shaderSource << std::endl;
 
     return loadComputeShader(shaderSource);
 }

@@ -11,60 +11,18 @@ uniform float fov;
 uniform float aspectRatio;
 uniform ivec2 resolution;
 
-struct GPULight {
-    vec3 position;
-    float intensity;
-    vec3 colorDiffuse;
-    float pad1;       // padding pour alignement
-    vec3 colorSpecular;
-    float pad2;       // padding
-    vec2 area;
-    vec2 pad3;        // padding
-};
-
-struct GPUMaterial {
-    float shininess;
-    float eta;
-    vec3 f0;
-    float pad;        // padding
-};
-
-uniform int numShapes;
-uniform int numLights;
 uniform vec3 skyColor;
 uniform vec3 ambientColor;
-
-struct Ray {
-    vec3 origin;
-    vec3 direction;
-};
-
-struct HitInfo {
-    bool hit;
-    float t;
-    vec3 point;
-    vec3 normal;
-    vec3 color;
-    int shapeIndex;
-};
 
 const float EPSILON = 1e-6;
 const float MAX_DIST = 1e6;
 const int MAX_BOUNCES = 10;
 
+#include "hitinfo.glsl"
+#include "ray.glsl"
 #include "shapes/shapes.glsl"
-
-layout(std430, binding = 1) buffer SceneData {
-    GPUShape shapes[];
-};
-
-layout(std430, binding = 2) buffer LightData {
-    GPULight lights[];
-};
-
-layout(std430, binding = 3) buffer MaterialData {
-    GPUMaterial materials[];
-};
+#include "material.glsl"
+#include "light.glsl"
 
 HitInfo findNearestIntersection(Ray ray) {
     HitInfo hit;
