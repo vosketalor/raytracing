@@ -20,6 +20,11 @@ void attenuation(Application& m_renderer) {
     ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled);
 }
 
+void texture(Application& m_renderer)
+{
+    ImGui::Checkbox("Enable texture", &m_renderer.renderer.textureEnabled);
+}
+
 void shadow(Application& m_renderer) {
     ImGui::Checkbox("Enable Shadows", &m_renderer.renderer.shadowsEnabled);
     if (m_renderer.renderer.shadowsEnabled) {
@@ -71,6 +76,8 @@ void RendererWindow::render() {
         specular(m_renderer);
 
         attenuation(m_renderer);
+
+        texture(m_renderer);
 
         ImGui::Separator();
 

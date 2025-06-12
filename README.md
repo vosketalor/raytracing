@@ -26,6 +26,7 @@ The raytracer simulates light transport to generate realistic images from 3D sce
   - Reflection map
 - Selection object by clicking 
 - Zoom
+- Handle preferences
   
 ## Build Instructions
 

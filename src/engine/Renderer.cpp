@@ -134,7 +134,7 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
     }
 
     Vector3 color;
-    if (result.shape->hasTexture())
+    if (result.shape->hasTexture() && this->textureEnabled)
     {
         Vector2 texCoords = result.shape->getTextureCoordinates(intersectionPoint);
         texCoords.clamp(0, 1);
@@ -170,9 +170,9 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
         if (material.getReflectivity() > 0.0 || material.getMetallic() > 0.0) {
             Vector3 reflectionColor;
 
-            if (material.getMetallic() > 0.0) {
+            if (material.getMetallic() > 0.0 && this->reflectionsEnabled) {
                 reflectionColor = sampleMicrofacetsReflection(P, v, intersectionPoint, normal, *result.shape, order);
-            } else {
+            } else if (this->reflectionsEnabled) {
                 reflectionColor = computeReflection(P, v, intersectionPoint, normal, *result.shape, order);
             }
 
@@ -180,7 +180,7 @@ Vector3 Renderer::getPixelColor(const Vector3 &P, const Vector3 &v, const int &o
         }
 
         // Réfraction (garder l'ancien pour l'instant)
-        if (material.getTransparency() > 0.0) {
+        if (material.getTransparency() > 0.0 && this->refractionsEnabled) {
             color += computeRefraction(P, v, intersectionPoint, normal, *result.shape, order, material.getTransparency());
         }
     }
@@ -218,7 +218,7 @@ Vector3 Renderer::computeLighting(const Vector3 &P,
     Vector3 result(0, 0, 0);
 
     // Nombre d'échantillons pour l’area light (1 = point light pur)
-    const int numSamples = 16;
+    // const int numSamples = 16;
 
     for (const auto& lightPtr : scene->getLightSources())
     {
@@ -226,7 +226,7 @@ Vector3 Renderer::computeLighting(const Vector3 &P,
         Vector3 accumLight(0, 0, 0);
 
         // Pour chaque échantillon sur l’area light
-        for (int i = 0; i < numSamples; ++i)
+        for (int i = 0; i < this->samplesNumber; ++i)
         {
             // 1) On prélève un point aléatoire sur l’area light
             Vector3 samplePos = L.samplePointOnArea();
@@ -245,22 +245,30 @@ Vector3 Renderer::computeLighting(const Vector3 &P,
             Vector3 diffuse = shape.getColor() * L.getColorDiffuse() * NdotL;
 
             // 4) Spéculaire (on recalculera la demi‐vector pour ce Ldir)
-            Vector3 viewDir = (P - intersectionPoint).normalized();
-            Vector3 halfVec = (viewDir + Ldir).normalized();
-            double specAngle = std::max(0.0, normal.dot(halfVec));
-            Vector3 specular = L.getColorSpecular()
-                             * L.getIntensity()
-                             * std::pow(specAngle, shape.getMaterial().getShininess());
+            Vector3 specular;
+            if (this->specularEnabled)
+            {
+                Vector3 viewDir = (P - intersectionPoint).normalized();
+                Vector3 halfVec = (viewDir + Ldir).normalized();
+                double specAngle = std::max(0.0, normal.dot(halfVec));
+                specular = L.getColorSpecular()
+                                 * L.getIntensity()
+                                 * std::pow(specAngle, shape.getMaterial().getShininess());
+            }
 
             // 5) Atténuation par distance
-            double attenDist = computeAttenuation(Ldist);
+            double attenDist = 1;
+            if (this->attenuationEnabled)
+            {
+                attenDist = computeAttenuation(Ldist);
+            }
 
             // 6) On cumule ce que voit ce sample
             accumLight += (diffuse + specular) * attenDist * attenShadow;
         }
 
         // 7) Moyenne sur tous les échantillons
-        result += accumLight * (1.0 / (double)numSamples);
+        result += accumLight / this->samplesNumber;
     }
 
     return result;
@@ -313,7 +321,7 @@ Vector3 Renderer::computeShadowAttenuation(const Vector3& origin, const Vector3&
 Vector3 Renderer::computeDiffuse(const Vector3 &intersectionPoint, const Vector3 &normal, const Shape &shape, const LightSource &lightSource, const Vector3 &shadowOrigin, const Vector3 &shadowRayDir) const
 {
     const double diffuseFactor = std::max(0.0, normal.dot(shadowRayDir));
-    if (shape.hasTexture())
+    if (shape.hasTexture() && this->textureEnabled)
     {
         Vector2 texCoords = shape.getTextureCoordinates(intersectionPoint);
         Vector3 texColor = shape.getTexture()->getTextureColor(texCoords);
@@ -544,10 +552,13 @@ Vector3 Renderer::computeMicrofacetsLighting(const Vector3& P, const Vector3& v,
             Vector3 Ldir = Lvec / Ldist;
 
             // Test d'ombre simple
-            Vector3 shadowOrig = intersectionPoint + normal * 0.001; // Offset simple
-            bool inShadow = isInShadow(shadowOrig, Ldir, Ldist);
+            if (this->shadowsEnabled)
+            {
+                Vector3 shadowOrig = intersectionPoint + normal * 0.001; // Offset simple
+                bool inShadow = isInShadow(shadowOrig, Ldir, Ldist);
 
-            if (inShadow) continue;
+                if (inShadow) continue;
+            }
 
             // BRDF microfacettes
             Vector3 brdf = computeMicrofacetsBRDF(viewDir, Ldir, normal, shape.getMaterial());

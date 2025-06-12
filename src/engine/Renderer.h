@@ -24,6 +24,7 @@ public:
     bool refractionsEnabled = false;
     bool specularEnabled = false;
     bool attenuationEnabled = false;
+    bool textureEnabled = false;
 
     explicit Renderer(Scene* scene, const Camera& camera, const int& width, const int& height) :
         scene(scene), bvh_(scene->getShapes()), camera_(camera), width(width), height(height)
