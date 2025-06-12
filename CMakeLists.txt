@@ -21,6 +21,9 @@ if(NOT WIN32)
     set(USE_TBB TRUE)
 endif()
 
+#GLEW
+add_subdirectory(external/glew)
+
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
     external/imgui/imgui_draw.cpp
@@ -93,7 +96,10 @@ add_executable(Raytracing
 
 )
 
-target_link_libraries(Raytracing PRIVATE glfw OpenGL::GL)
+target_link_libraries(Raytracing PRIVATE
+        glfw
+        glew
+        OpenGL::GL)
 
 if(USE_TBB)
     target_link_libraries(Raytracing PRIVATE TBB::tbb)

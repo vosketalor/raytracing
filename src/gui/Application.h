@@ -1,21 +1,13 @@
 #pragma once
 
-// ImGui includes
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+struct GLFWwindow;  // forward declaration
 
-// OpenGL includes
-#include <GLFW/glfw3.h>
-
+// autres includes locaux seulement
 #include <vector>
-#include <iostream>
-#include <fstream>
-#include <string>
-
 #include "Renderer.h"
+#include "ComputeRenderer.h"
 #include "../engine/Camera.h"
-#include "InputManager.h"
+
 
 class Application
 {
@@ -45,7 +37,7 @@ public:
     EnabledWindows enabledWindows;
 
     Camera camera;
-    Renderer renderer;
+    ComputeRenderer renderer;
 
     struct ResolutionPreset
     {

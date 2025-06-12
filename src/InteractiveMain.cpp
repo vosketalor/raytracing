@@ -8,17 +8,16 @@
 #include <string>
 
 // ImGui includes
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-// OpenGL includes
+#define GLEW_STATIC
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 
 #include "engine/Renderer.h"
 #include "scenes/Scene1.h"
 
 #include "Camera.h"
+#include "imgui_impl_glfw.h"
 #include "gui/Application.h"
 #include "gui/UIManager.h"
 #include "gui/InputManager.h"
@@ -34,8 +33,8 @@ const float mouseSensitivity = 1.0f;
 void performRender(Application &application, const int width, const int height)
 {
     application.setRendering(true);
-    application.renderer.width = width;
-    application.renderer.height = height;
+    // application.renderer.width = width;
+    // application.renderer.height = height;
 
     const auto startTime = std::chrono::high_resolution_clock::now();
 

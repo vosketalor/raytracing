@@ -1,5 +1,11 @@
-#include "Application.h"
+#define GLEW_STATIC
+#include <GL/glew.h>        // doit être en premier, avant glfw
+#include <GLFW/glfw3.h>
 
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include "Application.h"
 #include <ctime>
 
 bool Application::initialize(const int windowWidth, const int windowHeight)
