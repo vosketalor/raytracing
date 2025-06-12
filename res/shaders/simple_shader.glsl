@@ -1,4 +1,5 @@
 #version 430
+uniform ivec2 resolution;
 
 layout(local_size_x = 16, local_size_y = 16) in;
 
@@ -7,8 +8,8 @@ layout(rgba32f, binding = 0) uniform image2D outputImage;
 void main() {
     ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
 
-    int width = 800;  // ou ta valeur
-    int height = 600;
+    int width = resolution.x;
+    int height = resolution.y;
 
     if (pixel.x >= width || pixel.y >= height)
     return;

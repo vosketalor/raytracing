@@ -161,7 +161,16 @@ void ComputeRenderer::updateCameraUniforms() {
     glUniform3f(glGetUniformLocation(shaderProgram, "cameraUp"), up.x(), up.y(), up.z());
     glUniform1f(glGetUniformLocation(shaderProgram, "fov"), camera_.getFov());
     glUniform1f(glGetUniformLocation(shaderProgram, "aspectRatio"), (float)width / height);
-    glUniform2f(glGetUniformLocation(shaderProgram, "resolution"), width, height);
+
+    GLint loc = glGetUniformLocation(shaderProgram, "resolution");
+    if (loc == -1) {
+        std::cerr << "Uniform 'resolution' not found!" << std::endl;
+    } else
+    {
+        glUniform2i(loc, width, height);
+    }
+
+    // glUniform2i(glGetUniformLocation(shaderProgram, "resolution"), width, height);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "numShapes"), scene->getShapes().size());
     glUniform1i(glGetUniformLocation(shaderProgram, "numLights"), scene->getLightSources().size());
@@ -173,12 +182,27 @@ void ComputeRenderer::updateCameraUniforms() {
 }
 
 void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
+    if (outputTexture) {
+        glDeleteTextures(1, &outputTexture);
+    }
+
+    glGenTextures(1, &outputTexture);
+    glBindTexture(GL_TEXTURE_2D, outputTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);  // détacher texture
+
+    // Bind l'image pour le compute shader
+    glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
     updateCameraUniforms();
 
     glUseProgram(shaderProgram);
 
     int groupsX = (width + 15) / 16;
     int groupsY = (height + 15) / 16;
+    glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     glDispatchCompute(groupsX, groupsY, 1);
 
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -186,6 +210,7 @@ void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
     glBindTexture(GL_TEXTURE_2D, outputTexture);
     std::vector<float> pixels(width * height * 4);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, pixels.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     frameBuffer.resize(width * height);
     for (int i = 0; i < width * height; i++) {
