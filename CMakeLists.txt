@@ -24,6 +24,9 @@ endif()
 #GLEW
 add_subdirectory(external/glew)
 
+#GLM
+add_subdirectory(external/glm)
+
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
     external/imgui/imgui_draw.cpp
@@ -93,12 +96,16 @@ add_executable(Raytracing
         src/engine/scenes/SceneFresnel.h
         src/engine/Texture.cpp
         src/engine/Texture.h
+        src/engine/shapes/GPUShapeData.h
+        src/engine/scenes/SceneGPU.cpp
+        src/engine/scenes/SceneGPU.h
 
 )
 
 target_link_libraries(Raytracing PRIVATE
         glfw
         glew
+        glm
         OpenGL::GL)
 
 if(USE_TBB)

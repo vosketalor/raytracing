@@ -4,6 +4,7 @@
 #include "Vector.h"
 // #include "Texture.h"
 #include "Camera.h"
+#include "GPUShapeData.h"
 #include "Material.h"
 #include "Texture.h"
 #include "../Intersection.h"
@@ -19,23 +20,23 @@ protected:
     Vector3 color_ = {1.0f, 1.0f, 1.0f};  ///< Base color (if no texture)
     Material material_;
     bool visible = true;                 ///< Visibility flag
-    std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
-    std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
-    bool hasTexture_ = false;               ///< Texture presence flag
+    // std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
+    // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
+    // bool hasTexture_ = false;               ///< Texture presence flag
     bool wireframeEnabled = false;        ///< Wireframe mode flag
 
 public:
     virtual ~Shape() = default;
 
     // Core functionality
-    virtual Intersection getIntersection(const Vector3& P, const Vector3& v) const = 0;
-    virtual Vector2 getTextureCoordinates(const Vector3& intersection) const = 0;
+    // virtual Intersection getIntersection(const Vector3& P, const Vector3& v) const = 0;
+    // virtual Vector2 getTextureCoordinates(const Vector3& intersection) const = 0;
 
-    Vector3 getColor() const { return color_; }
-    void setColor(const Vector3& col) { color_ = col; }
-
-    Material getMaterial() const { return material_; }
-    void setMaterial(const Material& mat) { material_ = mat; }
+    // Vector3 getColor() const { return color_; }
+    // void setColor(const Vector3& col) { color_ = col; }
+    //
+    // Material getMaterial() const { return material_; }
+    // void setMaterial(const Material& mat) { material_ = mat; }
 
     // Transformations
     // virtual void scale(float scale) = 0;
@@ -43,30 +44,37 @@ public:
     // void rotate(const float angle) { rotate(angle, Vector3{0,1,0}); }
 
     // Bounding volume
-    virtual void setBoundingBox() = 0;
-    std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
+    // virtual void setBoundingBox() = 0;
+    // std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
+    //
+    // // Getters/Setters
+    // bool isVisible() const { return visible; }
+    // void setVisible(const bool isVisible) { visible = isVisible; }
 
-    // Getters/Setters
-    bool isVisible() const { return visible; }
-    void setVisible(const bool isVisible) { visible = isVisible; }
+    // std::shared_ptr<Texture> getTexture() const { return texture; }
+    //
+    // void setTexture(std::shared_ptr<Texture> tex) {
+    //     if (tex) {
+    //         texture = tex;
+    //         hasTexture_ = true;
+    //     }
+    // }
 
-    std::shared_ptr<Texture> getTexture() const { return texture; }
-
-    void setTexture(std::shared_ptr<Texture> tex) {
-        if (tex) {
-            texture = tex;
-            hasTexture_ = true;
-        }
-    }
-
-    bool hasTexture() const { return hasTexture_; }
-
-    virtual double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const = 0;
+    // bool hasTexture() const { return hasTexture_; }
+    //
+    // virtual double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const = 0;
 
     virtual std::string toString() const {
         return typeid(*this).name();
     }
 
-    bool isWireframeEnabled() const { return wireframeEnabled; }
-    void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
+    // bool isWireframeEnabled() const { return wireframeEnabled; }
+    // void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
+
+    virtual GPU::GPUShapeData toGPUShapeData() const
+    {
+        GPU::GPUShapeData data{};
+        data.color = glm::vec3(color_.x(), color_.y(), color_.z());
+        return data;
+    }
 };

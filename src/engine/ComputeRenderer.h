@@ -29,18 +29,8 @@ private:
     GLuint lightDataSSBO;
     GLuint materialDataSSBO;
 
-
     Scene* scene;
     Camera camera_;
-
-    struct GPUShape {
-        float center[3];
-        float radius;
-        float color[3];
-        int type;
-        float material[4];
-        float transform[16];
-    };
 
     struct GPULight {
         float position[3];

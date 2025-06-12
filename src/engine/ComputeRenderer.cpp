@@ -32,6 +32,7 @@ std::string ComputeRenderer::loadShaderSource(const std::string& filepath) {
 
 std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath, const std::string& basePath = "res/shaders/",
                                                     std::unordered_set<std::string>* includedFiles = nullptr) {
+    std::cout << "Loading shader from disk: " << basePath + filePath << std::endl;
     if (!includedFiles) {
         std::unordered_set<std::string> localSet;
         return loadShaderWithIncludes(filePath, basePath, &localSet);
@@ -94,8 +95,9 @@ bool ComputeRenderer::initialize() {
         return false;
     }
 
-    std::string shaderSource = loadShaderWithIncludes("shader.glsl");
+    const std::string shaderSource = loadShaderWithIncludes("shader.glsl");
     saveShaderToFile(shaderSource, "whole_shader.glsl");
+    // std::cout << "Current percent to the number max of characters : " << (shaderSource.size() / shaderSource.max_size())* 100 << "%" << std::endl;
 
     if (shaderSource.empty()) {
         return false;
@@ -151,58 +153,44 @@ void ComputeRenderer::setupBuffers() {
 }
 
 void ComputeRenderer::updateSceneData() {
-    std::vector<GPUShape> gpuShapes;
+    std::vector<GPU::GPUShapeData> gpuShapes;
     for (const auto& shape : scene->getShapes()) {
-        GPUShape gpuShape;
+        GPU::GPUShapeData gpuShape;
 
-        gpuShape.center[0] = 0;
-        gpuShape.center[1] = 0;
-        gpuShape.center[2] = 0;
-        gpuShape.radius = 1.0f;
-
-        Vector3 color = shape->getColor();
-        gpuShape.color[0] = color.x();
-        gpuShape.color[1] = color.y();
-        gpuShape.color[2] = color.z();
-
-        gpuShape.type = 0;
-
-        const Material& mat = shape->getMaterial();
-        gpuShape.material[0] = mat.getRoughness();
-        gpuShape.material[1] = mat.getMetallic();
-        gpuShape.material[2] = mat.getTransparency();
-        gpuShape.material[3] = mat.getReflectivity();
+        gpuShape = shape->toGPUShapeData();
 
         gpuShapes.push_back(gpuShape);
     }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, sceneDataSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuShapes.size() * sizeof(GPUShape),
+    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuShapes.size() * sizeof(GPU::GPUShapeData),
                  gpuShapes.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, sceneDataSSBO);
 
+    std::cout << "Size shapes : " << gpuShapes.size() << std::endl;
+
     std::vector<GPULight> gpuLights;
-    for (const auto& light : scene->getLightSources()) {
-        GPULight gpuLight;
-
-        Vector3 pos = light->getPosition();
-        gpuLight.position[0] = pos.x();
-        gpuLight.position[1] = pos.y();
-        gpuLight.position[2] = pos.z();
-        gpuLight.intensity = light->getIntensity();
-
-        Vector3 diffuse = light->getColorDiffuse();
-        gpuLight.colorDiffuse[0] = diffuse.x();
-        gpuLight.colorDiffuse[1] = diffuse.y();
-        gpuLight.colorDiffuse[2] = diffuse.z();
-
-        Vector3 specular = light->getColorSpecular();
-        gpuLight.colorSpecular[0] = specular.x();
-        gpuLight.colorSpecular[1] = specular.y();
-        gpuLight.colorSpecular[2] = specular.z();
-
-        gpuLights.push_back(gpuLight);
-    }
+    // for (const auto& light : scene->getLightSources()) {
+    //     GPULight gpuLight;
+    //
+    //     Vector3 pos = light->getPosition();
+    //     gpuLight.position[0] = pos.x();
+    //     gpuLight.position[1] = pos.y();
+    //     gpuLight.position[2] = pos.z();
+    //     gpuLight.intensity = light->getIntensity();
+    //
+    //     Vector3 diffuse = light->getColorDiffuse();
+    //     gpuLight.colorDiffuse[0] = diffuse.x();
+    //     gpuLight.colorDiffuse[1] = diffuse.y();
+    //     gpuLight.colorDiffuse[2] = diffuse.z();
+    //
+    //     Vector3 specular = light->getColorSpecular();
+    //     gpuLight.colorSpecular[0] = specular.x();
+    //     gpuLight.colorSpecular[1] = specular.y();
+    //     gpuLight.colorSpecular[2] = specular.z();
+    //
+    //     gpuLights.push_back(gpuLight);
+    // }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuLights.size() * sizeof(GPULight),
