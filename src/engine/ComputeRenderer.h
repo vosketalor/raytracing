@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
 #include <GL/glext.h>
 
 #include "Camera.h"
@@ -72,6 +73,7 @@ public:
 private:
     bool loadComputeShader(const std::string& shaderSource);
     std::string loadShaderSource(const std::string& filename);
+    std::string loadShaderWithIncludes(const std::string& filePath, const std::string& basePath, std::unordered_set<std::string>* includedFiles);
     void setupBuffers();
     void updateSceneData();
     void updateCameraUniforms();

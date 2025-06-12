@@ -24,6 +24,57 @@ std::string ComputeRenderer::loadShaderSource(const std::string& filepath) {
     return buffer.str();
 }
 
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <unordered_set>
+#include <algorithm>
+
+std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath, const std::string& basePath = "res/shaders/",
+                                                    std::unordered_set<std::string>* includedFiles = nullptr) {
+    if (!includedFiles) {
+        std::unordered_set<std::string> localSet;
+        return loadShaderWithIncludes(filePath, basePath, &localSet);
+    }
+    if (includedFiles->count(basePath + filePath)) {
+        // Déjà inclus, on évite la récursion infinie
+        return "";
+    }
+    std::cout << "Included shader : " << basePath << filePath << std::endl;
+    includedFiles->insert(basePath + filePath);
+
+    std::ifstream file(basePath + filePath);
+    if (!file.is_open()) throw std::runtime_error("Shader not found: " + basePath + filePath);
+
+    std::string line;
+    std::stringstream output;
+
+    while (std::getline(file, line)) {
+        // Supprime espaces début/fin
+        auto start = line.find_first_not_of(" \t");
+        auto end = line.find_last_not_of(" \t");
+        std::string trimmedLine = (start == std::string::npos) ? "" : line.substr(start, end - start + 1);
+
+        if (trimmedLine.find("#include") == 0) {
+            size_t firstQuote = trimmedLine.find('\"');
+            size_t lastQuote = trimmedLine.find_last_of('\"');
+            if (firstQuote != std::string::npos && lastQuote != std::string::npos && lastQuote > firstQuote) {
+                std::string includePath = trimmedLine.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+                output << loadShaderWithIncludes(includePath, basePath, includedFiles);
+            } else {
+                throw std::runtime_error("Invalid #include directive: " + line);
+            }
+        } else {
+            output << line << '\n';
+        }
+    }
+    file.close();
+
+    return output.str();
+}
+
+
+
 bool ComputeRenderer::initialize() {
     if (glewInit() != GLEW_OK) {
         std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -35,10 +86,14 @@ bool ComputeRenderer::initialize() {
         return false;
     }
 
-    std::string shaderSource = loadShaderSource("res/shaders/shader.glsl");
+    std::string shaderSource = loadShaderWithIncludes("shader.glsl");
+
     if (shaderSource.empty()) {
         return false;
     }
+
+    std::cout << "Shader : " << std::endl;
+    std::cout << shaderSource << std::endl;
 
     return loadComputeShader(shaderSource);
 }

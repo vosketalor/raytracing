@@ -11,15 +11,6 @@ uniform float fov;
 uniform float aspectRatio;
 uniform ivec2 resolution;
 
-struct GPUShape {
-    vec3 center;      // float[3]
-    float radius;
-    vec3 color;
-    int type;         // int (32 bits)
-    vec4 material;    // float[4]
-    mat4 transform;   // float[16]
-};
-
 struct GPULight {
     vec3 position;
     float intensity;
@@ -36,19 +27,6 @@ struct GPUMaterial {
     float eta;
     vec3 f0;
     float pad;        // padding
-};
-
-
-layout(std430, binding = 1) buffer SceneData {
-    GPUShape shapes[];
-};
-
-layout(std430, binding = 2) buffer LightData {
-    GPULight lights[];
-};
-
-layout(std430, binding = 3) buffer MaterialData {
-    GPUMaterial materials[];
 };
 
 uniform int numShapes;
@@ -74,30 +52,19 @@ const float EPSILON = 1e-6;
 const float MAX_DIST = 1e6;
 const int MAX_BOUNCES = 10;
 
-bool intersectSphere(Ray ray, vec3 center, float radius, out float t) {
-    vec3 oc = ray.origin - center;
-    float a = dot(ray.direction, ray.direction);
-    float b = 2.0 * dot(oc, ray.direction);
-    float c = dot(oc, oc) - radius * radius;
+#include "shapes/shapes.glsl"
 
-    float discriminant = b * b - 4.0 * a * c;
-    if (discriminant < 0.0) return false;
+layout(std430, binding = 1) buffer SceneData {
+    GPUShape shapes[];
+};
 
-    float sqrt_disc = sqrt(discriminant);
-    float t1 = (-b - sqrt_disc) / (2.0 * a);
-    float t2 = (-b + sqrt_disc) / (2.0 * a);
+layout(std430, binding = 2) buffer LightData {
+    GPULight lights[];
+};
 
-    t = (t1 > EPSILON) ? t1 : t2;
-    return t > EPSILON;
-}
-
-bool intersectPlane(Ray ray, vec3 normal, vec3 point, out float t) {
-    float denom = dot(normal, ray.direction);
-    if (abs(denom) < EPSILON) return false;
-
-    t = dot(point - ray.origin, normal) / denom;
-    return t > EPSILON;
-}
+layout(std430, binding = 3) buffer MaterialData {
+    GPUMaterial materials[];
+};
 
 HitInfo findNearestIntersection(Ray ray) {
     HitInfo hit;
