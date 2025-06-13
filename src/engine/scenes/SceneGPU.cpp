@@ -5,7 +5,8 @@
 
 void SceneGPU::createShapes()
 {
-    auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -3), 1);
+    auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -10), 1);
+    sphere->setColor(Vector3(1,0,1));
     this->addShape(sphere);
 }
 

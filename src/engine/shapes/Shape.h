@@ -32,8 +32,8 @@ public:
     // virtual Intersection getIntersection(const Vector3& P, const Vector3& v) const = 0;
     // virtual Vector2 getTextureCoordinates(const Vector3& intersection) const = 0;
 
-    // Vector3 getColor() const { return color_; }
-    // void setColor(const Vector3& col) { color_ = col; }
+    Vector3 getColor() const { return color_; }
+    void setColor(const Vector3& col) { color_ = col; }
     //
     // Material getMaterial() const { return material_; }
     // void setMaterial(const Material& mat) { material_ = mat; }
