@@ -14,8 +14,8 @@ uniform ivec2 resolution;
 uniform vec3 skyColor;
 uniform vec3 ambientColor;
 
-const float EPSILON = 1e-6;
-const float MAX_DIST = 1e6;
+const float EPSILON = 1e-6f;
+const float MAX_DIST = 1e6f;
 const int MAX_BOUNCES = 10;
 
 #include "hitinfo.glsl"
