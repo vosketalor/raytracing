@@ -31,22 +31,16 @@ HitInfo findNearestIntersection(Ray ray) {
 
     for (int i = 0; i < numShapes; i++) {
         float t;
-        bool intersected = false;
+        GPUShape shape = shapes[i];
+        bool intersected = intersect(ray, shape, t);
 
-        if (shapes[i].type == 0) {
-//            vec3 center = vec3(shapes[i].center[0], shapes[i].center[1], shapes[i].center[2]);
-            vec3 center = shapes[i].center;
-
-            intersected = intersectSphere(ray, center, shapes[i].radius, t);
-
-            if (intersected && t < hit.t) {
-                hit.hit = true;
-                hit.t = t;
-                hit.point = ray.origin + ray.direction * t;
-                hit.normal = normalize(hit.point - center);
-                hit.color = vec3(shapes[i].color[0], shapes[i].color[1], shapes[i].color[2]);
-                hit.shapeIndex = i;
-            }
+        if (intersected && t < hit.t) {
+            hit.hit = true;
+            hit.t = t;
+            hit.point = ray.origin + ray.direction * t;
+            hit.normal = getNormal(shape, hit.point);
+            hit.color = vec3(shape.color[0], shape.color[1], shape.color[2]);
+            hit.shapeIndex = i;
         }
     }
 

@@ -12,8 +12,13 @@ namespace GPU
         glm::vec3 color;
         int type;
 
+        //Sphere
         glm::vec3 center;
         float radius;
+
+        //Plane
+        glm::vec3 normal;
+        float dist;
     };
 }
 

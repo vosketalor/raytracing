@@ -1,20 +1,29 @@
-// #include "Plane.h"
+#include "Plane.h"
 //
 // #include "../acceleration/BoundingBox.h"
 // #include "../scenes/Scene.h"
 //
-// Plane::Plane(const Vector3& n, const double d)
-//     : normal(n.normalized()), distance(d) {
-//     setBoundingBox();
-// }
-//
-// Plane::Plane(const Vector3& P, const Vector3& n)
-//     : normal(n.normalized()), distance(-normal.dot(P)) {
-//     setBoundingBox();
-// }
-//
-// Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
-//     : Plane(C, v1.cross(v2).normalized()) {}
+Plane::Plane(const Vector3& n, const double d)
+    : normal(n.normalized()), distance(d) {
+    // setBoundingBox();
+}
+
+Plane::Plane(const Vector3& P, const Vector3& n)
+    : normal(n.normalized()), distance(-normal.dot(P)) {
+    // setBoundingBox();
+}
+
+Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
+    : Plane(C, v1.cross(v2).normalized()) {}
+
+GPU::GPUShapeData Plane::toGPUShapeData() const
+{
+    GPU::GPUShapeData data = Shape::toGPUShapeData();
+    data.type = GPU::GPUShapeEnum::Plane;
+    data.normal = glm::vec3(normal.x(), normal.y(), normal.z());
+    data.dist = static_cast<float>(distance);
+    return data;
+}
 //
 // Intersection Plane::getIntersection(const Vector3& P, const Vector3& v) const {
 //     if (!visible) return Intersection();

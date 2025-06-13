@@ -1,10 +1,14 @@
 #include "SceneGPU.h"
 
+#include "shapes/Plane.h"
 #include "shapes/Sphere.h"
 
 
 void SceneGPU::createShapes()
 {
+    auto plane = std::make_shared<Plane>(Vector3(0, 1, 0), -1);
+    this->addShape(plane);
+
     auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -10), 1);
     sphere->setColor(Vector3(1,0,1));
     this->addShape(sphere);

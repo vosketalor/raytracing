@@ -1,7 +1,9 @@
-bool intersectPlane(Ray ray, vec3 normal, vec3 point, out float t) {
+bool intersectPlane(Ray ray, vec3 normal, float dist, out float t) {
     float denom = dot(normal, ray.direction);
     if (abs(denom) < EPSILON) return false;
 
-    t = dot(point - ray.origin, normal) / denom;
+    float numerator = dot(normal, ray.origin) + dist;
+    t = -numerator / denom;
+
     return t > EPSILON;
 };
