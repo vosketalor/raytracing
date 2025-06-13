@@ -31,5 +31,5 @@ private:
 
 public:
     Sphere(const Vector3& P, double radius);
-    GPU::GPUShapeData toGPUShapeData() const override;
+    GPU::GPUShapeData toGPU() const override;
 };

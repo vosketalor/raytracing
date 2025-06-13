@@ -35,5 +35,5 @@ public :
     Plane(const Vector3& n, const double d);
     Plane(const Vector3& P, const Vector3& n);
     Plane(const Vector3& C, const Vector3& v1, const Vector3& v2);
-    GPU::GPUShapeData toGPUShapeData() const override;
+    GPU::GPUShapeData toGPU() const override;
 };

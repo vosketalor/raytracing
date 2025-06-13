@@ -1,4 +1,5 @@
 #pragma once
+#include "GPULightSource.h"
 #include "Vector.h"
 
 class LightSource {
@@ -42,8 +43,9 @@ public:
     const Vector3& getColorDiffuse() const;
     const Vector3& getColorSpecular() const;
     double getIntensity() const;
+    GPU::GPULightSource toGPU();
 
     void setIntensity(const double& intensity);
 
-    Vector3 samplePointOnArea() const;
+    // Vector3 samplePointOnArea() const;
 };

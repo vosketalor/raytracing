@@ -71,6 +71,7 @@ std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath,
     }
     file.close();
 
+
     return output.str();
 }
 
@@ -155,11 +156,7 @@ void ComputeRenderer::setupBuffers() {
 void ComputeRenderer::updateSceneData() {
     std::vector<GPU::GPUShapeData> gpuShapes;
     for (const auto& shape : scene->getShapes()) {
-        GPU::GPUShapeData gpuShape;
-
-        gpuShape = shape->toGPUShapeData();
-
-        gpuShapes.push_back(gpuShape);
+        gpuShapes.push_back(shape->toGPU());
     }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, sceneDataSSBO);
@@ -169,31 +166,15 @@ void ComputeRenderer::updateSceneData() {
 
     std::cout << "Size shapes : " << gpuShapes.size() << std::endl;
 
-    std::vector<GPULight> gpuLights;
-    // for (const auto& light : scene->getLightSources()) {
-    //     GPULight gpuLight;
-    //
-    //     Vector3 pos = light->getPosition();
-    //     gpuLight.position[0] = pos.x();
-    //     gpuLight.position[1] = pos.y();
-    //     gpuLight.position[2] = pos.z();
-    //     gpuLight.intensity = light->getIntensity();
-    //
-    //     Vector3 diffuse = light->getColorDiffuse();
-    //     gpuLight.colorDiffuse[0] = diffuse.x();
-    //     gpuLight.colorDiffuse[1] = diffuse.y();
-    //     gpuLight.colorDiffuse[2] = diffuse.z();
-    //
-    //     Vector3 specular = light->getColorSpecular();
-    //     gpuLight.colorSpecular[0] = specular.x();
-    //     gpuLight.colorSpecular[1] = specular.y();
-    //     gpuLight.colorSpecular[2] = specular.z();
-    //
-    //     gpuLights.push_back(gpuLight);
-    // }
+    std::vector<GPU::GPULightSource> gpuLights;
+    for (const auto& light : scene->getLightSources()) {
+        gpuLights.push_back(light->toGPU());
+    }
+
+    std::cout << "Size lights : " << gpuLights.size() << std::endl;
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightDataSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuLights.size() * sizeof(GPULight),
+    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuLights.size() * sizeof(GPU::GPULightSource),
                  gpuLights.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightDataSSBO);
 }

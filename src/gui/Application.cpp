@@ -1,4 +1,3 @@
-#define GLEW_STATIC
 #include <GL/glew.h>        // doit être en premier, avant glfw
 #include <GLFW/glfw3.h>
 

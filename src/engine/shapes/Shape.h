@@ -71,7 +71,7 @@ public:
     // bool isWireframeEnabled() const { return wireframeEnabled; }
     // void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
 
-    virtual GPU::GPUShapeData toGPUShapeData() const
+    virtual GPU::GPUShapeData toGPU() const
     {
         GPU::GPUShapeData data{};
         data.color = glm::vec3(color_.x(), color_.y(), color_.z());

@@ -46,20 +46,34 @@ double LightSource::getIntensity() const {
     return intensity_;
 }
 
+GPU::GPULightSource LightSource::toGPU()
+{
+    GPU::GPULightSource data;
+    data.position = glm::vec3(position_.x(), position_.y(), position_.z());
+    data.colorDiffuse = glm::vec3(colorDiffuse_.x(), colorDiffuse_.y(), colorDiffuse_.z());
+    data.colorSpecular = glm::vec3(colorSpecular_.x(), colorSpecular_.y(), colorSpecular_.z());
+    data.intensity = static_cast<float>(intensity_);
+    data.uDir = glm::vec3(uDir_.x(), uDir_.y(), uDir_.z());
+    data.vDir = glm::vec3(vDir_.x(), vDir_.y(), vDir_.z());
+    data.halfWidth = static_cast<float>(halfWidth_);
+    data.halfHeight = static_cast<float>(halfHeight_);
+    return data;
+}
+
 void LightSource::setIntensity(const double& intensity) {
     intensity_ = intensity;
 }
 
-Vector3 LightSource::samplePointOnArea() const {
-    if (halfWidth_ <= 0.0 || halfHeight_ <= 0.0 ||
-        (uDir_.norm() == 0.0) || (vDir_.norm() == 0.0))
-    {
-        return position_;
-    }
-
-    const double rx = (static_cast<double>(rand()) / RAND_MAX) * 2.0 - 1.0;
-    const double ry = (static_cast<double>(rand()) / RAND_MAX) * 2.0 - 1.0;
-
-    const Vector3 offset = uDir_ * (rx * halfWidth_) + vDir_ * (ry * halfHeight_);
-    return position_ + offset;
-}
+// Vector3 LightSource::samplePointOnArea() const {
+//     if (halfWidth_ <= 0.0 || halfHeight_ <= 0.0 ||
+//         (uDir_.norm() == 0.0) || (vDir_.norm() == 0.0))
+//     {
+//         return position_;
+//     }
+//
+//     const double rx = (static_cast<double>(rand()) / RAND_MAX) * 2.0 - 1.0;
+//     const double ry = (static_cast<double>(rand()) / RAND_MAX) * 2.0 - 1.0;
+//
+//     const Vector3 offset = uDir_ * (rx * halfWidth_) + vDir_ * (ry * halfHeight_);
+//     return position_ + offset;
+// }

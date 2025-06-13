@@ -31,17 +31,6 @@ private:
     Scene* scene;
     Camera camera_;
 
-    struct GPULight {
-        float position[3];
-        float intensity;
-        float colorDiffuse[3];
-        float pad1;
-        float colorSpecular[3];
-        float pad2;
-        float area[2];
-        float pad3[2];
-    };
-
     struct GPUMaterial {
         float shininess;
         float eta;

@@ -47,38 +47,38 @@ HitInfo findNearestIntersection(Ray ray) {
     return hit;
 }
 
-//vec3 computeLighting(vec3 point, vec3 normal, vec3 viewDir, vec3 color, int shapeIndex) {
-//    vec3 result = ambientColor * color;
-//
-//    for (int i = 0; i < numLights; i++) {
-//        vec3 lightPos = vec3(lights[i].position[0], lights[i].position[1], lights[i].position[2]);
-//        vec3 lightDir = normalize(lightPos - point);
-//        float lightDist = length(lightPos - point);
-//
-//        Ray shadowRay;
-//        shadowRay.origin = point + normal * EPSILON;
-//        shadowRay.direction = lightDir;
-//
-//        HitInfo shadowHit = findNearestIntersection(shadowRay);
-//        if (shadowHit.hit && shadowHit.t < lightDist) {
-//            continue;
-//        }
-//
-//        float NdotL = max(dot(normal, lightDir), 0.0);
-//        vec3 diffuse = color * vec3(lights[i].colorDiffuse[0], lights[i].colorDiffuse[1], lights[i].colorDiffuse[2]) * NdotL;
-//
-//        vec3 halfVec = normalize(viewDir + lightDir);
-//        float NdotH = max(dot(normal, halfVec), 0.0);
-//        vec3 specular = vec3(lights[i].colorSpecular[0], lights[i].colorSpecular[1], lights[i].colorSpecular[2]) *
-//                       pow(NdotH, 32.0) * lights[i].intensity;
-//
-//        float attenuation = 1.0 / (1.0 + 0.1 * lightDist + 0.01 * lightDist * lightDist);
-//
-//        result += (diffuse + specular) * attenuation;
-//    }
-//
-//    return result;
-//}
+vec3 computeLighting(vec3 point, vec3 normal, vec3 viewDir, vec3 color, int shapeIndex) {
+    vec3 result = ambientColor * color;
+
+    for (int i = 0; i < numLights; i++) {
+        vec3 lightPos = lights[i].position;
+        vec3 lightDir = normalize(lightPos - point);
+        float lightDist = length(lightPos - point);
+
+        Ray shadowRay;
+        shadowRay.origin = point + normal * EPSILON;
+        shadowRay.direction = lightDir;
+
+        HitInfo shadowHit = findNearestIntersection(shadowRay);
+        if (shadowHit.hit && shadowHit.t < lightDist) {
+            continue;
+        }
+
+        float NdotL = max(dot(normal, lightDir), 0.0);
+        vec3 diffuse = color * lights[i].colorDiffuse * NdotL;
+
+        vec3 halfVec = normalize(viewDir + lightDir);
+        float NdotH = max(dot(normal, halfVec), 0.0);
+        vec3 specular = lights[i].colorSpecular *
+                       pow(NdotH, 32.0) * lights[i].intensity;
+
+        float attenuation = 1.0 / (1.0 + 0.1 * lightDist + 0.01 * lightDist * lightDist);
+
+        result += (diffuse + specular) * attenuation;
+    }
+
+    return result;
+}
 
 vec3 traceRay(Ray ray) {
     vec3 finalColor = vec3(0.0);
@@ -91,11 +91,12 @@ vec3 traceRay(Ray ray) {
             break;
         }
 
-        return attenuation * hit.color;
+//        return attenuation * hit.color;
 
-//        vec3 viewDir = -ray.direction;
-//        vec3 localColor = computeLighting(hit.point, hit.normal, viewDir, hit.color, hit.shapeIndex);
-//        finalColor += attenuation * localColor;
+        vec3 viewDir = -ray.direction;
+        vec3 localColor = computeLighting(hit.point, hit.normal, viewDir, hit.color, hit.shapeIndex);
+        finalColor += attenuation * localColor;
+        break;
 //
 //        float reflectivity = shapes[hit.shapeIndex].material.w;
 //        if (reflectivity <= 0.0) {
