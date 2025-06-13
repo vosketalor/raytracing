@@ -119,7 +119,6 @@ void main() {
 
     vec2 uv = (vec2(pixelCoord) + 0.5) / vec2(resolution);
     vec2 ndc = uv * 2.0 - 1.0;
-    ndc.x *= aspectRatio;
 
     float fovRad = fov * 3.14159265359 / 180.0;
     float screenHeight = 2.0 * tan(fovRad / 2.0);

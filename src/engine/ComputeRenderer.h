@@ -14,7 +14,6 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_set>
-#include <GL/glext.h>
 
 #include "Camera.h"
 #include "scenes/Scene.h"
