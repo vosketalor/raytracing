@@ -3,7 +3,7 @@
 // #include "../acceleration/BoundingBox.h"
 // #include "../scenes/Scene.h"
 //
-Plane::Plane(const Vector3& n, const double d)
+Plane::Plane(const Vector3& n, const float d)
     : normal(n.normalized()), distance(d) {
     // setBoundingBox();
 }
@@ -21,7 +21,7 @@ GPU::GPUShapeData Plane::toGPU() const
     GPU::GPUShapeData data = Shape::toGPU();
     data.type = GPU::GPUShapeEnum::Plane;
     data.normal = glm::vec3(normal.x(), normal.y(), normal.z());
-    data.dist = static_cast<float>(distance);
+    data.dist = distance;
     return data;
 }
 //

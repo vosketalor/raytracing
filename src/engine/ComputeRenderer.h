@@ -1,6 +1,5 @@
 #pragma once
 
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -30,13 +29,6 @@ private:
 
     Scene* scene;
     Camera camera_;
-
-    struct GPUMaterial {
-        float shininess;
-        float eta;
-        float f0[3];
-        float pad;
-    };
 
 public:
     int width, height;

@@ -99,7 +99,8 @@ add_executable(Raytracing
         src/engine/shapes/GPUShapeData.h
         src/engine/scenes/SceneGPU.cpp
         src/engine/scenes/SceneGPU.h
-        src/engine/GPULight.h
+        src/engine/GPULightSource.h
+        src/engine/GPUMaterial.h
 
 )
 

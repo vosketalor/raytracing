@@ -23,9 +23,12 @@ protected:
     // std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
     // bool hasTexture_ = false;               ///< Texture presence flag
-    bool wireframeEnabled = false;        ///< Wireframe mode flag
+    // bool wireframeEnabled = false;        ///< Wireframe mode flag
+
+
 
 public:
+    static std::vector<Material> materials;
     virtual ~Shape() = default;
 
     // Core functionality
@@ -35,8 +38,8 @@ public:
     Vector3 getColor() const { return color_; }
     void setColor(const Vector3& col) { color_ = col; }
     //
-    // Material getMaterial() const { return material_; }
-    // void setMaterial(const Material& mat) { material_ = mat; }
+    Material getMaterial() const { return material_; }
+    void setMaterial(const Material& mat) { material_ = mat; }
 
     // Transformations
     // virtual void scale(float scale) = 0;
@@ -73,8 +76,19 @@ public:
 
     virtual GPU::GPUShapeData toGPU() const
     {
-        GPU::GPUShapeData data{};
+        GPU::GPUShapeData data;
         data.color = glm::vec3(color_.x(), color_.y(), color_.z());
+        data.materialIndex = Shape::addMaterial(material_);
         return data;
     }
+
+    static int addMaterial(const Material& mat) {
+        auto it = std::find(materials.begin(), materials.end(), mat);
+        if (it != materials.end()) {
+                return std::distance(materials.begin(), it);
+            }
+        materials.push_back(mat);
+        return static_cast<int>(materials.size() - 1);
+    }
+
 };

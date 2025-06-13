@@ -32,7 +32,6 @@ std::string ComputeRenderer::loadShaderSource(const std::string& filepath) {
 
 std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath, const std::string& basePath = "res/shaders/",
                                                     std::unordered_set<std::string>* includedFiles = nullptr) {
-    std::cout << "Loading shader from disk: " << basePath + filePath << std::endl;
     if (!includedFiles) {
         std::unordered_set<std::string> localSet;
         return loadShaderWithIncludes(filePath, basePath, &localSet);
@@ -154,17 +153,22 @@ void ComputeRenderer::setupBuffers() {
 }
 
 void ComputeRenderer::updateSceneData() {
+    std::cout << "=== DEBUG ALIGNEMENT ===" << std::endl;
+    std::cout << "GPUShapeData size: " << sizeof(GPU::GPUShapeData) << std::endl;
+    std::cout << "GPULightSource size: " << sizeof(GPU::GPULightSource) << std::endl;
+    std::cout << "GPUMaterial size: " << sizeof(GPU::GPUMaterial) << std::endl;
+
     std::vector<GPU::GPUShapeData> gpuShapes;
     for (const auto& shape : scene->getShapes()) {
         gpuShapes.push_back(shape->toGPU());
     }
 
+    std::cout << "Size shapes : " << gpuShapes.size() << std::endl;
+
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, sceneDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuShapes.size() * sizeof(GPU::GPUShapeData),
                  gpuShapes.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, sceneDataSSBO);
-
-    std::cout << "Size shapes : " << gpuShapes.size() << std::endl;
 
     std::vector<GPU::GPULightSource> gpuLights;
     for (const auto& light : scene->getLightSources()) {
@@ -177,6 +181,19 @@ void ComputeRenderer::updateSceneData() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuLights.size() * sizeof(GPU::GPULightSource),
                  gpuLights.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightDataSSBO);
+
+    std::vector<GPU::GPUMaterial> gpuMaterials;
+    for (const auto& mat : Shape::materials) {
+            gpuMaterials.push_back(mat.toGPU());
+        }
+
+    std::cout << "Size materials : " << gpuMaterials.size() << std::endl;
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, materialDataSSBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuMaterials.size() * sizeof(GPU::GPUMaterial),
+                 gpuMaterials.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, materialDataSSBO);
+
 }
 
 void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
@@ -228,9 +245,10 @@ void ComputeRenderer::updateCameraUniforms() {
     setUniform3f(shaderProgram, "cameraRight", right.x(), right.y(), right.z());
     setUniform3f(shaderProgram, "cameraUp", up.x(), up.y(), up.z());
     setUniform1f(shaderProgram, "fov", camera_.getFov());
-    setUniform1f(shaderProgram, "aspectRatio", (float)width / height);
+    setUniform1f(shaderProgram, "aspectRatio", static_cast<float>(width / height));
     setUniform2i(shaderProgram, "resolution", width, height);
 
+    setUniform1i(shaderProgram, "numMaterials", Shape::materials.size());
     setUniform1i(shaderProgram, "numShapes", scene->getShapes().size());
     setUniform1i(shaderProgram, "numLights", scene->getLightSources().size());
 

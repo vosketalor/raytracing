@@ -14,3 +14,17 @@ const Material Material::Glass = Material(0.0, 0.9, 1000, 1.5, 0.02, 0.0, Vector
 const Material Material::MetalGold = Material(0.8, 0.0, 1000, 1.0, 0.1, 1.0, Vector3(1.0, 0.86, 0.57));
 const Material Material::MetalCopper = Material(0.8, 0.0, 1000, 1.0, 0.15, 1.0, Vector3(0.95, 0.64, 0.54));
 const Material Material::PlasticRough = Material(0.2, 0.0, 100, 1.0, 0.8, 0.0, Vector3(0.04, 0.04, 0.04));
+
+GPU::GPUMaterial Material::toGPU() const
+{
+    GPU::GPUMaterial data;
+    data.reflectivity = static_cast<float>(reflectivity);
+    data.transparency = static_cast<float>(transparency);
+    data.shininess = static_cast<float>(shininess);
+    data.eta = static_cast<float>(eta);
+    data.roughness = static_cast<float>(roughness);
+    data.metallic = static_cast<float>(metallic);
+    data.f0 = glm::vec3(f0.x(), f0.y(), f0.z());
+    data._pad = 0;
+    return data;
+}

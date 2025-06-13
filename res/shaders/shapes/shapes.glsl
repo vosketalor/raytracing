@@ -1,20 +1,27 @@
 uniform int numShapes;
 
 struct GPUShape {
-    vec3 color;
-    int type;
+    vec3 color;         // 12 octets
+    int type;           // 4 octets
+    // Fin bloc 1: 16 octets
 
-    //Sphere
-    vec3 center;
-    float radius;
+    int materialIndex;  // 4 octets
+    float _pad1;        // 4 octets
+    float _pad2;        // 4 octets
+    float _pad3;        // 4 octets
+    // Fin bloc 2: 16 octets
 
-    //Plane
-    vec3 normal;
-    float dist;
+    vec3 center;        // 12 octets
+    float radius;       // 4 octets
+    // Fin bloc 3: 16 octets
 
+    vec3 normal;        // 12 octets
+    float dist;         // 4 octets
+    // Fin bloc 4: 16 octets
+    // Total: 64 octets
 };
 
-layout(std430, binding = 1) buffer SceneData {
+layout(std430, binding = 1) buffer ShapeData {
     GPUShape shapes[];
 };
 

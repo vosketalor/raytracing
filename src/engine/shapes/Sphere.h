@@ -27,9 +27,9 @@ class Sphere : public Shape
 {
 private:
     Vector3 center;
-    double radius;
+    float radius;
 
 public:
-    Sphere(const Vector3& P, double radius);
+    Sphere(const Vector3& P, float radius);
     GPU::GPUShapeData toGPU() const override;
 };

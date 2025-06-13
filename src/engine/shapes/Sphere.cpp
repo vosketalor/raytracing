@@ -6,7 +6,7 @@
 //   #include <corecrt_math_defines.h>  // Windows (Visual Studio)
 // #endif
 //
-Sphere::Sphere(const Vector3& P, const double radius)
+Sphere::Sphere(const Vector3& P, const float radius)
     : center(P), radius(radius) {
     // setBoundingBox();
 }
@@ -16,7 +16,7 @@ GPU::GPUShapeData Sphere::toGPU() const
     GPU::GPUShapeData data = Shape::toGPU();
     data.type = GPU::GPUShapeEnum::Sphere;
     data.center = glm::vec3(center.x(), center.y(), center.z());
-    data.radius = static_cast<float>(radius);
+    data.radius = radius;
     return data;
 }
 

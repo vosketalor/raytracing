@@ -97,16 +97,16 @@ vec3 traceRay(Ray ray) {
         vec3 localColor = computeLighting(hit.point, hit.normal, viewDir, hit.color, hit.shapeIndex);
         finalColor += attenuation * localColor;
         break;
-//
-//        float reflectivity = shapes[hit.shapeIndex].material.w;
-//        if (reflectivity <= 0.0) {
-//            break;
-//        }
 
-//        vec3 reflectDir = reflect(ray.direction, hit.normal);
-//        ray.origin = hit.point + hit.normal * EPSILON;
-//        ray.direction = reflectDir;
-//        attenuation *= reflectivity;
+        float reflectivity = materials[shapes[hit.shapeIndex].materialIndex].reflectivity;
+        if (reflectivity <= 0.0) {
+            break;
+        }
+
+        vec3 reflectDir = reflect(ray.direction, hit.normal);
+        ray.origin = hit.point + hit.normal * EPSILON;
+        ray.direction = reflectDir;
+        attenuation *= reflectivity;
     }
 
     return finalColor;
