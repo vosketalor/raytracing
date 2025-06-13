@@ -82,7 +82,7 @@ public:
         return data;
     }
 
-    static int addMaterial(const Material& mat) {
+    static uint64_t addMaterial(const Material& mat) {
         auto it = std::find(materials.begin(), materials.end(), mat);
         if (it != materials.end()) {
                 return std::distance(materials.begin(), it);

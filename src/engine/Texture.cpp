@@ -38,8 +38,8 @@ Vector3 Texture::getTextureColor(const Vector2& uv) const {
     }
 
     // Clamp des coordonnées UV dans [0, 1]
-    double u = std::max(0.0, std::min(1.0, uv.x()));
-    double v = std::max(0.0, std::min(1.0, uv.y()));
+    const float u = std::max(0.0, std::min(1.0, uv.x()));
+    const float v = std::max(0.0, std::min(1.0, uv.y()));
 
     // Conversion en coordonnées de pixel
     int pixelU = static_cast<int>(u * (width - 1));
@@ -52,7 +52,7 @@ Vector3 Texture::getTextureColor(const Vector2& uv) const {
     return textureData[pixelV][pixelU];
 }
 
-void Texture::scale(double scale) {
+void Texture::scale(float scale) {
     if (!isLoaded || scale <= 0.0) {
         return;
     }
@@ -104,9 +104,9 @@ bool Texture::loadFromFile(const std::string& filename) {
             int index = (y * width + x) * 3;  // 3 canaux RGB
 
             // Normaliser les valeurs [0-255] vers [0-1]
-            double r = static_cast<double>(data[index]) / 255.0;
-            double g = static_cast<double>(data[index + 1]) / 255.0;
-            double b = static_cast<double>(data[index + 2]) / 255.0;
+            const float r = static_cast<float>(data[index]) / 255.0;
+            const float g = static_cast<float>(data[index + 1]) / 255.0;
+            const float b = static_cast<float>(data[index + 2]) / 255.0;
 
             textureData[y][x] = Vector3(r, g, b);
         }

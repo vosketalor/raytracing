@@ -7,10 +7,10 @@ protected:
     Vector3 position_;        ///< Centre de l'area light (milieu du rectangle/disque)
     Vector3 colorDiffuse_;    ///< Couleur diffuse (RGB)
     Vector3 colorSpecular_;   ///< Couleur spéculaire (RGB)
-    double intensity_;        ///< Intensité globale
+    float intensity_;        ///< Intensité globale
 
     Vector3 uDir_, vDir_;     ///< Deux vecteurs unitaires formant la base du plan
-    double halfWidth_, halfHeight_;  ///< Demi-largeur et demi-hauteur du rectangle
+    float halfWidth_, halfHeight_;  ///< Demi-largeur et demi-hauteur du rectangle
 
 public:
     /**
@@ -33,8 +33,8 @@ public:
     LightSource(const Vector3& position,
                 const Vector3& uDir,
                 const Vector3& vDir,
-                double width,
-                double height,
+                float width,
+                float height,
                 const Vector3& colorDiffuse,
                 const Vector3& colorSpecular);
 
@@ -42,10 +42,10 @@ public:
     const Vector3& getPosition() const;
     const Vector3& getColorDiffuse() const;
     const Vector3& getColorSpecular() const;
-    double getIntensity() const;
+    float getIntensity() const;
     GPU::GPULightSource toGPU();
 
-    void setIntensity(const double& intensity);
+    void setIntensity(const float& intensity);
 
     // Vector3 samplePointOnArea() const;
 };

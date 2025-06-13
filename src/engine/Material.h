@@ -26,33 +26,33 @@ public:
     Material() = default;
 
     Material(const float refl, const float trans, const float shine,
-             const double refractiveIndex, const double rough = 0.0,
-             const double metal = 0.0, const Vector3& fresnel0 = Vector3(0.04, 0.04, 0.04))
+             const float refractiveIndex, const float rough = 0.0,
+             const float metal = 0.0, const Vector3& fresnel0 = Vector3(0.04, 0.04, 0.04))
         : reflectivity(refl), transparency(trans), shininess(shine),
           eta(refractiveIndex), roughness(rough), metallic(metal), f0(fresnel0) {}
 
     // Getters et setters existants...
-    double getRoughness() const { return roughness; }
-    void setRoughness(const double rough) { roughness = rough; }
+    float getRoughness() const { return roughness; }
+    void setRoughness(const float rough) { roughness = rough; }
 
     // NOUVEAUX GETTERS/SETTERS
-    double getMetallic() const { return metallic; }
-    void setMetallic(const double metal) { metallic = metal; }
+    float getMetallic() const { return metallic; }
+    void setMetallic(const float metal) { metallic = metal; }
 
     Vector3 getF0() const { return f0; }
     void setF0(const Vector3& fresnel0) { f0 = fresnel0; }
 
-    double getEta() const { return eta; }
-    void setEta(const double refractiveIndex) { eta = refractiveIndex; }
+    float getEta() const { return eta; }
+    void setEta(const float refractiveIndex) { eta = refractiveIndex; }
 
-    double getReflectivity() const { return reflectivity; }
-    void setReflectivity(const double refl) { reflectivity = refl; }
+    float getReflectivity() const { return reflectivity; }
+    void setReflectivity(const float refl) { reflectivity = refl; }
 
-    double getShininess() const { return shininess; }
-    void setShininess(const double shine) { shininess = shine; }
+    float getShininess() const { return shininess; }
+    void setShininess(const float shine) { shininess = shine; }
 
-    double getTransparency() const { return transparency; }
-    void setTransparency(const double trans) { transparency = trans; }
+    float getTransparency() const { return transparency; }
+    void setTransparency(const float trans) { transparency = trans; }
 
     GPU::GPUMaterial toGPU() const;
 
@@ -71,46 +71,46 @@ public:
     // MÉTHODES POUR MICROFACETTES
 
     /// Distribution normale de Trowbridge-Reitz (GGX)
-    // double distributionGGX(const Vector3& normal, const Vector3& halfVector, double alpha) const {
-    //     double a2 = alpha * alpha;
-    //     double NdotH = std::max(normal.dot(halfVector), 0.0);
-    //     double NdotH2 = NdotH * NdotH;
+    // float distributionGGX(const Vector3& normal, const Vector3& halfVector, float alpha) const {
+    //     float a2 = alpha * alpha;
+    //     float NdotH = std::max(normal.dot(halfVector), 0.0);
+    //     float NdotH2 = NdotH * NdotH;
     //
-    //     double denom = NdotH2 * (a2 - 1.0) + 1.0;
+    //     float denom = NdotH2 * (a2 - 1.0) + 1.0;
     //     denom = M_PI * denom * denom;
     //
     //     return a2 / denom;
     // }
     //
     // /// Fonction de géométrie de Smith pour GGX
-    // double geometrySchlickGGX(double NdotV, double alpha) const {
-    //     double r = alpha + 1.0;
-    //     double k = (r * r) / 8.0; // pour direct lighting
+    // float geometrySchlickGGX(float NdotV, float alpha) const {
+    //     float r = alpha + 1.0;
+    //     float k = (r * r) / 8.0; // pour direct lighting
     //
-    //     double denom = NdotV * (1.0 - k) + k;
+    //     float denom = NdotV * (1.0 - k) + k;
     //     return NdotV / denom;
     // }
     //
-    // double geometrySmith(const Vector3& normal, const Vector3& viewDir,
-    //                     const Vector3& lightDir, double alpha) const {
-    //     double NdotV = std::max(normal.dot(viewDir), 0.0);
-    //     double NdotL = std::max(normal.dot(lightDir), 0.0);
-    //     double ggx2 = geometrySchlickGGX(NdotV, alpha);
-    //     double ggx1 = geometrySchlickGGX(NdotL, alpha);
+    // float geometrySmith(const Vector3& normal, const Vector3& viewDir,
+    //                     const Vector3& lightDir, float alpha) const {
+    //     float NdotV = std::max(normal.dot(viewDir), 0.0);
+    //     float NdotL = std::max(normal.dot(lightDir), 0.0);
+    //     float ggx2 = geometrySchlickGGX(NdotV, alpha);
+    //     float ggx1 = geometrySchlickGGX(NdotL, alpha);
     //
     //     return ggx1 * ggx2;
     // }
     //
     // /// Approximation de Fresnel par Schlick
-    // Vector3 fresnelSchlick(double cosTheta, const Vector3& F0) const {
-    //     double f = std::pow(1.0 - cosTheta, 5.0);
+    // Vector3 fresnelSchlick(float cosTheta, const Vector3& F0) const {
+    //     float f = std::pow(1.0 - cosTheta, 5.0);
     //     return F0 + (Vector3(1.0, 1.0, 1.0) - F0) * f;
     // }
     //
     // /// Échantillonnage d'importance pour GGX
-    // Vector3 sampleGGX(const Vector3& normal, double alpha, double u1, double u2) const {
-    //     double theta = std::atan(alpha * std::sqrt(u1) / std::sqrt(1.0 - u1));
-    //     double phi = 2.0 * M_PI * u2;
+    // Vector3 sampleGGX(const Vector3& normal, float alpha, float u1, float u2) const {
+    //     float theta = std::atan(alpha * std::sqrt(u1) / std::sqrt(1.0 - u1));
+    //     float phi = 2.0 * M_PI * u2;
     //
     //     // Vecteur local (tangent space)
     //     Vector3 localH(

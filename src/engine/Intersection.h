@@ -9,7 +9,7 @@ class Shape; // Forward declaration
  */
 class Intersection {
 public:
-    double lambda;      ///< Distance from ray origin (-1 means no intersection)
+    float lambda;      ///< Distance from ray origin (-1 means no intersection)
     Vector3 normal;     ///< Surface normal at intersection point
     const Shape* shape; ///< Intersected shape
     
@@ -19,7 +19,7 @@ public:
      * @param normal Surface normal
      * @param shape Intersected shape
      */
-    Intersection(const double lambda, const Vector3& normal, const Shape* shape)
+    Intersection(const float lambda, const Vector3& normal, const Shape* shape)
     : lambda(lambda), normal(normal), shape(shape) {}
     
     /**

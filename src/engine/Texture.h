@@ -52,13 +52,13 @@ public:
      * @brief Returns the width of the texture in pixels.
      * @return The width of the texture.
      */
-    double getWidth() const { return static_cast<double>(width); }
+    float getWidth() const { return static_cast<float>(width); }
 
     /**
      * @brief Returns the height of the texture in pixels.
      * @return The height of the texture.
      */
-    double getHeight() const { return static_cast<double>(height); }
+    float getHeight() const { return static_cast<float>(height); }
 
     /**
      * @brief Returns the filename used to load the texture.
@@ -76,7 +76,7 @@ public:
      * @brief Scales the texture by the given factor.
      * @param scale The scaling factor.
      */
-    void scale(double scale);
+    void scale(float scale);
 
 private:
     /**

@@ -21,39 +21,39 @@ protected:
 
 public:
     // ============== COLOR CONSTANTS ==============
-    inline static constexpr Vector3 BLACK = Vector3(0, 0, 0);
-    inline static constexpr Vector3 WHITE = Vector3(1, 1, 1);
-    inline static constexpr Vector3 GRAY = Vector3(0.5, 0.5, 0.5);
-    inline static constexpr Vector3 DARK_GRAY = Vector3(0.25, 0.25, 0.25);
-    inline static constexpr Vector3 LIGHT_GRAY = Vector3(0.75, 0.75, 0.75);
+    static constexpr Vector3 BLACK = Vector3(0, 0, 0);
+    static constexpr Vector3 WHITE = Vector3(1, 1, 1);
+    static constexpr Vector3 GRAY = Vector3(0.5, 0.5, 0.5);
+    static constexpr Vector3 DARK_GRAY = Vector3(0.25, 0.25, 0.25);
+    static constexpr Vector3 LIGHT_GRAY = Vector3(0.75, 0.75, 0.75);
 
-    inline static constexpr Vector3 RED = Vector3(1, 0, 0);
-    inline static constexpr Vector3 GREEN = Vector3(0, 1, 0);
-    inline static constexpr Vector3 BLUE = Vector3(0, 0, 1);
+    static constexpr Vector3 RED = Vector3(1, 0, 0);
+    static constexpr Vector3 GREEN = Vector3(0, 1, 0);
+    static constexpr Vector3 BLUE = Vector3(0, 0, 1);
 
-    inline static constexpr Vector3 YELLOW = Vector3(1, 1, 0);
-    inline static constexpr Vector3 CYAN = Vector3(0, 1, 1);
-    inline static constexpr Vector3 MAGENTA = Vector3(1, 0, 1);
+    static constexpr Vector3 YELLOW = Vector3(1, 1, 0);
+    static constexpr Vector3 CYAN = Vector3(0, 1, 1);
+    static constexpr Vector3 MAGENTA = Vector3(1, 0, 1);
 
-    inline static constexpr Vector3 ORANGE = Vector3(1, 0.5, 0);
-    inline static constexpr Vector3 PURPLE = Vector3(0.5, 0, 0.5);
-    inline static constexpr Vector3 PINK = Vector3(1, 0.5, 0.75);
-    inline static constexpr Vector3 BROWN = Vector3(0.6, 0.3, 0.1);
+    static constexpr Vector3 ORANGE = Vector3(1, 0.5, 0);
+    static constexpr Vector3 PURPLE = Vector3(0.5, 0, 0.5);
+    static constexpr Vector3 PINK = Vector3(1, 0.5, 0.75);
+    static constexpr Vector3 BROWN = Vector3(0.6, 0.3, 0.1);
 
     // ============== REFRACTION INDICES ==============
-    static constexpr double ETA_AIR = 1.00029;
-    static constexpr double ETA_WATER = 1.333;
-    static constexpr double ETA_GLASS = 1.5;
-    static constexpr double ETA_CRYSTAL = 2.00;
-    static constexpr double ETA_DIAMOND = 2.417;
-    static constexpr double ETA_RUBY = 1.77;
-    static constexpr double ETA_PLEXIGLASS = 1.51;
-    static constexpr double ETA_EMERALD = 1.57;
-    static constexpr double ETA_CUBIC_ZIRCONIA = 2.1;
+    static constexpr float ETA_AIR = 1.00029f;
+    static constexpr float ETA_WATER = 1.333f;
+    static constexpr float ETA_GLASS = 1.5f;
+    static constexpr float ETA_CRYSTAL = 2.00f;
+    static constexpr float ETA_DIAMOND = 2.417f;
+    static constexpr float ETA_RUBY = 1.77f;
+    static constexpr float ETA_PLEXIGLASS = 1.51f;
+    static constexpr float ETA_EMERALD = 1.57f;
+    static constexpr float ETA_CUBIC_ZIRCONIA = 2.1f;
 
-    static constexpr double EPSILON = 1e-6;
-    inline static constexpr Vector3 WIREFRAME_COLOR = GREEN;
-    static constexpr double WIREFRAME_THICKNESS = 0.025;
+    static constexpr float EPSILON = 1e-6f;
+    static constexpr Vector3 WIREFRAME_COLOR = GREEN;
+    static constexpr float WIREFRAME_THICKNESS = 0.025f;
 
     Scene() = default;
     virtual ~Scene() = default;
