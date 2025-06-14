@@ -15,25 +15,25 @@ protected:
     std::vector<std::shared_ptr<Shape>> shapes;
     std::vector<std::shared_ptr<LightSource>> lightSources;
 
-    Vector3 ambient = {0.2, 0.2, 0.2};
-    Vector3 skyColor = {0.0, 0.0, 0.0};
-    Vector3 quadraticAttenuation = {1, 0.1, 0.01};
+    glm::vec3 ambient = {0.2f, 0.2f, 0.2f};
+    glm::vec3 skyColor = {0.f, 0.f, 0.f};
+    glm::vec3 quadraticAttenuation = {1.f, 0.1f, 0.01f};
 
 public:
     // ============== COLOR CONSTANTS ==============
-    static constexpr Vector3 BLACK = Vector3(0, 0, 0);
-    static constexpr Vector3 WHITE = Vector3(1, 1, 1);
-    static constexpr Vector3 GRAY = Vector3(0.5, 0.5, 0.5);
-    static constexpr Vector3 DARK_GRAY = Vector3(0.25, 0.25, 0.25);
-    static constexpr Vector3 LIGHT_GRAY = Vector3(0.75, 0.75, 0.75);
+    static constexpr glm::vec3 BLACK = {0.f, 0.f, 0.f};
+    static constexpr glm::vec3 WHITE = {1.f, 1.f, 1.f};
+    static constexpr glm::vec3 GRAY = {0.5f, 0.5f, 0.5f};
+    static constexpr glm::vec3 DARK_GRAY = {0.25f, 0.25f, 0.25f};
+    static constexpr glm::vec3 LIGHT_GRAY = {0.75f, 0.75f, 0.75f};
 
-    static constexpr Vector3 RED = Vector3(1, 0, 0);
-    static constexpr Vector3 GREEN = Vector3(0, 1, 0);
-    static constexpr Vector3 BLUE = Vector3(0, 0, 1);
+    static constexpr glm::vec3 RED = {1.f, 0.f, 0.f};
+    static constexpr glm::vec3 GREEN = {0.f, 1.f, 0.f};
+    static constexpr glm::vec3 BLUE = {0.f, 0.f, 1.f};
 
-    static constexpr Vector3 YELLOW = Vector3(1, 1, 0);
-    static constexpr Vector3 CYAN = Vector3(0, 1, 1);
-    static constexpr Vector3 MAGENTA = Vector3(1, 0, 1);
+    static constexpr glm::vec3 YELLOW = {1.f, 1.f, 0.f};
+    static constexpr glm::vec3 CYAN = {0.f, 1.f, 1.f};
+    static constexpr glm::vec3 MAGENTA = {1.f, 0.f, 1.f};
 
     static constexpr Vector3 ORANGE = Vector3(1, 0.5, 0);
     static constexpr Vector3 PURPLE = Vector3(0.5, 0, 0.5);
@@ -52,7 +52,7 @@ public:
     static constexpr float ETA_CUBIC_ZIRCONIA = 2.1f;
 
     static constexpr float EPSILON = 1e-6f;
-    static constexpr Vector3 WIREFRAME_COLOR = GREEN;
+    static constexpr glm::vec3 WIREFRAME_COLOR = GREEN;
     static constexpr float WIREFRAME_THICKNESS = 0.025f;
 
     Scene() = default;
@@ -64,12 +64,12 @@ public:
     void addShape(const std::shared_ptr<Shape>& shape);
     void addLightSource(const std::shared_ptr<LightSource>& lightSource);
 
-    void setSkyColor(const Vector3& color);
-    void setAmbient(const Vector3& ambient);
+    void setSkyColor(const glm::vec3& color);
+    void setAmbient(const glm::vec3& ambient);
 
     std::vector<std::shared_ptr<Shape>> getShapes() const { return shapes; }
     std::vector<std::shared_ptr<LightSource>> getLightSources() const { return lightSources; }
-    const Vector3& getSkyColor() const { return skyColor; }
-    const Vector3& getAmbient() const { return ambient; }
-    const Vector3& getQuadraticAttenuation() const { return quadraticAttenuation; }
+    const glm::vec3& getSkyColor() const { return skyColor; }
+    const glm::vec3& getAmbient() const { return ambient; }
+    const glm::vec3& getQuadraticAttenuation() const { return quadraticAttenuation; }
 };

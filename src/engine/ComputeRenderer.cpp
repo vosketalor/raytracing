@@ -231,29 +231,30 @@ void setUniform2i(GLuint program, const char* name, int x, int y) {
     }
 }
 
-void ComputeRenderer::updateCameraUniforms() {
+void ComputeRenderer::updateCameraUniforms() const {
     glUseProgram(shaderProgram);
 
-    Vector3 pos = camera_.getPosition();
-    Vector3 dir = camera_.getDirection();
-    Vector3 right = camera_.getRight();
-    Vector3 up = camera_.getUp();
+    glm::vec3 pos = camera_.getPosition();
+    glm::vec3 dir = camera_.getDirection();
+    glm::vec3 right = camera_.getRight();
+    glm::vec3 up = camera_.getUp();
 
-    setUniform3f(shaderProgram, "cameraPos", pos.x(), pos.y(), pos.z());
-    setUniform3f(shaderProgram, "cameraDir", dir.x(), dir.y(), dir.z());
-    setUniform3f(shaderProgram, "cameraRight", right.x(), right.y(), right.z());
-    setUniform3f(shaderProgram, "cameraUp", up.x(), up.y(), up.z());
+    setUniform3f(shaderProgram, "cameraPos", pos.x, pos.y, pos.z);
+    setUniform3f(shaderProgram, "cameraDir", dir.x, dir.y, dir.z);
+    setUniform3f(shaderProgram, "cameraRight", right.x, right.y, right.z);
+    setUniform3f(shaderProgram, "cameraUp", up.x, up.y, up.z);
     setUniform1f(shaderProgram, "fov", camera_.getFov());
-    setUniform1f(shaderProgram, "aspectRatio", static_cast<float>(width) / static_cast<float>(height));    setUniform2i(shaderProgram, "resolution", width, height);
+    setUniform1f(shaderProgram, "aspectRatio", static_cast<float>(width) / static_cast<float>(height));
+    setUniform2i(shaderProgram, "resolution", width, height);
 
-    setUniform1i(shaderProgram, "numMaterials", Shape::materials.size());
-    setUniform1i(shaderProgram, "numShapes", scene->getShapes().size());
-    setUniform1i(shaderProgram, "numLights", scene->getLightSources().size());
+    setUniform1i(shaderProgram, "numMaterials", static_cast<int>(Shape::materials.size()));
+    setUniform1i(shaderProgram, "numShapes", static_cast<int>(scene->getShapes().size()));
+    setUniform1i(shaderProgram, "numLights", static_cast<int>(scene->getLightSources().size()));
 
-    Vector3 skyColor = scene->getSkyColor();
-    Vector3 ambient = scene->getAmbient();
-    setUniform3f(shaderProgram, "skyColor", skyColor.x(), skyColor.y(), skyColor.z());
-    setUniform3f(shaderProgram, "ambientColor", ambient.x(), ambient.y(), ambient.z());
+    glm::vec3 skyColor = scene->getSkyColor();
+    glm::vec3 ambient = scene->getAmbient();
+    setUniform3f(shaderProgram, "skyColor", skyColor.x, skyColor.y, skyColor.z);
+    setUniform3f(shaderProgram, "ambientColor", ambient.x, ambient.y, ambient.z);
 }
 
 void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
