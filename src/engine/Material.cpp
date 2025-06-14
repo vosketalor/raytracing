@@ -9,21 +9,21 @@
 // const Material Material::Wood     = Material(0.1, 0.0, 30.0, Scene::ETA_AIR, 0.8);
 // const Material Material::Plastic  = Material(0.3, 0.0, 100.0, Scene::ETA_AIR, 0.3);
 // const Material Material::Diamond  = Material(0.17, 0.9, 1000.0, Scene::ETA_DIAMOND, 0.01);
-const Material Material::Mirror = Material(0.9, 0.0, 1000, 1.0, 0.05, 1.0, Vector3(0.95, 0.95, 0.95));
-const Material Material::Glass = Material(0.0, 0.9, 1000, 1.5, 0.02, 0.0, Vector3(0.04, 0.04, 0.04));
-const Material Material::MetalGold = Material(0.8, 0.0, 1000, 1.0, 0.1, 1.0, Vector3(1.0, 0.86, 0.57));
-const Material Material::MetalCopper = Material(0.8, 0.0, 1000, 1.0, 0.15, 1.0, Vector3(0.95, 0.64, 0.54));
-const Material Material::PlasticRough = Material(0.2, 0.0, 100, 1.0, 0.8, 0.0, Vector3(0.04, 0.04, 0.04));
+const Material Material::Mirror = Material(0.9f, 0.f, 1000.f, 1.f, 0.05f, 1.f, Vector3(0.95, 0.95, 0.95));
+const Material Material::Glass = Material(0.f, 0.9f, 1000.f, 1.5f, 0.02f, 0.f, Vector3(0.04, 0.04, 0.04));
+const Material Material::MetalGold = Material(0.8f, 0.0f, 1000.f, 1.f, 0.1f, 1.f, Vector3(1.0, 0.86, 0.57));
+const Material Material::MetalCopper = Material(0.8f, 0.0f, 1000.f, 1.f, 0.15f, 1.f, Vector3(0.95, 0.64, 0.54));
+const Material Material::PlasticRough = Material(0.2f, 0.0f, 100.f, 1.f, 0.8f, 0.f, Vector3(0.04, 0.04, 0.04));
 
 GPU::GPUMaterial Material::toGPU() const
 {
     GPU::GPUMaterial data;
-    data.reflectivity = static_cast<float>(reflectivity);
-    data.transparency = static_cast<float>(transparency);
-    data.shininess = static_cast<float>(shininess);
-    data.eta = static_cast<float>(eta);
-    data.roughness = static_cast<float>(roughness);
-    data.metallic = static_cast<float>(metallic);
+    data.reflectivity = reflectivity;
+    data.transparency = transparency;
+    data.shininess = shininess;
+    data.eta = eta;
+    data.roughness = roughness;
+    data.metallic = metallic;
     data.f0 = glm::vec3(f0.x(), f0.y(), f0.z());
     data._pad = 0;
     return data;

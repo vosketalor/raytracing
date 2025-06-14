@@ -24,16 +24,16 @@ protected:
 
 public:
     Camera(const Vector3& position = Vector3{0,0,0},
-           const float pitch = 0.0,
-           const float yaw = 0.0,
-           const float roll = 0.0,
-           const float fov = 60.0,
-           const float aspectRatio = 16.0 / 9.0,
-           const float nearPlane = 0.1,
-           const float farPlane = 1000.0)
+           const float pitch = 0.f,
+           const float yaw = 0.f,
+           const float roll = 0.f,
+           const float fov = 60.f,
+           const float aspectRatio = 16.f / 9.f,
+           const float nearPlane = 0.1f,
+           const float farPlane = 1000.f)
     : position(position), pitch(pitch), yaw(yaw), roll(roll),
       fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane),
-      movementSpeed(2.5), mouseSensitivity(0.1) {}
+      movementSpeed(2.5f), mouseSensitivity(0.1f) {}
 
     ~Camera() = default;
 
