@@ -19,8 +19,10 @@ namespace GPU
     };
 #pragma pack(pop)
 
-    static_assert(sizeof(GPULightSource) == 80, "Taille doit être 80 octets");
-    static_assert(offsetof(GPULightSource, position) == 0, "Position à offset 0");
-    static_assert(offsetof(GPULightSource, intensity) == 12, "Intensity à offset 12");
-    static_assert(offsetof(GPULightSource, colorDiffuse) == 16, "ColorDiffuse à offset 16");
+    static_assert(sizeof(GPULightSource) % 16 == 0, "Doit être aligné sur 16 octets");
+    static_assert(offsetof(GPULightSource, position) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPULightSource, colorDiffuse) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPULightSource, colorSpecular) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPULightSource, uDir) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPULightSource, vDir) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
 }

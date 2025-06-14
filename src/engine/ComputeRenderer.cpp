@@ -70,7 +70,6 @@ std::string ComputeRenderer::loadShaderWithIncludes(const std::string& filePath,
     }
     file.close();
 
-
     return output.str();
 }
 
@@ -193,6 +192,20 @@ void ComputeRenderer::updateSceneData() {
     std::cout << "ShapeData size: " << gpuShapes.size() * sizeof(GPU::GPUShapeData) << std::endl;
     std::cout << "LightSource size: " << gpuLights.size() * sizeof(GPU::GPULightSource) << std::endl;
     std::cout << "Material size: " << gpuMaterials.size() * sizeof(GPU::GPUMaterial) << std::endl;
+
+    for (int i = 0; i < std::min(2, (int)gpuMaterials.size()); ++i) {
+        auto& m = gpuMaterials[i];
+        std::cout << "CPU Mat " << i << ": "
+                  << m.reflectivity << ", "
+                  << m.transparency << ", "
+                  << m.shininess << ", "
+                  << m.eta << ", "
+                  << m.roughness << ", "
+                  << m.metallic << ", "
+                  << m.f0.x << ", "
+                  << m.f0.y << ", "
+                  << m.f0.z << "\n";
+    }
 }
 
 void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
@@ -246,7 +259,7 @@ void ComputeRenderer::updateCameraUniforms() {
     setUniform1f(shaderProgram, "fov", camera_.getFov());
     setUniform1f(shaderProgram, "aspectRatio", static_cast<float>(width) / static_cast<float>(height));    setUniform2i(shaderProgram, "resolution", width, height);
 
-    setUniform1i(shaderProgram, "numMaterials", Shape::materials.size());
+    // setUniform1i(shaderProgram, "numMaterials", Shape::materials.size());
     setUniform1i(shaderProgram, "numShapes", scene->getShapes().size());
     setUniform1i(shaderProgram, "numLights", scene->getLightSources().size());
 

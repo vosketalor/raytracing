@@ -32,7 +32,10 @@ namespace GPU
     };
 #pragma pack(pop)
 
-    static_assert(sizeof(GPUShapeData) == 64, "Taille doit être 64 octets");
+    static_assert(sizeof(GPUShapeData) % 16 == 0, "Doit être aligné sur 16 octets");
+    static_assert(offsetof(GPUShapeData, color) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPUShapeData, center) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
+    static_assert(offsetof(GPUShapeData, normal) % 16 == 0, "Vec3 doit être aligné sur 16 octets");
 }
 
 

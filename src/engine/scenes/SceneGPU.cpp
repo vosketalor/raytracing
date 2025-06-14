@@ -7,10 +7,12 @@
 void SceneGPU::createShapes()
 {
     auto plane = std::make_shared<Plane>(Vector3(0, 1, 0), -1);
+    plane->setMaterial(Material(0.3f, 0, 100, Scene::ETA_WATER));
     this->addShape(plane);
 
     auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -10), 1);
     sphere->setColor(Vector3(1,0,1));
+    sphere->setMaterial(Material::Glass);
     this->addShape(sphere);
 }
 

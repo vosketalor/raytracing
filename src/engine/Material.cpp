@@ -25,6 +25,5 @@ GPU::GPUMaterial Material::toGPU() const
     data.roughness = roughness;
     data.metallic = metallic;
     data.f0 = glm::vec3(f0.x(), f0.y(), f0.z());
-    data._pad = 0;
     return data;
 }
