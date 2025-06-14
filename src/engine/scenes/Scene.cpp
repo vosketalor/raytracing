@@ -8,10 +8,10 @@ void Scene::addLightSource(const std::shared_ptr<LightSource>& lightSource) {
     lightSources.push_back(lightSource);
 }
 
-void Scene::setSkyColor(const Vector3& color) {
+void Scene::setSkyColor(const glm::vec3& color) {
     skyColor = color;
 }
 
-void Scene::setAmbient(const Vector3& ambient) {
+void Scene::setAmbient(const glm::vec3& ambient) {
     this->ambient = ambient;
 }

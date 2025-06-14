@@ -24,11 +24,11 @@
 #include "scenes/SceneGPU.h"
 #include "scenes/SceneMicrofacets.h"
 
-const Vector3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
+constexpr glm::vec3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
 static bool rightMousePressed = false;
-static double lastMouseX = 0.0;
-static double lastMouseY = 0.0;
-const float mouseSensitivity = 1.0f;
+static double lastMouseX = 0.f;
+static double lastMouseY = 0.f;
+constexpr float mouseSensitivity = 1.f;
 
 void performRender(Application &application, const int width, const int height)
 {
@@ -69,7 +69,7 @@ static double lastFrameTime = 0.0;
 static bool keysPressed[512] = {false};
 static bool mouseCaptured = false;
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void keyCallback(GLFWwindow *window, const int key, const int scancode, const int action, const int mods)
 {
     if (mouseCaptured)
     {
@@ -90,7 +90,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
     }
 }
 
-void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+void mouseButtonCallback(GLFWwindow *window, const int button, const int action, const int mods)
 {
 
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
@@ -113,7 +113,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
     }
 }
 
-void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
+void cursorPosCallback(GLFWwindow *window, const double xpos, const double ypos)
 {
 
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
@@ -129,15 +129,15 @@ void cursorPosCallback(GLFWwindow *window, double xpos, double ypos)
         yoffset *= mouseSensitivity;
 
         Application *application = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        application->camera.processMouseMovement(xoffset, yoffset);
+        application->camera.processMouseMovement(static_cast<float>(xoffset), static_cast<float>(yoffset));
         application->triggerRerender();
     }
 }
 
 int main(const int argc, char *argv[])
 {
-    int width = 512;
-    int height = 384;
+    const int width = 512;
+    const int height = 384;
 
     const auto scene = std::make_unique<SceneGPU>();
     scene->setSkyColor(SKYCOLOR);
@@ -168,8 +168,8 @@ int main(const int argc, char *argv[])
 
     while (!application.shouldClose())
     {
-        double currentFrameTime = glfwGetTime();
-        double deltaTime = currentFrameTime - lastFrameTime;
+        const double currentFrameTime = glfwGetTime();
+        const double deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
 
         if (keysPressed[GLFW_KEY_ESCAPE])
@@ -191,38 +191,38 @@ int main(const int argc, char *argv[])
         }
         if (keysPressed[GLFW_KEY_W] || keysPressed[GLFW_KEY_Z])
         {
-            application.camera.moveForward(deltaTime);
+            application.camera.moveForward(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_S])
         {
-            application.camera.moveBackward(deltaTime);
+            application.camera.moveBackward(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_A] || keysPressed[GLFW_KEY_Q])
         {
-            application.camera.moveLeft(deltaTime);
+            application.camera.moveLeft(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_D])
         {
-            application.camera.moveRight(deltaTime);
+            application.camera.moveRight(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_SPACE])
         {
-            application.camera.moveUp(deltaTime);
+            application.camera.moveUp(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
         if (keysPressed[GLFW_KEY_LEFT_SHIFT])
         {
-            application.camera.moveDown(deltaTime);
+            application.camera.moveDown(static_cast<float>(deltaTime));
             application.triggerRerender();
         }
 
         if (!ImGui::GetIO().WantCaptureMouse && rightMousePressed)
         {
-            static Vector3 lastCamPos = application.camera.getPosition();
+            static glm::vec3 lastCamPos = application.camera.getPosition();
             static double lastCamPitch = application.camera.getPitch();
             static double lastCamYaw = application.camera.getYaw();
 

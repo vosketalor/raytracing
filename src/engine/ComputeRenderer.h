@@ -46,5 +46,5 @@ private:
     std::string loadShaderWithIncludes(const std::string& filePath, const std::string& basePath, std::unordered_set<std::string>* includedFiles);
     void setupBuffers();
     void updateSceneData();
-    void updateCameraUniforms();
+    void updateCameraUniforms() const;
 };

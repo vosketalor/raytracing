@@ -2,6 +2,9 @@
 #include "Vector.h"
 #include <cmath>
 
+#include "glm/vec3.hpp"
+#include "glm/ext/quaternion_geometric.hpp"
+
 #ifdef _WIN32
   #include <corecrt_math_defines.h>
 #endif
@@ -9,35 +12,42 @@
 class Camera
 {
 protected:
-    Vector3 position;
-    float pitch;  // rotation autour de l'axe X (regarder en haut/bas)
-    float yaw;    // rotation autour de l'axe Y (regarder à gauche/droite)
-    float roll;   // rotation autour de l'axe Z (inclinaison de la tête)
+    glm::vec3 position;
+    float pitch;
+    float yaw;
+    float roll;
 
-    float fov;          // champ de vision en degrés
-    float aspectRatio;  // largeur / hauteur
-    float nearPlane;    // plan proche de clipping
-    float farPlane;     // plan lointain de clipping
+    float fov;
+    float aspectRatio;
+    float nearPlane;
+    float farPlane;
 
     float movementSpeed;
     float mouseSensitivity;
 
 public:
-    Camera(const Vector3& position = Vector3{0,0,0},
-           const float pitch = 0.f,
-           const float yaw = 0.f,
-           const float roll = 0.f,
-           const float fov = 60.f,
-           const float aspectRatio = 16.f / 9.f,
-           const float nearPlane = 0.1f,
-           const float farPlane = 1000.f)
-    : position(position), pitch(pitch), yaw(yaw), roll(roll),
-      fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane),
-      movementSpeed(2.5f), mouseSensitivity(0.1f) {}
+    explicit Camera(const glm::vec3& position = {0.f,0.f,0.f},
+                    const float pitch = 0.f,
+                    const float yaw = 0.f,
+                    const float roll = 0.f,
+                    const float fov = 60.f,
+                    const float aspectRatio = 16.f / 9.f,
+                    const float nearPlane = 0.1f,
+                    const float farPlane = 1000.f)
+    : position(position),
+    pitch(pitch),
+    yaw(yaw),
+    roll(roll),
+    fov(fov),
+    aspectRatio(aspectRatio),
+    nearPlane(nearPlane),
+    farPlane(farPlane),
+    movementSpeed(2.5f),
+    mouseSensitivity(0.1f) {}
 
     ~Camera() = default;
 
-    const Vector3& getPosition() const { return position; }
+    const glm::vec3& getPosition() const { return position; }
     float getPitch() const { return pitch; }
     float getYaw() const { return yaw; }
     float getRoll() const { return roll; }
@@ -46,7 +56,7 @@ public:
     float getNearPlane() const { return nearPlane; }
     float getFarPlane() const { return farPlane; }
 
-    void setPosition(const Vector3& pos) { position = pos; }
+    void setPosition(const glm::vec3& pos) { position = pos; }
     void setPitch(const float p) { pitch = p; }
     void setYaw(const float y) { yaw = y; }
     void setRoll(const float r) { roll = r; }
@@ -55,31 +65,31 @@ public:
     void setNearPlane(const float n) { nearPlane = n; }
     void setFarPlane(const float f) { farPlane = f; }
 
-    Vector3 getDirection() const {
-        const float pitchRad = pitch * M_PI / 180.0;
-        const float yawRad = yaw * M_PI / 180.0;
+    glm::vec3 getDirection() const {
+        const float pitchRad = pitch * static_cast<float>(M_PI) / 180.f;
+        const float yawRad = yaw * static_cast<float>(M_PI) / 180.f;
 
         const float x = cos(pitchRad) * sin(yawRad);
         const float y = sin(pitchRad);
         const float z = -cos(pitchRad) * cos(yawRad);
 
-        return Vector3{x, y, z}.normalized();
+        return glm::normalize(glm::vec3{x, y, z});
     }
 
-    Vector3 getRight() const {
-        const float yawRad = yaw * M_PI / 180.0;
-        const float rollRad = roll * M_PI / 180.0;
+    glm::vec3 getRight() const {
+        const float yawRad = yaw * static_cast<float>(M_PI) / 180.f;
+        const float rollRad = roll * static_cast<float>(M_PI) / 180.f;
 
-        const Vector3 right{
+        const glm::vec3 right{
             cos(yawRad) * cos(rollRad),
             -sin(rollRad),
             sin(yawRad) * cos(rollRad)
         };
-        return right.normalized();
+        return glm::normalize(right);
     }
 
-    Vector3 getUp() const {
-        return getRight().cross(getDirection()).normalized();
+    glm::vec3 getUp() const {
+        return glm::normalize(glm::cross(getRight(), getDirection()));
     }
 
     void moveForward(const float deltaTime) {
@@ -99,11 +109,11 @@ public:
     }
 
     void moveUp(const float deltaTime) {
-        position.y() -= movementSpeed * deltaTime;
+        position.y -= movementSpeed * deltaTime;
     }
 
     void moveDown(const float deltaTime) {
-        position.y() += movementSpeed * deltaTime;
+        position.y += movementSpeed * deltaTime;
     }
 
     void processMouseMovement(float xoffset, float yoffset, const bool constrainPitch = true) {
