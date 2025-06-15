@@ -38,10 +38,11 @@ bool intersect(Ray ray, GPUShape shape, out float t) {
 };
 
 vec3 getNormal(GPUShape shape, vec3 point) {
-    if (shape.type == 0) {
+    if (shape.type == 0) { //Sphere
         return normalize(point - shape.center);
-    } else if (shape.type == 1) {
+    } else if (shape.type == 1) { //Plane
         return normalize(shape.normal);
     }
+    return vec3(0.0, 1.0, 0.0);
 }
 
