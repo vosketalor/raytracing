@@ -121,7 +121,7 @@ public:
         yoffset *= mouseSensitivity;
 
         yaw += xoffset;
-        pitch += yoffset;
+        pitch -= yoffset;
 
         if (constrainPitch) {
             if (pitch > 89.0) pitch = 89.0;
