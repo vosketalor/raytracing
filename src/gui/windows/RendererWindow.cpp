@@ -8,6 +8,13 @@ void reflection(Application& m_renderer) {
     if (ImGui::Checkbox("Enable Reflection", &m_renderer.renderer.reflectionsEnabled)) {
         m_renderer.renderer.prefs.set("reflectionsEnabled", m_renderer.renderer.reflectionsEnabled);
         m_renderer.renderer.prefs.save();
+
+        if (!m_renderer.renderer.reflectionsEnabled) {
+            m_renderer.renderer.fresnelEnabled = false;
+            m_renderer.renderer.prefs.set("fresnelEnabled", m_renderer.renderer.fresnelEnabled);
+            m_renderer.renderer.prefs.save();
+        }
+
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
     }
 }
@@ -16,6 +23,13 @@ void refraction(Application& m_renderer) {
     if (ImGui::Checkbox("Enable Refraction", &m_renderer.renderer.refractionsEnabled)) {
         m_renderer.renderer.prefs.set("refractionsEnabled", m_renderer.renderer.refractionsEnabled);
         m_renderer.renderer.prefs.save();
+
+        if (!m_renderer.renderer.refractionsEnabled) {
+            m_renderer.renderer.fresnelEnabled = false;
+            m_renderer.renderer.prefs.set("fresnelEnabled", m_renderer.renderer.fresnelEnabled);
+            m_renderer.renderer.prefs.save();
+        }
+
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
     }
 }
@@ -40,6 +54,15 @@ void fresnel(Application& m_renderer) {
     if (ImGui::Checkbox("Enable Fresnel", &m_renderer.renderer.fresnelEnabled)) {
         m_renderer.renderer.prefs.set("fresnelEnabled", m_renderer.renderer.fresnelEnabled);
         m_renderer.renderer.prefs.save();
+
+        if (m_renderer.renderer.fresnelEnabled)
+        {
+            m_renderer.renderer.reflectionsEnabled = true;
+            m_renderer.renderer.refractionsEnabled = true;
+            m_renderer.renderer.prefs.set("reflectionsEnabled", m_renderer.renderer.reflectionsEnabled);
+            m_renderer.renderer.prefs.set("refractionsEnabled", m_renderer.renderer.refractionsEnabled);
+            m_renderer.renderer.prefs.save();
+        }
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
     }
 }
@@ -113,13 +136,15 @@ void RendererWindow::render() {
 
         refraction(m_renderer);
 
-        specular(m_renderer);
-
-        attenuation(m_renderer);
-
         fresnel(m_renderer);
 
+        ImGui::Separator();
+
+        specular(m_renderer);
+
         roughness(m_renderer);
+
+        attenuation(m_renderer);
 
         ImGui::Separator();
 
