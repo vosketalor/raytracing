@@ -159,8 +159,6 @@ void ComputeRenderer::updateSceneData() {
         gpuShapes.push_back(shape->toGPU());
     }
 
-    std::cout << "Size shapes : " << gpuShapes.size() << std::endl;
-
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, sceneDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuShapes.size() * sizeof(GPU::GPUShapeData),
                  gpuShapes.data(), GL_STATIC_DRAW);
@@ -170,8 +168,6 @@ void ComputeRenderer::updateSceneData() {
     for (const auto& light : scene->getLightSources()) {
         gpuLights.push_back(light->toGPU());
     }
-
-    std::cout << "Size lights : " << gpuLights.size() << std::endl;
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuLights.size() * sizeof(GPU::GPULightSource),
@@ -183,31 +179,10 @@ void ComputeRenderer::updateSceneData() {
             gpuMaterials.push_back(mat.toGPU());
         }
 
-    std::cout << "Size materials : " << gpuMaterials.size() << std::endl;
-
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, materialDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuMaterials.size() * sizeof(GPU::GPUMaterial),
                  gpuMaterials.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, materialDataSSBO);
-
-    std::cout << "=== DEBUG ALIGNEMENT ===" << std::endl;
-    std::cout << "ShapeData size: " << gpuShapes.size() * sizeof(GPU::GPUShapeData) << std::endl;
-    std::cout << "LightSource size: " << gpuLights.size() * sizeof(GPU::GPULightSource) << std::endl;
-    std::cout << "Material size: " << gpuMaterials.size() * sizeof(GPU::GPUMaterial) << std::endl;
-
-    for (int i = 0; i < std::min(2, (int)gpuMaterials.size()); ++i) {
-        auto& m = gpuMaterials[i];
-        std::cout << "CPU Mat " << i << ": "
-                  << m.reflectivity << ", "
-                  << m.transparency << ", "
-                  << m.shininess << ", "
-                  << m.eta << ", "
-                  << m.roughness << ", "
-                  << m.metallic << ", "
-                  << m.f0.x << ", "
-                  << m.f0.y << ", "
-                  << m.f0.z << "\n";
-    }
 }
 
 void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
@@ -258,6 +233,17 @@ void setUniformBool(GLuint program, const char* name, bool value) {
 
 void ComputeRenderer::updateCameraUniforms() const {
     glUseProgram(shaderProgram);
+
+    std::cout << "=== DEBUG CAMERA ===" << std::endl;
+    std::cout << "Position: (" << camera_.getPosition().x << ", "
+              << camera_.getPosition().y << ", " << camera_.getPosition().z << ")" << std::endl;
+    std::cout << "Direction: (" << camera_.getDirection().x << ", "
+              << camera_.getDirection().y << ", " << camera_.getDirection().z << ")" << std::endl;
+    std::cout << "Up: (" << camera_.getUp().x << ", "
+              << camera_.getUp().y << ", " << camera_.getUp().z << ")" << std::endl;
+    std::cout << "Right: (" << camera_.getRight().x << ", "
+              << camera_.getRight().y << ", " << camera_.getRight().z << ")" << std::endl;
+    std::cout << "Pitch: " << camera_.getPitch() << ", Yaw: " << camera_.getYaw() << std::endl;
 
     glm::vec3 pos = camera_.getPosition();
     glm::vec3 dir = camera_.getDirection();

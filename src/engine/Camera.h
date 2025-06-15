@@ -89,7 +89,7 @@ public:
     }
 
     glm::vec3 getUp() const {
-        return glm::normalize(glm::cross(getRight(), getDirection()));
+        return -glm::normalize(glm::cross(getRight(), getDirection()));
     }
 
     void moveForward(const float deltaTime) {
@@ -109,11 +109,11 @@ public:
     }
 
     void moveUp(const float deltaTime) {
-        position.y -= movementSpeed * deltaTime;
+        position.y += movementSpeed * deltaTime;
     }
 
     void moveDown(const float deltaTime) {
-        position.y += movementSpeed * deltaTime;
+        position.y -= movementSpeed * deltaTime;
     }
 
     void processMouseMovement(float xoffset, float yoffset, const bool constrainPitch = true) {
@@ -121,7 +121,7 @@ public:
         yoffset *= mouseSensitivity;
 
         yaw += xoffset;
-        pitch -= yoffset;
+        pitch += yoffset;
 
         if (constrainPitch) {
             if (pitch > 89.0) pitch = 89.0;

@@ -25,7 +25,6 @@ vec3 computeLighting(Ray ray, vec3 point, vec3 normal, vec3 color, int shapeInde
 
         Ray shadowRay;
         shadowRay.origin = point + lightDir * EPSILON;
-//        shadowRay.direction = lightDir;
 
         vec3 toLight = lightPos - shadowRay.origin;
         float lightDist = length(toLight);

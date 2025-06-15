@@ -17,6 +17,7 @@ void main() {
     if (pixelCoord.x >= resolution.x || pixelCoord.y >= resolution.y) return;
 
     vec2 uv = (vec2(pixelCoord) + 0.5) / vec2(resolution);
+
     vec2 ndc = uv * 2.0 - 1.0;
 
     float fovRad = fov * 3.14159265359 / 180.0;

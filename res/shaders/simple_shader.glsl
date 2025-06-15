@@ -14,7 +14,7 @@ void main() {
     if (pixel.x >= width || pixel.y >= height)
     return;
 
-    float t = float(pixel.x) / float(width);
+    float t = float(pixel.y) / float(height);
     vec4 color = vec4(t, 0.0, 0.0, 1.0);
     imageStore(outputImage, pixel, color);
 }
