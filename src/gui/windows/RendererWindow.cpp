@@ -5,7 +5,11 @@ RendererWindow::RendererWindow(Application& renderer)
     : UIWindow("Renderer Settings"), m_renderer(renderer) {}
 
 void reflection(Application& m_renderer) {
-    ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled);
+    if (ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled)) {
+        m_renderer.renderer.prefs.set("reflectionsEnabled", m_renderer.renderer.reflectionsEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering) m_renderer.triggerRerender();
+    }
 }
 
 void refraction(Application& m_renderer) {

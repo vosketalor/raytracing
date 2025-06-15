@@ -1,11 +1,16 @@
 #include "ComputeRenderer.h"
 
 #include <execution>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, int height)
     : scene(scene), camera_(camera), width(width), height(height),
       computeShader(0), shaderProgram(0), outputTexture(0),
       sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0) {
+    prefs.load();
+    std::cout << prefs << std::endl;
 }
 
 ComputeRenderer::~ComputeRenderer() {

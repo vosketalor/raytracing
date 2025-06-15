@@ -9,14 +9,13 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+
 #include <unordered_set>
 
 #include "Camera.h"
 #include "scenes/Scene.h"
 #include "Vector.h"
+#include "../preferences/PreferenceManager.h"
 
 class ComputeRenderer {
 private:
@@ -31,11 +30,13 @@ private:
     Camera camera_;
 
 public:
-    bool reflectionsEnabled = false;
-    bool refractionsEnabled = false;
-    bool specularEnabled = false;
-    bool attenuationEnabled = false;
-    bool shadowsEnabled = false;
+    PreferenceManager& prefs = PreferenceManager::getInstance();
+
+    bool reflectionsEnabled = prefs.get("reflectionsEnabled", false);
+    bool refractionsEnabled = prefs.get("refractionsEnabled", false);
+    bool specularEnabled = prefs.get("specularEnabled", false);
+    bool attenuationEnabled = prefs.get("attenuationEnabled", false);
+    bool shadowsEnabled = prefs.get("shadowsEnabled", false);
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

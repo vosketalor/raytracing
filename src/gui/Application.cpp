@@ -6,6 +6,9 @@
 
 #include "Application.h"
 #include <ctime>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 bool Application::initialize(const int windowWidth, const int windowHeight)
 {

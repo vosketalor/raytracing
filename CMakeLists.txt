@@ -57,6 +57,9 @@ set(IMGUI_SOURCES
         src/gui/windows/MenuBar.h
         src/engine/ComputeRenderer.cpp
         src/engine/ComputeRenderer.h
+        src/preferences/PreferenceManager.cpp
+        src/preferences/PreferenceManager.h
+        external/json.hpp
 )
 
 add_executable(Raytracing
