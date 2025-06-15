@@ -5,7 +5,7 @@ RendererWindow::RendererWindow(Application& renderer)
     : UIWindow("Renderer Settings"), m_renderer(renderer) {}
 
 void reflection(Application& m_renderer) {
-    if (ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled)) {
+    if (ImGui::Checkbox("Enable Reflection", &m_renderer.renderer.reflectionsEnabled)) {
         m_renderer.renderer.prefs.set("reflectionsEnabled", m_renderer.renderer.reflectionsEnabled);
         m_renderer.renderer.prefs.save();
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
@@ -13,7 +13,7 @@ void reflection(Application& m_renderer) {
 }
 
 void refraction(Application& m_renderer) {
-    if (ImGui::Checkbox("Enable refraction", &m_renderer.renderer.refractionsEnabled)) {
+    if (ImGui::Checkbox("Enable Refraction", &m_renderer.renderer.refractionsEnabled)) {
         m_renderer.renderer.prefs.set("refractionsEnabled", m_renderer.renderer.refractionsEnabled);
         m_renderer.renderer.prefs.save();
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
@@ -21,7 +21,7 @@ void refraction(Application& m_renderer) {
 }
 
 void specular(Application& m_renderer) {
-    if (ImGui::Checkbox("Enable specular", &m_renderer.renderer.specularEnabled)) {
+    if (ImGui::Checkbox("Enable Specular", &m_renderer.renderer.specularEnabled)) {
         m_renderer.renderer.prefs.set("specularEnabled", m_renderer.renderer.specularEnabled);
         m_renderer.renderer.prefs.save();
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
@@ -29,8 +29,24 @@ void specular(Application& m_renderer) {
 }
 
 void attenuation(Application& m_renderer) {
-    if (ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled)) {
+    if (ImGui::Checkbox("Enable Attenuation", &m_renderer.renderer.attenuationEnabled)) {
         m_renderer.renderer.prefs.set("attenuationEnabled", m_renderer.renderer.attenuationEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
+}
+
+void fresnel(Application& m_renderer) {
+    if (ImGui::Checkbox("Enable Fresnel", &m_renderer.renderer.fresnelEnabled)) {
+        m_renderer.renderer.prefs.set("fresnelEnabled", m_renderer.renderer.fresnelEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
+}
+
+void roughness(Application& m_renderer) {
+    if (ImGui::Checkbox("Enable Roughness", &m_renderer.renderer.roughnessEnabled)) {
+        m_renderer.renderer.prefs.set("roughnessEnabled", m_renderer.renderer.roughnessEnabled);
         m_renderer.renderer.prefs.save();
         if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
     }
@@ -100,6 +116,10 @@ void RendererWindow::render() {
         specular(m_renderer);
 
         attenuation(m_renderer);
+
+        fresnel(m_renderer);
+
+        roughness(m_renderer);
 
         ImGui::Separator();
 

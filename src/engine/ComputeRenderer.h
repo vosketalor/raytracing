@@ -38,6 +38,8 @@ public:
     bool attenuationEnabled;
     bool shadowsEnabled;
     bool immediateEffect;
+    bool fresnelEnabled;
+    bool roughnessEnabled;
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

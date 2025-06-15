@@ -16,6 +16,8 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
     attenuationEnabled = prefs.get("attenuationEnabled", false);
     shadowsEnabled     = prefs.get("shadowsEnabled", false);
     immediateEffect    = prefs.get("immediateEffect", false);
+    fresnelEnabled     = prefs.get("fresnelEnabled", false);
+    roughnessEnabled   = prefs.get("roughnessEnabled", false);
     this->width        = prefs.get("width", 512);
     this->height       = prefs.get("height", 384);
     std::cout << prefs << std::endl;
@@ -247,17 +249,6 @@ void setUniformBool(GLuint program, const char* name, bool value) {
 void ComputeRenderer::updateCameraUniforms() const {
     glUseProgram(shaderProgram);
 
-    std::cout << "=== DEBUG CAMERA ===" << std::endl;
-    std::cout << "Position: (" << camera_.getPosition().x << ", "
-              << camera_.getPosition().y << ", " << camera_.getPosition().z << ")" << std::endl;
-    std::cout << "Direction: (" << camera_.getDirection().x << ", "
-              << camera_.getDirection().y << ", " << camera_.getDirection().z << ")" << std::endl;
-    std::cout << "Up: (" << camera_.getUp().x << ", "
-              << camera_.getUp().y << ", " << camera_.getUp().z << ")" << std::endl;
-    std::cout << "Right: (" << camera_.getRight().x << ", "
-              << camera_.getRight().y << ", " << camera_.getRight().z << ")" << std::endl;
-    std::cout << "Pitch: " << camera_.getPitch() << ", Yaw: " << camera_.getYaw() << std::endl;
-
     glm::vec3 pos = camera_.getPosition();
     glm::vec3 dir = camera_.getDirection();
     glm::vec3 right = camera_.getRight();
@@ -280,6 +271,8 @@ void ComputeRenderer::updateCameraUniforms() const {
     setUniformBool(shaderProgram, "specularEnabled", specularEnabled);
     setUniformBool(shaderProgram, "attenuationEnabled", attenuationEnabled);
     setUniformBool(shaderProgram, "shadowsEnabled", shadowsEnabled);
+    setUniformBool(shaderProgram, "fresnelEnabled", fresnelEnabled);
+    setUniformBool(shaderProgram, "roughnessEnabled", roughnessEnabled);
 
     glm::vec3 skyColor = scene->getSkyColor();
     glm::vec3 ambient = scene->getAmbient();

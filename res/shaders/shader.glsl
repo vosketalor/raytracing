@@ -7,8 +7,10 @@ layout(rgba32f, binding = 0) uniform image2D outputImage;
 
 #include "core/intersection.glsl"
 #include "shading/shadow.glsl"
+#include "shading/pbr.glsl"
 #include "shading/reflection.glsl"
 #include "shading/refraction.glsl"
+#include "shading/fresnel.glsl"
 #include "shading/lighting.glsl"
 #include "core/trace.glsl"
 

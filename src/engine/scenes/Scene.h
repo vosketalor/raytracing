@@ -35,10 +35,10 @@ public:
     static constexpr glm::vec3 CYAN = {0.f, 1.f, 1.f};
     static constexpr glm::vec3 MAGENTA = {1.f, 0.f, 1.f};
 
-    static constexpr Vector3 ORANGE = Vector3(1, 0.5, 0);
-    static constexpr Vector3 PURPLE = Vector3(0.5, 0, 0.5);
-    static constexpr Vector3 PINK = Vector3(1, 0.5, 0.75);
-    static constexpr Vector3 BROWN = Vector3(0.6, 0.3, 0.1);
+    static constexpr glm::vec3 ORANGE = {1, 0.5, 0};
+    static constexpr glm::vec3 PURPLE = {0.5, 0, 0.5};
+    static constexpr glm::vec3 PINK = {1, 0.5, 0.75};
+    static constexpr glm::vec3 BROWN = {0.6, 0.3, 0.1};
 
     // ============== REFRACTION INDICES ==============
     static constexpr float ETA_AIR = 1.00029f;

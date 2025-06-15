@@ -2,18 +2,7 @@
 
 #include "scenes/Scene.h"
 
-// const Material Material::Mirror   = Material(1.0, 0.0, 1000.0, Scene::ETA_AIR, 0.0);
-// const Material Material::Glass    = Material(0.1, 0.9, 300.0, Scene::ETA_GLASS, 0.05);
-// const Material Material::Water    = Material(0.05, 0.95, 100.0, Scene::ETA_WATER, 0.2);
-// const Material Material::Metal    = Material(0.85, 0.0, 800.0, Scene::ETA_AIR, 0.15);
-// const Material Material::Wood     = Material(0.1, 0.0, 30.0, Scene::ETA_AIR, 0.8);
-// const Material Material::Plastic  = Material(0.3, 0.0, 100.0, Scene::ETA_AIR, 0.3);
-// const Material Material::Diamond  = Material(0.17, 0.9, 1000.0, Scene::ETA_DIAMOND, 0.01);
-const Material Material::Mirror = Material(0.9f, 0.f, 1000.f, 1.f, 0.05f, 1.f, Vector3(0.95, 0.95, 0.95));
-const Material Material::Glass = Material(0.f, 0.9f, 1000.f, 1.5f, 0.02f, 0.f, Vector3(0.04, 0.04, 0.04));
-const Material Material::MetalGold = Material(0.8f, 0.0f, 1000.f, 1.f, 0.1f, 1.f, Vector3(1.0, 0.86, 0.57));
-const Material Material::MetalCopper = Material(0.8f, 0.0f, 1000.f, 1.f, 0.15f, 1.f, Vector3(0.95, 0.64, 0.54));
-const Material Material::PlasticRough = Material(0.2f, 0.0f, 100.f, 1.f, 0.8f, 0.f, Vector3(0.04, 0.04, 0.04));
+
 
 GPU::GPUMaterial Material::toGPU() const
 {
@@ -27,3 +16,272 @@ GPU::GPUMaterial Material::toGPU() const
     data.f0 = glm::vec3(f0.x(), f0.y(), f0.z());
     return data;
 }
+
+// === MÉTAUX PRÉCIEUX ===
+const Material Material::Gold = Material(
+    0.9f,                               // reflectivity
+    0.0f,                               // transparency
+    200.0f,                             // shininess
+    0.47f,                              // eta (complexe, partie réelle)
+    0.02f,                              // roughness (poli)
+    1.0f,                               // metallic
+    Vector3(1.00f, 0.86f, 0.57f)       // f0 - couleur dorée
+);
+
+const Material Material::Silver = Material(
+    0.95f,                              // reflectivity
+    0.0f,                               // transparency
+    250.0f,                             // shininess
+    0.155f,                             // eta
+    0.01f,                              // roughness (très poli)
+    1.0f,                               // metallic
+    Vector3(0.95f, 0.95f, 0.95f)       // f0 - blanc argenté
+);
+
+const Material Material::Copper = Material(
+    0.85f,                              // reflectivity
+    0.0f,                               // transparency
+    180.0f,                             // shininess
+    1.1f,                               // eta
+    0.05f,                              // roughness
+    1.0f,                               // metallic
+    Vector3(0.95f, 0.64f, 0.54f)       // f0 - rouge cuivré
+);
+
+const Material Material::Platinum = Material(
+    0.90f,                              // reflectivity
+    0.0f,                               // transparency
+    220.0f,                             // shininess
+    2.33f,                              // eta
+    0.02f,                              // roughness
+    1.0f,                               // metallic
+    Vector3(0.73f, 0.71f, 0.68f)       // f0 - gris platine
+);
+
+// === MÉTAUX INDUSTRIELS ===
+const Material Material::Iron = Material(
+    0.70f,                              // reflectivity
+    0.0f,                               // transparency
+    120.0f,                             // shininess
+    2.95f,                              // eta
+    0.15f,                              // roughness (un peu rugueuse)
+    1.0f,                               // metallic
+    Vector3(0.56f, 0.57f, 0.58f)       // f0 - gris fer
+);
+
+const Material Material::Aluminum = Material(
+    0.85f,                              // reflectivity
+    0.0f,                               // transparency
+    150.0f,                             // shininess
+    1.44f,                              // eta
+    0.08f,                              // roughness
+    1.0f,                               // metallic
+    Vector3(0.91f, 0.92f, 0.92f)       // f0 - blanc aluminium
+);
+
+const Material Material::Chrome = Material(
+    0.95f,                              // reflectivity
+    0.0f,                               // transparency
+    300.0f,                             // shininess
+    3.2f,                               // eta
+    0.01f,                              // roughness (très poli)
+    1.0f,                               // metallic
+    Vector3(0.54f, 0.55f, 0.55f)       // f0 - gris chrome
+);
+
+// === VERRES ET TRANSPARENTS ===
+const Material Material::Glass = Material(
+    0.08f,                              // reflectivity (Fresnel)
+    0.95f,                              // transparency
+    200.0f,                             // shininess
+    1.52f,                              // eta (verre standard)
+    0.0f,                               // roughness (lisse)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0 diélectrique
+);
+
+const Material Material::Diamond = Material(
+    0.17f,                              // reflectivity (Fresnel élevé)
+    0.98f,                              // transparency
+    500.0f,                             // shininess (très brillant)
+    2.42f,                              // eta (diamant)
+    0.0f,                               // roughness
+    0.0f,                               // metallic
+    Vector3(0.17f, 0.17f, 0.17f)       // f0 élevé pour diamant
+);
+
+const Material Material::Water = Material(
+    0.02f,                              // reflectivity (Fresnel faible)
+    0.90f,                              // transparency
+    100.0f,                             // shininess
+    1.33f,                              // eta (eau)
+    0.02f,                              // roughness (légères ondulations)
+    0.0f,                               // metallic
+    Vector3(0.02f, 0.02f, 0.02f)       // f0 très faible
+);
+
+const Material Material::Ice = Material(
+    0.03f,                              // reflectivity
+    0.85f,                              // transparency
+    150.0f,                             // shininess
+    1.31f,                              // eta (glace)
+    0.05f,                              // roughness (surface irrégulière)
+    0.0f,                               // metallic
+    Vector3(0.03f, 0.03f, 0.03f)       // f0
+);
+
+// === PLASTIQUES ===
+const Material Material::PlasticSmooth = Material(
+    0.05f,                              // reflectivity
+    0.0f,                               // transparency
+    80.0f,                              // shininess
+    1.46f,                              // eta (plastique)
+    0.0f,                               // roughness (lisse)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0 diélectrique
+);
+
+const Material Material::PlasticRough = Material(
+    0.03f,                              // reflectivity
+    0.0f,                               // transparency
+    40.0f,                              // shininess
+    1.46f,                              // eta
+    0.4f,                               // roughness (rugueux)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+const Material Material::Rubber = Material(
+    0.01f,                              // reflectivity (très faible)
+    0.0f,                               // transparency
+    20.0f,                              // shininess (mat)
+    1.52f,                              // eta
+    0.8f,                               // roughness (très rugueux)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+// === CÉRAMIQUES ET PORCELAINES ===
+const Material Material::Ceramic = Material(
+    0.12f,                              // reflectivity
+    0.0f,                               // transparency
+    150.0f,                             // shininess
+    1.62f,                              // eta (céramique)
+    0.02f,                              // roughness (émaillée)
+    0.0f,                               // metallic
+    Vector3(0.08f, 0.08f, 0.08f)       // f0 plus élevé que plastique
+);
+
+const Material Material::Porcelain = Material(
+    0.15f,                              // reflectivity
+    0.0f,                               // transparency
+    200.0f,                             // shininess
+    1.54f,                              // eta
+    0.01f,                              // roughness (très lisse)
+    0.0f,                               // metallic
+    Vector3(0.08f, 0.08f, 0.08f)       // f0
+);
+
+// === MATÉRIAUX ORGANIQUES ===
+const Material Material::Wood = Material(
+    0.02f,                              // reflectivity (très faible)
+    0.0f,                               // transparency
+    30.0f,                              // shininess (mat)
+    1.54f,                              // eta
+    0.6f,                               // roughness (fibre du bois)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+const Material Material::Leather = Material(
+    0.03f,                              // reflectivity
+    0.0f,                               // transparency
+    25.0f,                              // shininess
+    1.5f,                               // eta
+    0.7f,                               // roughness (texture cuir)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+const Material Material::Fabric = Material(
+    0.01f,                              // reflectivity (très mat)
+    0.0f,                               // transparency
+    10.0f,                              // shininess (très mat)
+    1.46f,                              // eta
+    0.9f,                               // roughness (très rugueux)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+// === MATÉRIAUX SPÉCIAUX ===
+const Material Material::Mirror = Material(
+    0.98f,                              // reflectivity (quasi parfait)
+    0.0f,                               // transparency
+    1000.0f,                            // shininess (parfait)
+    1.0f,                               // eta (pas utilisé pour miroir)
+    0.0f,                               // roughness
+    1.0f,                               // metallic (se comporte comme métal)
+    Vector3(0.95f, 0.95f, 0.95f)       // f0 très élevé
+);
+
+const Material Material::Obsidian = Material(
+    0.15f,                              // reflectivity
+    0.1f,                               // transparency (légèrement translucide)
+    300.0f,                             // shininess (très poli naturellement)
+    1.48f,                              // eta (verre volcanique)
+    0.01f,                              // roughness (naturellement lisse)
+    0.0f,                               // metallic
+    Vector3(0.08f, 0.08f, 0.08f)       // f0
+);
+
+const Material Material::Marble = Material(
+    0.08f,                              // reflectivity
+    0.05f,                              // transparency (légèrement translucide)
+    100.0f,                             // shininess (poli)
+    1.54f,                              // eta (calcaire)
+    0.05f,                              // roughness (poli mais pas parfait)
+    0.0f,                               // metallic
+    Vector3(0.06f, 0.06f, 0.06f)       // f0
+);
+
+// === MATÉRIAUX COMPOSITES ===
+const Material Material::CarbonFiber = Material(
+    0.25f,                              // reflectivity (semi-métallique)
+    0.0f,                               // transparency
+    150.0f,                             // shininess
+    1.7f,                               // eta
+    0.1f,                               // roughness (texture tissée)
+    0.5f,                               // metallic (composite)
+    Vector3(0.12f, 0.12f, 0.12f)       // f0 intermédiaire
+);
+
+const Material Material::Concrete = Material(
+    0.02f,                              // reflectivity (très mat)
+    0.0f,                               // transparency
+    20.0f,                              // shininess
+    1.55f,                              // eta
+    0.8f,                               // roughness (très rugueux)
+    0.0f,                               // metallic
+    Vector3(0.04f, 0.04f, 0.04f)       // f0
+);
+
+// === VARIATIONS RUGUEUSES DES MÉTAUX ===
+const Material Material::GoldBrushed = Material(
+    0.75f,                              // reflectivity (réduite par rugosité)
+    0.0f,                               // transparency
+    80.0f,                              // shininess (réduite)
+    0.47f,                              // eta
+    0.3f,                               // roughness (brossé)
+    1.0f,                               // metallic
+    Vector3(1.00f, 0.86f, 0.57f)       // f0 identique à l'or poli
+);
+
+const Material Material::IronRusty = Material(
+    0.25f,                              // reflectivity (très réduite)
+    0.0f,                               // transparency
+    30.0f,                              // shininess (très mat)
+    2.95f,                              // eta
+    0.9f,                               // roughness (rouille = très rugueux)
+    0.7f,                               // metallic (partiellement oxydé)
+    Vector3(0.45f, 0.35f, 0.25f)       // f0 modifié (couleur rouille)
+);

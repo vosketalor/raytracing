@@ -25,6 +25,7 @@
 #include "scenes/SceneMicrofacets.h"
 
 constexpr glm::vec3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
+// constexpr glm::vec3 SKYCOLOR = Scene::BLACK;
 static bool rightMousePressed = false;
 static double lastMouseX = 0.f;
 static double lastMouseY = 0.f;

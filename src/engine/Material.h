@@ -55,6 +55,29 @@ public:
     void setTransparency(const float trans) { transparency = trans; }
 
     GPU::GPUMaterial toGPU() const;
+    static const Material IronRusty;
+    static const Material GoldBrushed;
+    static const Material Concrete;
+    static const Material CarbonFiber;
+    static const Material Marble;
+    static const Material Obsidian;
+    static const Material Fabric;
+    static const Material Leather;
+    static const Material Wood;
+    static const Material Porcelain;
+    static const Material Ceramic;
+    static const Material Rubber;
+    static const Material PlasticSmooth;
+    static const Material Ice;
+    static const Material Water;
+    static const Material Diamond;
+    static const Material Chrome;
+    static const Material Aluminum;
+    static const Material Iron;
+    static const Material Platinum;
+    static const Material Copper;
+    static const Material Silver;
+    static const Material Gold;
 
     bool operator==(const Material& other) const
     {
@@ -66,67 +89,6 @@ public:
             metallic == other.metallic &&
             f0 == other.f0;
     }
-
-
-    // MÉTHODES POUR MICROFACETTES
-
-    /// Distribution normale de Trowbridge-Reitz (GGX)
-    // float distributionGGX(const Vector3& normal, const Vector3& halfVector, float alpha) const {
-    //     float a2 = alpha * alpha;
-    //     float NdotH = std::max(normal.dot(halfVector), 0.0);
-    //     float NdotH2 = NdotH * NdotH;
-    //
-    //     float denom = NdotH2 * (a2 - 1.0) + 1.0;
-    //     denom = M_PI * denom * denom;
-    //
-    //     return a2 / denom;
-    // }
-    //
-    // /// Fonction de géométrie de Smith pour GGX
-    // float geometrySchlickGGX(float NdotV, float alpha) const {
-    //     float r = alpha + 1.0;
-    //     float k = (r * r) / 8.0; // pour direct lighting
-    //
-    //     float denom = NdotV * (1.0 - k) + k;
-    //     return NdotV / denom;
-    // }
-    //
-    // float geometrySmith(const Vector3& normal, const Vector3& viewDir,
-    //                     const Vector3& lightDir, float alpha) const {
-    //     float NdotV = std::max(normal.dot(viewDir), 0.0);
-    //     float NdotL = std::max(normal.dot(lightDir), 0.0);
-    //     float ggx2 = geometrySchlickGGX(NdotV, alpha);
-    //     float ggx1 = geometrySchlickGGX(NdotL, alpha);
-    //
-    //     return ggx1 * ggx2;
-    // }
-    //
-    // /// Approximation de Fresnel par Schlick
-    // Vector3 fresnelSchlick(float cosTheta, const Vector3& F0) const {
-    //     float f = std::pow(1.0 - cosTheta, 5.0);
-    //     return F0 + (Vector3(1.0, 1.0, 1.0) - F0) * f;
-    // }
-    //
-    // /// Échantillonnage d'importance pour GGX
-    // Vector3 sampleGGX(const Vector3& normal, float alpha, float u1, float u2) const {
-    //     float theta = std::atan(alpha * std::sqrt(u1) / std::sqrt(1.0 - u1));
-    //     float phi = 2.0 * M_PI * u2;
-    //
-    //     // Vecteur local (tangent space)
-    //     Vector3 localH(
-    //         std::sin(theta) * std::cos(phi),
-    //         std::sin(theta) * std::sin(phi),
-    //         std::cos(theta)
-    //     );
-    //
-    //     // Transformation vers world space
-    //     Vector3 up = std::abs(normal.z()) < 0.999 ? Vector3(0, 0, 1) : Vector3(1, 0, 0);
-    //     Vector3 tangent = up.cross(normal).normalized();
-    //     Vector3 bitangent = normal.cross(tangent);
-    //
-    //     return tangent * localH.x() + bitangent * localH.y() + normal * localH.z();
-    // }
-
 
     // Matériaux prédéfinis mis à jour
     static const Material Mirror;
