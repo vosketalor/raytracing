@@ -5,23 +5,23 @@ RendererWindow::RendererWindow(Application& renderer)
     : UIWindow("Renderer Settings"), m_renderer(renderer) {}
 
 void reflection(Application& m_renderer) {
-    // ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled);
+    ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled);
 }
 
 void refraction(Application& m_renderer) {
-    // ImGui::Checkbox("Enable refraction", &m_renderer.renderer.refractionsEnabled);
+    ImGui::Checkbox("Enable refraction", &m_renderer.renderer.refractionsEnabled);
 }
 
 void specular(Application& m_renderer) {
-    // ImGui::Checkbox("Enable specular", &m_renderer.renderer.specularEnabled);
+    ImGui::Checkbox("Enable specular", &m_renderer.renderer.specularEnabled);
 }
 
 void attenuation(Application& m_renderer) {
-    // ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled);
+    ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled);
 }
 
 void shadow(Application& m_renderer) {
-    // ImGui::Checkbox("Enable Shadows", &m_renderer.renderer.shadowsEnabled);
+    ImGui::Checkbox("Enable Shadows", &m_renderer.renderer.shadowsEnabled);
     // if (m_renderer.renderer.shadowsEnabled) {
     //     ImGui::Checkbox("Enable Soft Shadows", &m_renderer.renderer.softShadowsEnabled);
     //     if (m_renderer.renderer.softShadowsEnabled) {

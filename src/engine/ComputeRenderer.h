@@ -31,6 +31,11 @@ private:
     Camera camera_;
 
 public:
+    bool reflectionsEnabled = false;
+    bool refractionsEnabled = false;
+    bool specularEnabled = false;
+    bool attenuationEnabled = false;
+    bool shadowsEnabled = false;
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

@@ -10,15 +10,15 @@ void SceneGPU::createShapes()
     plane->setMaterial(Material(0.3f, 0, 100, Scene::ETA_WATER));
     this->addShape(plane);
 
-    auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -10), 1);
-    sphere->setColor(Vector3(1,0,1));
-    sphere->setMaterial(Material::Glass);
+    auto sphere = std::make_shared<Sphere>(Vector3(0, 0, -4), 1);
+    sphere->setColor(Scene::ORANGE);
+    sphere->setMaterial(Material(0, 0.5f, 1000, Scene::ETA_WATER));
     this->addShape(sphere);
 }
 
 void SceneGPU::createLights()
 {
-    Vector3 position{0, 6, 2};
+    Vector3 position{0, 6, -3};
 
     Vector3 uDir{1, 0, 0};
     Vector3 vDir{0, 0, 1};

@@ -244,6 +244,16 @@ void setUniform2i(GLuint program, const char* name, int x, int y) {
     }
 }
 
+void setUniformBool(GLuint program, const char* name, bool value) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform1i(loc, value ? 1 : 0);  // true = 1, false = 0
+    }
+}
+
+
 void ComputeRenderer::updateCameraUniforms() const {
     glUseProgram(shaderProgram);
 
@@ -263,6 +273,12 @@ void ComputeRenderer::updateCameraUniforms() const {
     // setUniform1i(shaderProgram, "numMaterials", static_cast<int>(Shape::materials.size()));
     setUniform1i(shaderProgram, "numShapes", static_cast<int>(scene->getShapes().size()));
     setUniform1i(shaderProgram, "numLights", static_cast<int>(scene->getLightSources().size()));
+
+    setUniformBool(shaderProgram, "reflectionsEnabled", reflectionsEnabled);
+    setUniformBool(shaderProgram, "refractionsEnabled", refractionsEnabled);
+    setUniformBool(shaderProgram, "specularEnabled", specularEnabled);
+    setUniformBool(shaderProgram, "attenuationEnabled", attenuationEnabled);
+    setUniformBool(shaderProgram, "shadowsEnabled", shadowsEnabled);
 
     glm::vec3 skyColor = scene->getSkyColor();
     glm::vec3 ambient = scene->getAmbient();
