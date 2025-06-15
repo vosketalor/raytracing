@@ -19,24 +19,10 @@ vec3 traceRay(Ray ray) {
             break;
         }
 
-        // TEST 5: Afficher la normale avec un code couleur spécial
-        // pour identifier les axes
-//        vec3 debugNormal = manualNormal;
-//
-//        // Marquer spécialement les points où Y est dominant
-//        if (abs(debugNormal.y) > 0.8) {
-//            if (debugNormal.y > 0.0) {
-//                return vec3(0.0, 1.0, 0.0); // Vert pur pour +Y
-//            } else {
-//                return vec3(0.0, 0.5, 0.0); // Vert sombre pour -Y
-//            }
-//        }
-
         GPUMaterial mat = materials[shapes[hit.shapeIndex].materialIndex];
 
         vec3 localColor = hit.color * ambientColor;
         localColor += computeLighting(ray, hit.point, hit.normal, hit.color, hit.shapeIndex);
-//        localColor += (hit.normal + 1.0) * 0.5;
         finalColor += localColor * attenuation;
 
         bool hasReflection = (mat.reflectivity > 0.0) ? true : false;

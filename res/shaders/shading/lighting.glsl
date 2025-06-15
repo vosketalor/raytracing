@@ -2,7 +2,7 @@
 
 vec3 computeDiffuse(vec3 color, vec3 normal, vec3 lightDir, GPULight light) {
     float NdotL = max(dot(normal, lightDir), 0.0);
-    return color * light.colorDiffuse * NdotL * light.intensity;
+    return color * light.colorDiffuse * NdotL;
 }
 
 vec3 computeSpecular(Ray ray, vec3 point, vec3 normal, GPULight light, int shapeIndex) {

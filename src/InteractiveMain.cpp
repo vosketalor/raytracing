@@ -149,7 +149,7 @@ int main(const int argc, char *argv[])
 
     const auto scene = std::make_unique<SceneGPU>();
     scene->setSkyColor(SKYCOLOR);
-    scene->setAmbient({0.1f, 0.1f, 0.1f});
+    scene->setAmbient({0.3f, 0.3f, 0.3f});
     scene->createLights();
     scene->createShapes();
 

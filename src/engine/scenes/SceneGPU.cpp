@@ -18,7 +18,7 @@ void SceneGPU::createShapes()
 
 void SceneGPU::createLights()
 {
-    Vector3 position{3, 6, -3};
+    Vector3 position{0, 6, 0};
 
     Vector3 uDir{1, 0, 0};
     Vector3 vDir{0, 0, 1};
@@ -38,7 +38,7 @@ void SceneGPU::createLights()
         colorDiffuse,
         colorSpecular);
 
-    source->setIntensity(2.0);
+    source->setIntensity(1.0);
 
     addLightSource(source);
 }
