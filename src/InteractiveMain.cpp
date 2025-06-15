@@ -30,6 +30,14 @@ static double lastMouseX = 0.f;
 static double lastMouseY = 0.f;
 constexpr float mouseSensitivity = 1.f;
 
+#ifdef _WIN32
+#include <windows.h>
+extern "C" {
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 void performRender(Application &application, const int width, const int height)
 {
     application.setRendering(true);
@@ -157,6 +165,7 @@ int main(const int argc, char *argv[])
 
     std::cout << "Starting initial render..." << std::endl;
     std::cout << "Resolution: " << width << "x" << height << std::endl;
+    std::cout << "GPU: " << glGetString(GL_RENDERER) << std::endl;
 
     glfwSetKeyCallback(application.window, keyCallback);
     glfwSetMouseButtonCallback(application.window, mouseButtonCallback);

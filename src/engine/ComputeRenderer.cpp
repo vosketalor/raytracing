@@ -1,5 +1,7 @@
 #include "ComputeRenderer.h"
 
+#include <execution>
+
 ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, int height)
     : scene(scene), camera_(camera), width(width), height(height),
       computeShader(0), shaderProgram(0), outputTexture(0),
@@ -302,9 +304,18 @@ void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     frameBuffer.resize(width * height);
-    for (int i = 0; i < width * height; i++) {
-        frameBuffer[i] = Vector3(pixels[i*4], pixels[i*4+1], pixels[i*4+2]);
-    }
+    // for (int i = 0; i < width * height; i++) {
+    //     frameBuffer[i] = Vector3(pixels[i*4], pixels[i*4+1], pixels[i*4+2]);
+    // }
+    std::for_each(
+        std::execution::par,
+        frameBuffer.begin(),
+        frameBuffer.end(),
+        [&](Vector3& color) {
+            const size_t i = &color - frameBuffer.data();
+            color = Vector3(pixels[i*4], pixels[i*4+1], pixels[i*4+2]);
+        }
+    );
 }
 
 void ComputeRenderer::setCamera(const Camera& camera) {
