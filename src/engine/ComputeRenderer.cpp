@@ -274,6 +274,8 @@ void ComputeRenderer::updateCameraUniforms() const {
     setUniformBool(shaderProgram, "fresnelEnabled", fresnelEnabled);
     setUniformBool(shaderProgram, "roughnessEnabled", roughnessEnabled);
 
+    setUniform1f(shaderProgram, "u_time", static_cast<float>(glfwGetTime()));
+
     glm::vec3 skyColor = scene->getSkyColor();
     glm::vec3 ambient = scene->getAmbient();
     setUniform3f(shaderProgram, "skyColor", skyColor.x, skyColor.y, skyColor.z);

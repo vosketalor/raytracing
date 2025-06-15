@@ -55,6 +55,7 @@ public:
     void setTransparency(const float trans) { transparency = trans; }
 
     GPU::GPUMaterial toGPU() const;
+
     static const Material IronRusty;
     static const Material GoldBrushed;
     static const Material Concrete;
@@ -78,6 +79,9 @@ public:
     static const Material Copper;
     static const Material Silver;
     static const Material Gold;
+    static const Material Mirror;
+    static const Material Glass;
+    static const Material PlasticRough;
 
     bool operator==(const Material& other) const
     {
@@ -89,11 +93,4 @@ public:
             metallic == other.metallic &&
             f0 == other.f0;
     }
-
-    // Matériaux prédéfinis mis à jour
-    static const Material Mirror;
-    static const Material Glass;
-    static const Material MetalGold;
-    static const Material MetalCopper;
-    static const Material PlasticRough;
 };

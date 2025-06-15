@@ -14,6 +14,11 @@ void SceneGPU::createShapes()
     sphere->setColor(Scene::YELLOW);
     sphere->setMaterial(Material::Wood);
     this->addShape(sphere);
+
+    sphere = std::make_shared<Sphere>(Vector3(-2, 0, -4), 1);
+    sphere->setColor(Scene::RED);
+    sphere->setMaterial(Material::IronRusty);
+    this->addShape(sphere);
 }
 
 void SceneGPU::createLights()
