@@ -6,10 +6,18 @@
 #include <sstream>
 
 ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, int height)
-    : scene(scene), camera_(camera), width(width), height(height),
+    : scene(scene), camera_(camera),
       computeShader(0), shaderProgram(0), outputTexture(0),
       sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0) {
     prefs.load();
+    reflectionsEnabled = prefs.get("reflectionsEnabled", false);
+    refractionsEnabled = prefs.get("refractionsEnabled", false);
+    specularEnabled    = prefs.get("specularEnabled", false);
+    attenuationEnabled = prefs.get("attenuationEnabled", false);
+    shadowsEnabled     = prefs.get("shadowsEnabled", false);
+    immediateEffect    = prefs.get("immediateEffect", false);
+    this->width        = prefs.get("width", 512);
+    this->height       = prefs.get("height", 384);
     std::cout << prefs << std::endl;
 }
 

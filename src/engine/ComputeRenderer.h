@@ -32,11 +32,12 @@ private:
 public:
     PreferenceManager& prefs = PreferenceManager::getInstance();
 
-    bool reflectionsEnabled = prefs.get("reflectionsEnabled", false);
-    bool refractionsEnabled = prefs.get("refractionsEnabled", false);
-    bool specularEnabled = prefs.get("specularEnabled", false);
-    bool attenuationEnabled = prefs.get("attenuationEnabled", false);
-    bool shadowsEnabled = prefs.get("shadowsEnabled", false);
+    bool reflectionsEnabled;
+    bool refractionsEnabled;
+    bool specularEnabled;
+    bool attenuationEnabled;
+    bool shadowsEnabled;
+    bool immediateEffect;
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

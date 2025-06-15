@@ -144,8 +144,10 @@ void cursorPosCallback(GLFWwindow *window, const double xpos, const double ypos)
 
 int main(const int argc, char *argv[])
 {
-    const int width = 512;
-    const int height = 384;
+    auto& prefs = PreferenceManager::getInstance();
+    prefs.load();
+    const int width = prefs.get("width", 512);
+    const int height = prefs.get("height", 384);
 
     const auto scene = std::make_unique<SceneGPU>();
     scene->setSkyColor(SKYCOLOR);

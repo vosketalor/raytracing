@@ -17,7 +17,7 @@ void ResolutionWindow::render() {
 
         if (ImGui::BeginCombo("Preset", m_renderer.resolutionPresets[m_renderer.selectedPreset].name)) {
             for (int i = 0; i < m_renderer.resolutionPresets.size(); i++) {
-                const bool isSelected = (m_renderer.selectedPreset == i);
+                const bool isSelected = m_renderer.selectedPreset == i;
                 if (ImGui::Selectable(m_renderer.resolutionPresets[i].name, isSelected)) {
                     m_renderer.selectedPreset = i;
                     if (i < m_renderer.resolutionPresets.size() - 1) {
@@ -27,6 +27,12 @@ void ResolutionWindow::render() {
                     } else {
                         m_renderer.customResolution = true;
                     }
+
+                    auto& prefs = PreferenceManager::getInstance();
+                    prefs.set("width", m_renderer.renderWidth);
+                    prefs.set("height", m_renderer.renderHeight);
+                    prefs.set("preset", m_renderer.selectedPreset);
+                    prefs.save();
                 }
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
@@ -35,8 +41,16 @@ void ResolutionWindow::render() {
         }
 
         if (m_renderer.customResolution) {
-            ImGui::InputInt("Width", &m_renderer.renderWidth);
-            ImGui::InputInt("Height", &m_renderer.renderHeight);
+            bool updated = false;
+            updated |= ImGui::InputInt("Width", &m_renderer.renderWidth);
+            updated |= ImGui::InputInt("Height", &m_renderer.renderHeight);
+
+            if (updated) {
+                auto& prefs = PreferenceManager::getInstance();
+                prefs.set("width", m_renderer.renderWidth);
+                prefs.set("height", m_renderer.renderHeight);
+                prefs.save();
+            }
         }
 
         ImGui::Text("Current: %dx%d", m_renderer.renderWidth, m_renderer.renderHeight);

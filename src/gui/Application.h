@@ -22,8 +22,8 @@ public:
     int prevWindowWidth = -1;
     int prevWindowHeight = -1;
 
-    int renderWidth = 512;
-    int renderHeight = 384;
+    int renderWidth;
+    int renderHeight;
     bool showResolutionMenu = false;
 
     bool softShadowsEnabled = false;
@@ -55,7 +55,7 @@ public:
         {"1920x1080", 1920, 1080},
         {"Custom", 0, 0}};
 
-    int selectedPreset = 0;
+    int selectedPreset;
     bool customResolution = false;
 
     bool enableAccumulation = false;
@@ -71,7 +71,13 @@ private:
 public:
     Application(Scene* scene) : window(nullptr), textureID(0), imageWidth(0), imageHeight(0),
                       renderTime(0.0), imageReady(false), isRendering(false), prevWindowWidth(-1),
-                      prevWindowHeight(-1), renderer(scene, camera, 0, 0), shouldRerender(false) {}
+                      prevWindowHeight(-1), renderer(scene, camera, 0, 0), shouldRerender(false) {
+        auto& prefs = PreferenceManager::getInstance();
+        prefs.load();
+        renderWidth = prefs.get("width", 512);
+        renderHeight = prefs.get("height", 384);
+        selectedPreset = prefs.get("preset", 0);
+    }
 
     ~Application()
     {

@@ -8,30 +8,55 @@ void reflection(Application& m_renderer) {
     if (ImGui::Checkbox("Enable reflection", &m_renderer.renderer.reflectionsEnabled)) {
         m_renderer.renderer.prefs.set("reflectionsEnabled", m_renderer.renderer.reflectionsEnabled);
         m_renderer.renderer.prefs.save();
-        if (!m_renderer.isRendering) m_renderer.triggerRerender();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
     }
 }
 
 void refraction(Application& m_renderer) {
-    ImGui::Checkbox("Enable refraction", &m_renderer.renderer.refractionsEnabled);
+    if (ImGui::Checkbox("Enable refraction", &m_renderer.renderer.refractionsEnabled)) {
+        m_renderer.renderer.prefs.set("refractionsEnabled", m_renderer.renderer.refractionsEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
 }
 
 void specular(Application& m_renderer) {
-    ImGui::Checkbox("Enable specular", &m_renderer.renderer.specularEnabled);
+    if (ImGui::Checkbox("Enable specular", &m_renderer.renderer.specularEnabled)) {
+        m_renderer.renderer.prefs.set("specularEnabled", m_renderer.renderer.specularEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
 }
 
 void attenuation(Application& m_renderer) {
-    ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled);
+    if (ImGui::Checkbox("Enable attenuation", &m_renderer.renderer.attenuationEnabled)) {
+        m_renderer.renderer.prefs.set("attenuationEnabled", m_renderer.renderer.attenuationEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
 }
 
 void shadow(Application& m_renderer) {
-    ImGui::Checkbox("Enable Shadows", &m_renderer.renderer.shadowsEnabled);
+    if (ImGui::Checkbox("Enable Shadows", &m_renderer.renderer.shadowsEnabled)) {
+        m_renderer.renderer.prefs.set("shadowsEnabled", m_renderer.renderer.shadowsEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering) m_renderer.triggerRerender();
+    }
+
     // if (m_renderer.renderer.shadowsEnabled) {
     //     ImGui::Checkbox("Enable Soft Shadows", &m_renderer.renderer.softShadowsEnabled);
     //     if (m_renderer.renderer.softShadowsEnabled) {
     //         ImGui::SliderInt("Samples", &m_renderer.renderer.samplesNumber, 1, 32);
     //     }
     // }
+}
+
+void immediateEffect(Application& m_renderer) {
+    if (ImGui::Checkbox("Immediate effect", &m_renderer.renderer.immediateEffect)) {
+        m_renderer.renderer.prefs.set("immediateEffect", m_renderer.renderer.immediateEffect);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering) m_renderer.triggerRerender();
+    }
 }
 
 void accumulation(Application& m_renderer) {
@@ -83,6 +108,10 @@ void RendererWindow::render() {
         ImGui::Separator();
 
         accumulation(m_renderer);
+
+        ImGui::Separator();
+
+        immediateEffect(m_renderer);
 
         ImGui::Separator();
 
