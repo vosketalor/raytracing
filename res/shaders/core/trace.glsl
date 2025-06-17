@@ -12,7 +12,13 @@ vec3 traceRay(Ray ray) {
     vec3 throughput = vec3(1.0);
 
     for (int depth = 0; depth < MAX_BOUNCES; ++depth) {
-        HitInfo hit = findNearestIntersection(ray);
+        HitInfo hit;
+        if (useBVH) {
+            hit = findNearestIntersectionBVH(ray);
+        } else {
+            hit = findNearestIntersection(ray);
+        }
+
         if (!hit.hit) {
             finalColor += skyColor * throughput;
             break;

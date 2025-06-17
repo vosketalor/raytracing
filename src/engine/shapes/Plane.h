@@ -36,4 +36,5 @@ public :
     Plane(const Vector3& P, const Vector3& n);
     Plane(const Vector3& C, const Vector3& v1, const Vector3& v2);
     GPU::GPUShapeData toGPU() const override;
+    void setBoundingBox() override;
 };

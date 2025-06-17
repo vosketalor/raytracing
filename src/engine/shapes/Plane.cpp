@@ -1,4 +1,6 @@
 #include "Plane.h"
+
+#include "acceleration/BoundingBox.h"
 //
 // #include "../acceleration/BoundingBox.h"
 // #include "../scenes/Scene.h"
@@ -40,17 +42,17 @@ GPU::GPUShapeData Plane::toGPU() const
 //     return (lambda >= 0) ? Intersection(lambda, normal, this) : Intersection();
 // }
 //
-// void Plane::setBoundingBox() {
-//     const Vector3 min(-std::numeric_limits<double>::max(),
-//                 -std::numeric_limits<double>::max(),
-//                 -std::numeric_limits<double>::max());
-//
-//     const Vector3 max(std::numeric_limits<double>::max(),
-//                 std::numeric_limits<double>::max(),
-//                 std::numeric_limits<double>::max());
-//
-//     this->boundingBox = std::make_shared<BoundingBox>(min, max);
-// }
+void Plane::setBoundingBox() {
+    const glm::vec3 min(-std::numeric_limits<double>::max(),
+                -std::numeric_limits<double>::max(),
+                -std::numeric_limits<double>::max());
+
+    const glm::vec3 max(std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max(),
+                std::numeric_limits<double>::max());
+
+    this->boundingBox = std::make_shared<BoundingBox>(min, max);
+}
 //
 //
 // // void Plane::scale(double /*scale*/) {

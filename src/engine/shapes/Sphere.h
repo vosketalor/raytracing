@@ -1,7 +1,6 @@
 #pragma once
 #include "Shape.h"
 
-
 //
 // class Sphere : public Shape {
 // private:
@@ -26,10 +25,11 @@
 class Sphere : public Shape
 {
 private:
-    Vector3 center;
+    glm::vec3 center;
     float radius;
 
 public:
-    Sphere(const Vector3& P, float radius);
+    Sphere(const glm::vec3& P, float radius);
     GPU::GPUShapeData toGPU() const override;
+    void setBoundingBox() override;
 };

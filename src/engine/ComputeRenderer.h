@@ -16,6 +16,7 @@
 #include "scenes/Scene.h"
 #include "Vector.h"
 #include "../preferences/PreferenceManager.h"
+#include "acceleration/BVHNode.h"
 
 class ComputeRenderer {
 private:
@@ -25,9 +26,11 @@ private:
     GLuint sceneDataSSBO;
     GLuint lightDataSSBO;
     GLuint materialDataSSBO;
+    GLuint bvhDataSSBO;
 
     Scene* scene;
     Camera camera_;
+    BVHNode bvh_;
 
 public:
     PreferenceManager& prefs = PreferenceManager::getInstance();
@@ -40,6 +43,7 @@ public:
     bool immediateEffect;
     bool fresnelEnabled;
     bool roughnessEnabled;
+    bool bvhEnabled;
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

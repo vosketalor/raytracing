@@ -6,7 +6,7 @@
 //   #include <corecrt_math_defines.h>  // Windows (Visual Studio)
 // #endif
 //
-Sphere::Sphere(const Vector3& P, const float radius)
+Sphere::Sphere(const glm::vec3& P, const float radius)
     : center(P), radius(radius) {
     // setBoundingBox();
 }
@@ -15,7 +15,7 @@ GPU::GPUShapeData Sphere::toGPU() const
 {
     GPU::GPUShapeData data = Shape::toGPU();
     data.type = GPU::GPUShapeEnum::Sphere;
-    data.center = glm::vec3(center.x(), center.y(), center.z());
+    data.center = glm::vec3(center.x, center.y, center.z);
     data.radius = radius;
     return data;
 }
@@ -57,11 +57,11 @@ GPU::GPUShapeData Sphere::toGPU() const
 // //     // Rotation has no effect on a sphere
 // // }
 //
-// void Sphere::setBoundingBox() {
-//     Vector3 min = center - Vector3(radius, radius, radius);
-//     Vector3 max = center + Vector3(radius, radius, radius);
-//     boundingBox = std::make_shared<BoundingBox>(min, max);
-// }
+void Sphere::setBoundingBox() {
+    glm::vec3 min = center - glm::vec3(radius, radius, radius);
+    glm::vec3 max = center + glm::vec3(radius, radius, radius);
+    boundingBox = std::make_shared<BoundingBox>(min, max);
+}
 //
 // Vector2 Sphere::getTextureCoordinates(const Vector3& intersection) const {
 //     Vector3 P = (intersection - center).normalized();

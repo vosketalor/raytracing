@@ -5,10 +5,12 @@
 #include <fstream>
 #include <sstream>
 
+#include "acceleration/GPUBVHNode.h"
+
 ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, int height)
-    : scene(scene), camera_(camera),
+    : scene(scene), camera_(camera), bvh_(scene->getShapes(), 0),
       computeShader(0), shaderProgram(0), outputTexture(0),
-      sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0) {
+      sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0), bvhDataSSBO(0) {
     prefs.load();
     reflectionsEnabled = prefs.get("reflectionsEnabled", false);
     refractionsEnabled = prefs.get("refractionsEnabled", false);
@@ -18,9 +20,11 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
     immediateEffect    = prefs.get("immediateEffect", false);
     fresnelEnabled     = prefs.get("fresnelEnabled", false);
     roughnessEnabled   = prefs.get("roughnessEnabled", false);
+    bvhEnabled         = prefs.get("bvhEnabled", false);
     this->width        = prefs.get("width", 512);
     this->height       = prefs.get("height", 384);
     std::cout << prefs << std::endl;
+    std::cout << bvh_ << std::endl;
 }
 
 ComputeRenderer::~ComputeRenderer() {
@@ -164,6 +168,7 @@ void ComputeRenderer::setupBuffers() {
     glGenBuffers(1, &sceneDataSSBO);
     glGenBuffers(1, &lightDataSSBO);
     glGenBuffers(1, &materialDataSSBO);
+    glGenBuffers(1, &bvhDataSSBO);
 
     updateSceneData();
 }
@@ -198,6 +203,12 @@ void ComputeRenderer::updateSceneData() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuMaterials.size() * sizeof(GPU::GPUMaterial),
                  gpuMaterials.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, materialDataSSBO);
+
+    std::vector<GPU::GPUBVHNode> gpuBVH = this->bvh_.toGPU(scene->getShapes());
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, bvhDataSSBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuBVH.size() * sizeof(GPU::GPUBVHNode),
+                 gpuBVH.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, bvhDataSSBO);
 }
 
 void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
@@ -265,6 +276,8 @@ void ComputeRenderer::updateCameraUniforms() const {
     // setUniform1i(shaderProgram, "numMaterials", static_cast<int>(Shape::materials.size()));
     setUniform1i(shaderProgram, "numShapes", static_cast<int>(scene->getShapes().size()));
     setUniform1i(shaderProgram, "numLights", static_cast<int>(scene->getLightSources().size()));
+    //TODO : do better later
+    setUniform1i(shaderProgram, "numBVHNodes", static_cast<int>(this->bvh_.toGPU(scene->getShapes()).size()));
 
     setUniformBool(shaderProgram, "reflectionsEnabled", reflectionsEnabled);
     setUniformBool(shaderProgram, "refractionsEnabled", refractionsEnabled);
@@ -273,6 +286,7 @@ void ComputeRenderer::updateCameraUniforms() const {
     setUniformBool(shaderProgram, "shadowsEnabled", shadowsEnabled);
     setUniformBool(shaderProgram, "fresnelEnabled", fresnelEnabled);
     setUniformBool(shaderProgram, "roughnessEnabled", roughnessEnabled);
+    setUniformBool(shaderProgram, "useBVH", bvhEnabled);
 
     setUniform1f(shaderProgram, "u_time", static_cast<float>(glfwGetTime()));
 
@@ -337,6 +351,7 @@ void ComputeRenderer::cleanup() {
     if (sceneDataSSBO) glDeleteBuffers(1, &sceneDataSSBO);
     if (lightDataSSBO) glDeleteBuffers(1, &lightDataSSBO);
     if (materialDataSSBO) glDeleteBuffers(1, &materialDataSSBO);
+    if (bvhDataSSBO) glDeleteBuffers(1, &bvhDataSSBO);
     if (shaderProgram) glDeleteProgram(shaderProgram);
     if (computeShader) glDeleteShader(computeShader);
 }

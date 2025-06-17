@@ -14,9 +14,12 @@ The raytracer simulates light transport to generate realistic images from 3D sce
 - Camera system with adjustable parameters
 - Scene description and rendering pipeline
 - Image output generation
+- GPU
 
 ## Possibles extensions
-- GPU
+- Shape
+  - OBJ
+  - Triangle
 - Textures
 - Animations
 - Multiple types of maps: https://3dstudio.co/3d-texture-mapping/
@@ -24,8 +27,23 @@ The raytracer simulates light transport to generate realistic images from 3D sce
   - Roughness map
   - Bump map
   - Reflection map
-- Selection object by clicking 
-- Zoom
+- Acceleration
+  - BVH
+- GUI
+  - Selection object by clicking 
+  - Zoom
+  - Inspector menu for objects clicked
+  - Scenes switching in real time
+- Antialiasing 
+  - Oversampling (SSAA)
+  - MSAA
+  - FXAA
+- True HDR
+- Global Illumnation
+- Multiple types of lights
+  - Spot Light
+  - Ambient Light
+  - Sun Light
   
 ## Build Instructions
 

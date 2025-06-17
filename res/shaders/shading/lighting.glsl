@@ -66,7 +66,13 @@ vec3 computeLighting(Ray ray, vec3 point, vec3 normal, vec3 color, int shapeInde
         float lightDist = length(toLight);
         shadowRay.direction = normalize(toLight);
 
-        HitInfo shadowHit = findNearestIntersection(shadowRay);
+        HitInfo shadowHit;
+        if (useBVH) {
+            shadowHit = findNearestIntersectionBVH(shadowRay);
+        } else {
+            shadowHit = findNearestIntersection(shadowRay);
+        }
+
         if (isInShadow(shadowHit, lightDist) && shadowsEnabled) {
             continue;
         }

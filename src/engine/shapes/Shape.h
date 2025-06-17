@@ -2,12 +2,10 @@
 #include <memory>
 #include <string>
 #include "Vector.h"
-// #include "Texture.h"
 #include "Camera.h"
 #include "GPUShapeData.h"
 #include "Material.h"
 #include "Texture.h"
-#include "../Intersection.h"
 
 class BoundingBox;
 
@@ -20,7 +18,7 @@ protected:
     glm::vec3 color_ = {1.0f, 1.0f, 1.0f};  ///< Base color (if no texture)
     Material material_;
     bool visible = true;                 ///< Visibility flag
-    // std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
+    std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
     // bool hasTexture_ = false;               ///< Texture presence flag
     // bool wireframeEnabled = false;        ///< Wireframe mode flag
@@ -47,8 +45,8 @@ public:
     // void rotate(const float angle) { rotate(angle, Vector3{0,1,0}); }
 
     // Bounding volume
-    // virtual void setBoundingBox() = 0;
-    // std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
+    virtual void setBoundingBox() = 0;
+    std::shared_ptr<BoundingBox> getBoundingBox() const { return boundingBox; }
     //
     // // Getters/Setters
     // bool isVisible() const { return visible; }

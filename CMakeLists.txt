@@ -104,6 +104,7 @@ add_executable(Raytracing
         src/engine/scenes/SceneGPU.h
         src/engine/GPULightSource.h
         src/engine/GPUMaterial.h
+        src/engine/acceleration/GPUBVHNode.h
 
 )
 

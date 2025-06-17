@@ -67,6 +67,14 @@ void fresnel(Application& m_renderer) {
     }
 }
 
+void bvh(Application& m_renderer) {
+    if (ImGui::Checkbox("Enable BVH", &m_renderer.renderer.bvhEnabled)) {
+        m_renderer.renderer.prefs.set("bvhEnabled", m_renderer.renderer.bvhEnabled);
+        m_renderer.renderer.prefs.save();
+        if (!m_renderer.isRendering && m_renderer.renderer.immediateEffect) m_renderer.triggerRerender();
+    }
+}
+
 void roughness(Application& m_renderer) {
     if (ImGui::Checkbox("Enable Roughness", &m_renderer.renderer.roughnessEnabled)) {
         m_renderer.renderer.prefs.set("roughnessEnabled", m_renderer.renderer.roughnessEnabled);
@@ -151,6 +159,8 @@ void RendererWindow::render() {
         shadow(m_renderer);
 
         ImGui::Separator();
+
+        bvh(m_renderer);
 
         accumulation(m_renderer);
 
