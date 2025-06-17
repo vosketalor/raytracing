@@ -24,7 +24,6 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
     this->width        = prefs.get("width", 512);
     this->height       = prefs.get("height", 384);
     std::cout << prefs << std::endl;
-    std::cout << bvh_ << std::endl;
 }
 
 ComputeRenderer::~ComputeRenderer() {

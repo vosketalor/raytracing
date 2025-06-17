@@ -19,11 +19,8 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<Shape>>& shapes, int depth)
 
         shapes[0]->setBoundingBox();
 
-        std::cout << "Feuille créée avec 1 shape à profondeur " << depth << std::endl;
         return;
     }
-
-    std::cout << "Nœud interne avec " << shapes.size() << " shapes à profondeur " << depth << std::endl;
 
     // Calculer la bounding box de ce nœud
     boundingBox = std::make_shared<BoundingBox>(computeBoundingBox(shapes));
@@ -47,7 +44,6 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<Shape>>& shapes, int depth)
 
     // Si toutes les shapes sont au même point, on divise quand même arbitrairement
     if (maxExtent < 1e-6f) {
-        std::cout << "Shapes colocalisées, division arbitraire" << std::endl;
         // Division arbitraire au milieu
         size_t splitPoint = shapes.size() / 2;
         if (splitPoint == 0) splitPoint = 1;
@@ -80,9 +76,6 @@ BVHNode::BVHNode(const std::vector<std::shared_ptr<Shape>>& shapes, int depth)
 
     std::vector<std::shared_ptr<Shape>> leftShapes(sortedShapes.begin(), sortedShapes.begin() + splitPoint);
     std::vector<std::shared_ptr<Shape>> rightShapes(sortedShapes.begin() + splitPoint, sortedShapes.end());
-
-    std::cout << "Division axe " << bestAxis << ": " << shapes.size()
-              << " -> " << leftShapes.size() << " + " << rightShapes.size() << std::endl;
 
     // Vérification de sécurité - ne devrait jamais arriver avec la nouvelle logique
     if (leftShapes.empty() || rightShapes.empty()) {
@@ -204,12 +197,6 @@ std::vector<GPU::GPUBVHNode> BVHNode::toGPU(const std::vector<std::shared_ptr<Sh
     int maxDepth = getMaxDepth();
     int totalNodes = countNodes();
 
-    std::cout << "=== BVH STATS ===" << std::endl;
-    std::cout << "Total Shapes: " << shapeCount << std::endl;
-    std::cout << "Input Shapes: " << allShapes.size() << std::endl;
-    std::cout << "Max Depth: " << maxDepth << std::endl;
-    std::cout << "Node Count: " << totalNodes << std::endl;
-
     if (!verifyIntegrity()) {
         std::cerr << "ERROR: BVH integrity check failed!" << std::endl;
     }
@@ -270,9 +257,6 @@ std::vector<GPU::GPUBVHNode> BVHNode::toGPU(const std::vector<std::shared_ptr<Sh
         std::cerr << "ERROR: Node count mismatch! Expected: " << totalNodes
                   << ", Actual: " << (nextIndex + 1) << std::endl;
     }
-
-    std::cout << "GPU conversion complete: " << gpuNodes.size()
-              << " nodes created (BFS layout)" << std::endl;
     return gpuNodes;
 }
 
