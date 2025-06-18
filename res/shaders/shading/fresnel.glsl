@@ -7,6 +7,7 @@ float fresnelSchlick(float cosTheta, float F0) {
 }
 
 float fresnelExact(float cosI, float etaI, float etaT) {
+    cosI = clamp(cosI, -1.0, 1.0);
     float sinT2 = (etaI / etaT) * (etaI / etaT) * (1.0 - cosI * cosI);
 
     // Réflexion totale interne
@@ -20,23 +21,28 @@ float fresnelExact(float cosI, float etaI, float etaT) {
     return 0.5 * (Rs * Rs + Rp * Rp);
 }
 
-// Version hybride avec support des métaux
 vec3 computeFresnel(vec3 rayDir, vec3 normal, float etaI, float etaT, vec3 F0, float metallic) {
-    float cosI = abs(dot(-rayDir, normal));
+    float cosI = abs(dot(-normalize(rayDir), normalize(normal)));
 
     if (metallic > 0.5) {
-        // Matériau métallique : utiliser F0 coloré avec Schlick
+        // Matériau métallique - utilise F0 directement (déjà vectoriel)
         return fresnelSchlick(cosI, F0);
     } else {
-        // Matériau diélectrique : utiliser la moyenne de F0 ou calcul exact
-        float F0_avg = (F0.r + F0.g + F0.b) / 3.0;
-        if (F0_avg > 0.0) {
-            float fresnel = fresnelSchlick(cosI, F0_avg);
-            return vec3(fresnel); // Fresnel identique sur tous les canaux
+        // Matériau diélectrique
+        if (length(F0) > 0.1) {
+            // F0 défini - utilise Schlick vectoriel
+            return fresnelSchlick(cosI, F0);
         } else {
-            // Calcul exact pour diélectriques purs
-            float fresnel = fresnelExact(cosI, etaI, etaT);
-            return vec3(fresnel);
+            // Calcul exact du Fresnel pour diélectriques avec dispersion simple
+            // Simulation basique de dispersion chromatique
+            vec3 etaRGB = vec3(1.513, 1.517, 1.528); // Pour verre crown (BK7)
+
+            vec3 fresnelValues;
+            fresnelValues.r = fresnelExact(cosI, etaI, etaRGB.r);
+            fresnelValues.g = fresnelExact(cosI, etaI, etaRGB.g);
+            fresnelValues.b = fresnelExact(cosI, etaI, etaRGB.b);
+
+            return fresnelValues;
         }
     }
 }

@@ -10,30 +10,30 @@ void SceneGPU::createShapes()
     plane->setMaterial(Material::Concrete);
     this->addShape(plane);
 
-    // auto sphere = std::make_shared<Sphere>(glm::vec3{0, 0, -3}, 1);
-    // sphere->setColor(Scene::YELLOW);
-    // sphere->setMaterial(Material::Wood);
-    // this->addShape(sphere);
-    //
-    // sphere = std::make_shared<Sphere>(glm::vec3{-2, 0, -4}, 1);
-    // sphere->setColor(Scene::RED);
-    // sphere->setMaterial(Material::IronRusty);
-    // this->addShape(sphere);
+    auto sphere = std::make_shared<Sphere>(glm::vec3{0, 0, -3}, 1);
+    sphere->setColor(Scene::YELLOW);
+    sphere->setMaterial(Material(1,0,1000,1));
+    this->addShape(sphere);
 
-    int nb = 10;
-    for (int i = -nb; i < nb; ++i)
-    {
-        for (int k = -nb; k < nb; ++k)
-        {
-            if (i != 0 || k!=0)
-            {
-                auto sphere = std::make_shared<Sphere>(glm::vec3{2*i, 0, 2*k}, 1);
-                sphere->setColor(Scene::YELLOW);
-                sphere->setMaterial(Material::Wood);
-                this->addShape(sphere);
-            }
-        }
-    }
+    sphere = std::make_shared<Sphere>(glm::vec3{-2, 0, -4}, 1);
+    sphere->setColor(Scene::RED);
+    sphere->setMaterial(Material(0,1,1000,Scene::ETA_AIR));
+    this->addShape(sphere);
+
+    // int nb = 10;
+    // for (int i = -nb; i < nb; ++i)
+    // {
+    //     for (int k = -nb; k < nb; ++k)
+    //     {
+    //         if (i != 0 || k!=0)
+    //         {
+    //             auto sphere = std::make_shared<Sphere>(glm::vec3{2*i, 0, 2*k}, 1);
+    //             sphere->setColor(Scene::YELLOW);
+    //             sphere->setMaterial(Material(0, k%2 ? 1 : 0, 0, 1000, Scene::ETA_AIR));
+    //             this->addShape(sphere);
+    //         }
+    //     }
+    // }
 }
 
 void SceneGPU::createLights()

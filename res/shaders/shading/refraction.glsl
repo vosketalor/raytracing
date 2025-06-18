@@ -30,11 +30,8 @@ vec3 computeRefractionDirection(vec3 dir, vec3 normal, float etaI, float etaT) {
     }
 }
 
-vec3 computeRefraction(Ray ray, vec3 point, vec3 normal, int shapeIndex, int order) {
-    if (order <= 0) return vec3(0.0);
-
+vec3 computeRefraction(Ray ray, vec3 point, vec3 normal, int shapeIndex) {
     GPUMaterial mat = materials[shapes[shapeIndex].materialIndex];
-    if (mat.transparency <= 0.0) return vec3(0.0);
 
     return computeRefractionDirection(ray.direction, normal, 1.0, mat.eta);
 }
