@@ -15,21 +15,22 @@ protected:
     float reflectivity = 0.0;            ///< [0-1] reflection coefficient
     float transparency = 0.0;            ///< [0-1] transparency coefficient
     float shininess = 100.0;             ///< Phong shininess factor
-    float eta = 1.0;                     ///< Refractive index
+    float etaReal = 1.0;                     ///< Refractive index
+    glm::vec3 etaIm = glm::vec3{0.0, 0.0, 0.0}; ///< Refractive imaginary index
     float roughness = 0.0;               ///< [0-1] surface roughness (0 = perfectly smooth)
 
     // NOUVEAUX PARAMÈTRES POUR MICROFACETTES
     float metallic = 0.0;                ///< [0-1] métallique (0=diélectrique, 1=conducteur)
-    Vector3 f0 = Vector3(0.04, 0.04, 0.04); ///< Réflectance à incidence normale (pour diélectriques)
+    glm::vec3 f0 = glm::vec3{0.04, 0.04, 0.04}; ///< Réflectance à incidence normale (pour diélectriques)
 
 public:
     Material() = default;
 
     Material(const float refl, const float trans, const float shine,
-             const float refractiveIndex, const float rough = 0.0,
-             const float metal = 0.0, const Vector3& fresnel0 = Vector3(0.04, 0.04, 0.04))
+             const float refractiveIndex, const glm::vec3& refractiveImIndex = glm::vec3(0.0,0.0,0.0), const float rough = 0.0,
+             const float metal = 0.0, const glm::vec3& fresnel0 = glm::vec3(0.04, 0.04, 0.04))
         : reflectivity(refl), transparency(trans), shininess(shine),
-          eta(refractiveIndex), roughness(rough), metallic(metal), f0(fresnel0) {}
+          etaReal(refractiveIndex), etaIm(refractiveImIndex), roughness(rough), metallic(metal), f0(fresnel0) {}
 
     // Getters et setters existants...
     float getRoughness() const { return roughness; }
@@ -39,11 +40,11 @@ public:
     float getMetallic() const { return metallic; }
     void setMetallic(const float metal) { metallic = metal; }
 
-    Vector3 getF0() const { return f0; }
-    void setF0(const Vector3& fresnel0) { f0 = fresnel0; }
+    glm::vec3 getF0() const { return f0; }
+    void setF0(const glm::vec3& fresnel0) { f0 = fresnel0; }
 
-    float getEta() const { return eta; }
-    void setEta(const float refractiveIndex) { eta = refractiveIndex; }
+    float getEta() const { return etaReal; }
+    void setEta(const float refractiveIndex) { etaReal = refractiveIndex; }
 
     float getReflectivity() const { return reflectivity; }
     void setReflectivity(const float refl) { reflectivity = refl; }
@@ -88,7 +89,8 @@ public:
         return reflectivity == other.reflectivity &&
             transparency == other.transparency &&
             shininess == other.shininess &&
-            eta == other.eta &&
+            etaReal == other.etaReal &&
+            etaIm == other.etaIm &&
             roughness == other.roughness &&
             metallic == other.metallic &&
             f0 == other.f0;

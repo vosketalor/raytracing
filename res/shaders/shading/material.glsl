@@ -12,6 +12,8 @@ struct GPUMaterial {
     float pad2;
     vec3 f0;              // 12 (24-35)
     float pad3;
+    vec3 k;
+    float pas4;
 };
 
 layout(std430, binding = 3) buffer MaterialData {

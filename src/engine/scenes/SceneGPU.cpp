@@ -7,17 +7,22 @@
 void SceneGPU::createShapes()
 {
     auto plane = std::make_shared<Plane>(Vector3(0, 1, 0), 1);
-    plane->setMaterial(Material::Concrete);
+    plane->setMaterial(Material::PlasticRough);
     this->addShape(plane);
 
     auto sphere = std::make_shared<Sphere>(glm::vec3{0, 0, -3}, 1);
     sphere->setColor(Scene::YELLOW);
-    sphere->setMaterial(Material(1,0,1000,1));
+    sphere->setMaterial(Material(0.3,0.7,1000,ETA_WATER, glm::vec3(2.95f, 2.38f, 1.71f), 0.1));
     this->addShape(sphere);
 
     sphere = std::make_shared<Sphere>(glm::vec3{-2, 0, -4}, 1);
     sphere->setColor(Scene::RED);
-    sphere->setMaterial(Material(0,1,1000,Scene::ETA_AIR));
+    sphere->setMaterial(Material(0,1,1000,Scene::ETA_GLASS, glm::vec3(0.0), 0.01));
+    this->addShape(sphere);
+
+    sphere = std::make_shared<Sphere>(glm::vec3{2, 0, -4}, 1);
+    sphere->setColor(Scene::BLUE);
+    sphere->setMaterial(Material(0.3,0,1000,1.8, glm::vec3(0.0),0.1, 0.5));
     this->addShape(sphere);
 
     // int nb = 10;
