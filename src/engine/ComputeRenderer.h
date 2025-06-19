@@ -21,12 +21,15 @@
 class ComputeRenderer {
 private:
     GLuint computeShader;
+    GLuint pickShader;
     GLuint shaderProgram;
+    GLuint pickShaderProgram;
     GLuint outputTexture;
     GLuint sceneDataSSBO;
     GLuint lightDataSSBO;
     GLuint materialDataSSBO;
     GLuint bvhDataSSBO;
+    GLuint pickSSBO;
 
     Scene* scene;
     Camera camera_;
@@ -54,12 +57,20 @@ public:
     void render(std::vector<Vector3>& frameBuffer);
     void setCamera(const Camera& camera);
     void cleanup();
+    int pick(int mouseX, int mouseY) const;
 
 private:
-    bool loadComputeShader(const std::string& shaderSource);
+    bool loadComputeShader(GLuint& shader, GLuint& program, const std::string& shaderSource);
+    bool loadPickShader(const std::string& shaderSource);
     std::string loadShaderSource(const std::string& filename);
     std::string loadShaderWithIncludes(const std::string& filePath, const std::string& basePath, std::unordered_set<std::string>* includedFiles);
     void setupBuffers();
     void updateSceneData();
-    void updateCameraUniforms() const;
+    void updateUniforms() const;
+    void setUniform3f(GLuint program, const char* name, float x, float y, float z) const;
+    void setUniform1f(GLuint program, const char* name, float value) const;
+    void setUniform1i(GLuint program, const char* name, int value) const;
+    void setUniform2i(GLuint program, const char* name, int x, int y) const;
+    void setUniformBool(GLuint program, const char* name, bool value) const;
+    void updateCameraUniforms(const GLuint& program) const;
 };

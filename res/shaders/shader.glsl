@@ -18,6 +18,7 @@ layout(rgba32f, binding = 0) uniform image2D outputImage;
 
 void main() {
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+
     if (pixelCoord.x >= resolution.x || pixelCoord.y >= resolution.y) return;
 
     vec2 uv = (vec2(pixelCoord) + 0.5) / vec2(resolution);
@@ -28,9 +29,11 @@ void main() {
     float screenHeight = 2.0 * tan(fovRad / 2.0);
     float screenWidth = screenHeight * aspectRatio;
 
-    vec3 rayDir = normalize(cameraDir +
-                            ndc.x * screenWidth * 0.5 * cameraRight +
-    ndc.y * screenHeight * 0.5 * cameraUp);
+    vec3 rayDir = normalize(
+        cameraDir +
+        ndc.x * screenWidth * 0.5 * cameraRight +
+        ndc.y * screenHeight * 0.5 * cameraUp
+    );
 
     Ray ray;
     ray.origin = cameraPos;

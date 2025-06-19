@@ -9,8 +9,10 @@
 
 ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, int height)
     : scene(scene), camera_(camera), bvh_(scene->getShapes(), 0),
-      computeShader(0), shaderProgram(0), outputTexture(0),
-      sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0), bvhDataSSBO(0) {
+      computeShader(0), pickShader(0),
+      shaderProgram(0), pickShaderProgram(0), outputTexture(0),
+      sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0), bvhDataSSBO(0),
+      pickSSBO(0) {
     prefs.load();
     reflectionsEnabled = prefs.get("reflectionsEnabled", false);
     refractionsEnabled = prefs.get("refractionsEnabled", false);
@@ -118,45 +120,87 @@ bool ComputeRenderer::initialize() {
 
     const std::string shaderSource = loadShaderWithIncludes("shader.glsl");
     saveShaderToFile(shaderSource, "whole_shader.glsl");
-    // std::cout << "Current percent to the number max of characters : " << (shaderSource.size() / shaderSource.max_size())* 100 << "%" << std::endl;
 
-    if (shaderSource.empty()) {
+    const std::string pickSource = loadShaderWithIncludes("shader_pick.glsl");
+    saveShaderToFile(pickSource, "whole_shader_pick.glsl");
+
+    if (shaderSource.empty() || pickSource.empty()) {
         return false;
     }
 
-    return loadComputeShader(shaderSource);
+    if (!loadComputeShader(computeShader, shaderProgram, shaderSource)) return false;
+    if (!loadComputeShader(pickShader, pickShaderProgram, pickSource)) return false;
+
+    setupBuffers();
+
+    return true;
 }
 
-bool ComputeRenderer::loadComputeShader(const std::string& shaderSource) {
-    computeShader = glCreateShader(GL_COMPUTE_SHADER);
+bool ComputeRenderer::loadComputeShader(GLuint& shader, GLuint& program, const std::string& shaderSource) {
+    shader = glCreateShader(GL_COMPUTE_SHADER);
     const char* source = shaderSource.c_str();
-    glShaderSource(computeShader, 1, &source, NULL);
-    glCompileShader(computeShader);
+    glShaderSource(shader, 1, &source, NULL);
+    glCompileShader(shader);
 
     GLint success;
-    glGetShaderiv(computeShader, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         char infoLog[512];
-        glGetShaderInfoLog(computeShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "Compute shader compilation failed:\n" << infoLog << std::endl;
         return false;
     }
 
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, computeShader);
-    glLinkProgram(shaderProgram);
+    program = glCreateProgram();
+    glAttachShader(program, shader);
+    glLinkProgram(program);
 
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         char infoLog[512];
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
         std::cerr << "Shader program linking failed:\n" << infoLog << std::endl;
         return false;
     }
 
-    setupBuffers();
     return true;
 }
+
+int ComputeRenderer::pick(const int mouseX, const int mouseY) const {
+    // 1) Réinitialiser le SSBO de pick
+    const int clearVal = -1;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, pickSSBO);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &clearVal);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, sceneDataSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, lightDataSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, materialDataSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, bvhDataSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, pickSSBO);
+
+    // 2) Choix du programme de picking
+    glUseProgram(pickShaderProgram);
+
+    // 2a) Remplissage des uniforms de caméra et clic
+    updateCameraUniforms(pickShaderProgram);
+
+    setUniform1i(pickShaderProgram, "numShapes", static_cast<int>(scene->getShapes().size()));
+    setUniform1i(pickShaderProgram, "numBVHNodes", static_cast<int>(this->bvh_.toGPU(scene->getShapes()).size()));
+    setUniform2i(pickShaderProgram, "u_ClickCoord", mouseX, mouseY);
+
+    // 3) Dispatch et synchronisation
+    int groupsX = (width + 15) / 16;  // ou (width + 0) / 1 si vous gardez local_size 1
+    int groupsY = (height + 15) / 16; // ou (height + 0) / 1 si vous gardez local_size 1
+    glDispatchCompute(groupsX, groupsY, 1);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    // 4) Lecture CPU
+    int pickedID = -1;
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &pickedID);
+    return pickedID;
+}
+
+
 
 void ComputeRenderer::setupBuffers() {
     glGenTextures(1, &outputTexture);
@@ -170,6 +214,9 @@ void ComputeRenderer::setupBuffers() {
     glGenBuffers(1, &lightDataSSBO);
     glGenBuffers(1, &materialDataSSBO);
     glGenBuffers(1, &bvhDataSSBO);
+    glGenBuffers(1, &pickSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, pickSSBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), nullptr, GL_STATIC_DRAW);
 
     updateSceneData();
 }
@@ -210,9 +257,11 @@ void ComputeRenderer::updateSceneData() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuBVH.size() * sizeof(GPU::GPUBVHNode),
                  gpuBVH.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, bvhDataSSBO);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, pickSSBO);
 }
 
-void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
+void ComputeRenderer::setUniform3f(GLuint program, const char* name, float x, float y, float z) const {
     GLint loc = glGetUniformLocation(program, name);
     if (loc == -1) {
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
@@ -221,7 +270,7 @@ void setUniform3f(GLuint program, const char* name, float x, float y, float z) {
     }
 }
 
-void setUniform1f(GLuint program, const char* name, float value) {
+void ComputeRenderer::setUniform1f(GLuint program, const char* name, float value) const {
     GLint loc = glGetUniformLocation(program, name);
     if (loc == -1) {
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
@@ -230,7 +279,7 @@ void setUniform1f(GLuint program, const char* name, float value) {
     }
 }
 
-void setUniform1i(GLuint program, const char* name, int value) {
+void ComputeRenderer::setUniform1i(GLuint program, const char* name, int value) const {
     GLint loc = glGetUniformLocation(program, name);
     if (loc == -1) {
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
@@ -239,7 +288,7 @@ void setUniform1i(GLuint program, const char* name, int value) {
     }
 }
 
-void setUniform2i(GLuint program, const char* name, int x, int y) {
+void ComputeRenderer::setUniform2i(GLuint program, const char* name, int x, int y) const {
     GLint loc = glGetUniformLocation(program, name);
     if (loc == -1) {
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
@@ -248,7 +297,7 @@ void setUniform2i(GLuint program, const char* name, int x, int y) {
     }
 }
 
-void setUniformBool(GLuint program, const char* name, bool value) {
+void ComputeRenderer::setUniformBool(GLuint program, const char* name, bool value) const {
     GLint loc = glGetUniformLocation(program, name);
     if (loc == -1) {
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
@@ -257,22 +306,27 @@ void setUniformBool(GLuint program, const char* name, bool value) {
     }
 }
 
+void ComputeRenderer::updateCameraUniforms(const GLuint& program) const
+{
+    const glm::vec3 pos = camera_.getPosition();
+    const glm::vec3 dir = camera_.getDirection();
+    const glm::vec3 right = camera_.getRight();
+    const glm::vec3 up = camera_.getUp();
 
-void ComputeRenderer::updateCameraUniforms() const {
+    setUniform3f(program, "cameraPos", pos.x, pos.y, pos.z);
+    setUniform3f(program, "cameraDir", dir.x, dir.y, dir.z);
+    setUniform3f(program, "cameraRight", right.x, right.y, right.z);
+    setUniform3f(program, "cameraUp", up.x, up.y, up.z);
+    setUniform1f(program, "fov", camera_.getFov());
+    setUniform1f(program, "aspectRatio", static_cast<float>(width) / static_cast<float>(height));
+    setUniform2i(program, "resolution", width, height);
+}
+
+
+void ComputeRenderer::updateUniforms() const {
     glUseProgram(shaderProgram);
 
-    glm::vec3 pos = camera_.getPosition();
-    glm::vec3 dir = camera_.getDirection();
-    glm::vec3 right = camera_.getRight();
-    glm::vec3 up = camera_.getUp();
-
-    setUniform3f(shaderProgram, "cameraPos", pos.x, pos.y, pos.z);
-    setUniform3f(shaderProgram, "cameraDir", dir.x, dir.y, dir.z);
-    setUniform3f(shaderProgram, "cameraRight", right.x, right.y, right.z);
-    setUniform3f(shaderProgram, "cameraUp", up.x, up.y, up.z);
-    setUniform1f(shaderProgram, "fov", camera_.getFov());
-    setUniform1f(shaderProgram, "aspectRatio", static_cast<float>(width) / static_cast<float>(height));
-    setUniform2i(shaderProgram, "resolution", width, height);
+    updateCameraUniforms(shaderProgram);
 
     // setUniform1i(shaderProgram, "numMaterials", static_cast<int>(Shape::materials.size()));
     setUniform1i(shaderProgram, "numShapes", static_cast<int>(scene->getShapes().size()));
@@ -314,7 +368,7 @@ void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
     // Bind l'image pour le compute shader
     glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-    updateCameraUniforms();
+    updateUniforms();
 
     glUseProgram(shaderProgram);
 
@@ -355,6 +409,9 @@ void ComputeRenderer::cleanup() {
     if (lightDataSSBO) glDeleteBuffers(1, &lightDataSSBO);
     if (materialDataSSBO) glDeleteBuffers(1, &materialDataSSBO);
     if (bvhDataSSBO) glDeleteBuffers(1, &bvhDataSSBO);
+    if (pickSSBO) glDeleteBuffers(1, &pickSSBO);
     if (shaderProgram) glDeleteProgram(shaderProgram);
+    if (pickShaderProgram) glDeleteProgram(pickShaderProgram);
     if (computeShader) glDeleteShader(computeShader);
+    if (pickShader) glDeleteShader(pickShader);
 }

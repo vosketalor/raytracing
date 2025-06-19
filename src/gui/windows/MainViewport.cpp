@@ -47,6 +47,11 @@ void MainViewport::render() {
 
         ImGui::SetCursorPos(imagePos);
         ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(m_renderer.textureID)), imageSize);
+
+        const ImVec2 winPos = ImGui::GetWindowPos();
+        m_renderer.imgScreenOrigin.x = winPos.x + imagePos.x;
+        m_renderer.imgScreenOrigin.y = winPos.y + imagePos.y;
+        m_renderer.imgScreenSize    = imageSize;
     }
     ImGui::End();
 }

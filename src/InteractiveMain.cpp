@@ -27,8 +27,10 @@
 constexpr glm::vec3 SKYCOLOR = {135.0 / 255, 206.0 / 255, 235.0 / 255};
 // constexpr glm::vec3 SKYCOLOR = Scene::BLACK;
 static bool rightMousePressed = false;
+static bool leftMousePressed = false;
 static double lastMouseX = 0.f;
 static double lastMouseY = 0.f;
+static double mouseXf, mouseYf = 0.f;
 constexpr float mouseSensitivity = 1.f;
 
 #ifdef _WIN32
@@ -99,6 +101,8 @@ void keyCallback(GLFWwindow *window, const int key, const int scancode, const in
     }
 }
 
+
+
 void mouseButtonCallback(GLFWwindow *window, const int button, const int action, const int mods)
 {
 
@@ -118,6 +122,15 @@ void mouseButtonCallback(GLFWwindow *window, const int button, const int action,
             rightMousePressed = false;
             mouseCaptured = false;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        if (action == GLFW_PRESS)
+        {
+            leftMousePressed = true;
+            mouseCaptured = true;
+            glfwGetCursorPos(window, &mouseXf, &mouseYf);
         }
     }
 }
@@ -239,8 +252,8 @@ int main(const int argc, char *argv[])
             static double lastCamYaw = application.camera.getYaw();
 
             if (lastCamPos != application.camera.getPosition() ||
-                lastCamPitch != application.camera.getPitch() ||
-                lastCamYaw != application.camera.getYaw())
+            lastCamPitch != application.camera.getPitch() ||
+            lastCamYaw != application.camera.getYaw())
             {
                 application.triggerRerender();
                 lastCamPos = application.camera.getPosition();
@@ -249,6 +262,27 @@ int main(const int argc, char *argv[])
             }
         }
 
+        if (leftMousePressed) {
+            double mouseX, mouseY;
+            glfwGetCursorPos(application.window, &mouseX, &mouseY);
+
+            // 1. Conversion relative à la zone de rendu
+            float relX = mouseX - application.imgScreenOrigin.x;
+            float relY = mouseY - application.imgScreenOrigin.y;
+
+            // 2. Normalisation [0-1]
+            float normX = relX / application.imgScreenSize.x;
+            float normY = relY / application.imgScreenSize.y;
+
+            // 3. Conversion vers coordonnées texture
+            int texX = static_cast<int>(normX * application.renderWidth);
+            int texY = static_cast<int>(normY * application.renderHeight);
+
+            const int shapeId = application.renderer.pick(texX, texY);
+            std::cout << "RESULT: ShapeID = " << shapeId << std::endl;
+
+            leftMousePressed = false;
+        }
         if (application.needsRerender() || (application.needsContinuousRender() && !application.isRendering))
         {
             performRender(application, application.renderWidth, application.renderHeight);
