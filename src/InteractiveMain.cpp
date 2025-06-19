@@ -32,6 +32,7 @@ static double lastMouseX = 0.f;
 static double lastMouseY = 0.f;
 static double mouseXf, mouseYf = 0.f;
 constexpr float mouseSensitivity = 1.f;
+Shape* lastShape = nullptr;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -129,8 +130,6 @@ void mouseButtonCallback(GLFWwindow *window, const int button, const int action,
         if (action == GLFW_PRESS)
         {
             leftMousePressed = true;
-            mouseCaptured = true;
-            glfwGetCursorPos(window, &mouseXf, &mouseYf);
         }
     }
 }
@@ -279,7 +278,17 @@ int main(const int argc, char *argv[])
             int texY = static_cast<int>(normY * application.renderHeight);
 
             const int shapeId = application.renderer.pick(texX, texY);
-            std::cout << "RESULT: ShapeID = " << shapeId << std::endl;
+            if (shapeId >= 0 && shapeId < application.renderer.scene->getShapes().size())
+            {
+                if (lastShape != nullptr)
+                {
+                    lastShape->setWireframeEnabled(false);
+                }
+                lastShape = application.renderer.scene->getShapes()[shapeId].get();
+                lastShape->setWireframeEnabled(true);
+                application.renderer.updateSceneData();
+                performRender(application, application.renderWidth, application.renderHeight);
+            }
 
             leftMousePressed = false;
         }

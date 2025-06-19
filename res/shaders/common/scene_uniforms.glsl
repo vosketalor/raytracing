@@ -11,4 +11,7 @@ uniform vec3 ambientColor;
 
 uniform float u_time;
 
+uniform vec3 wireframeColor;
+uniform float wireframeThickness;
+
 

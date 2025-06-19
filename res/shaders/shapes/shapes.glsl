@@ -6,9 +6,9 @@ struct GPUShape {
     // Fin bloc 1: 16 octets
 
     int materialIndex;  // 4 octets
-    float _pad1;        // 4 octets
-    float _pad2;        // 4 octets
-    float _pad3;        // 4 octets
+    int wireframeEnabled;
+    float _pad4;        // 4 octets
+    float _pad5;        // 4 octets
     // Fin bloc 2: 16 octets
 
     vec3 center;        // 12 octets
@@ -44,5 +44,15 @@ vec3 getNormal(GPUShape shape, vec3 point) {
         return normalize(shape.normal);
     }
     return vec3(0.0, 1.0, 0.0);
+}
+
+float getDistanceNearestEdge(Ray ray, vec3 point, int shapeIndex) {
+    GPUShape shape = shapes[shapeIndex];
+    if (shape.type == 0) {
+        return getDistanceNearestEdgeSphere(ray, point, shape.center, shape.radius);
+    } else if (shape.type == 1) {
+        return wireframeThickness +1;
+    }
+
 }
 

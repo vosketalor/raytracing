@@ -19,6 +19,14 @@ vec3 traceRay(Ray ray) {
             break;
         }
 
+        if (shapes[hit.shapeIndex].wireframeEnabled != 0 && depth == 0) {
+            vec3 color;
+            if (handleWireframe(ray, hit.point, hit.shapeIndex, color)) {
+                finalColor += throughput * color;
+                break;
+            }
+        }
+
         GPUMaterial mat = materials[shapes[hit.shapeIndex].materialIndex];
 
         vec3 localColor = hit.color * ambientColor;

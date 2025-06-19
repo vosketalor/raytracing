@@ -21,9 +21,7 @@ protected:
     std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
     // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
     // bool hasTexture_ = false;               ///< Texture presence flag
-    // bool wireframeEnabled = false;        ///< Wireframe mode flag
-
-
+    bool wireframeEnabled = false;        ///< Wireframe mode flag
 
 public:
     static std::vector<Material> materials;
@@ -69,14 +67,15 @@ public:
         return typeid(*this).name();
     }
 
-    // bool isWireframeEnabled() const { return wireframeEnabled; }
-    // void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
+    bool isWireframeEnabled() const { return wireframeEnabled; }
+    void setWireframeEnabled(const bool isEnabled) { wireframeEnabled = isEnabled; }
 
     virtual GPU::GPUShapeData toGPU() const
     {
         GPU::GPUShapeData data;
         data.color = glm::vec3(color_.x, color_.y, color_.z);
         data.materialIndex = Shape::addMaterial(material_);
+        data.wireframeEnabled = wireframeEnabled;
         return data;
     }
 

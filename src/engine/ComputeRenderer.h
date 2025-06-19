@@ -31,7 +31,6 @@ private:
     GLuint bvhDataSSBO;
     GLuint pickSSBO;
 
-    Scene* scene;
     Camera camera_;
     BVHNode bvh_;
 
@@ -50,6 +49,7 @@ public:
     bool oversamplingEnabled;
     int oversamplingFactor;
     int width, height;
+    Scene* scene;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();
 
@@ -58,6 +58,9 @@ public:
     void setCamera(const Camera& camera);
     void cleanup();
     int pick(int mouseX, int mouseY) const;
+    void updateSceneData();
+    void updateUniforms() const;
+    void updateCameraUniforms(const GLuint& program) const;
 
 private:
     bool loadComputeShader(GLuint& shader, GLuint& program, const std::string& shaderSource);
@@ -65,12 +68,9 @@ private:
     std::string loadShaderSource(const std::string& filename);
     std::string loadShaderWithIncludes(const std::string& filePath, const std::string& basePath, std::unordered_set<std::string>* includedFiles);
     void setupBuffers();
-    void updateSceneData();
-    void updateUniforms() const;
     void setUniform3f(GLuint program, const char* name, float x, float y, float z) const;
     void setUniform1f(GLuint program, const char* name, float value) const;
     void setUniform1i(GLuint program, const char* name, int value) const;
     void setUniform2i(GLuint program, const char* name, int x, int y) const;
     void setUniformBool(GLuint program, const char* name, bool value) const;
-    void updateCameraUniforms(const GLuint& program) const;
 };

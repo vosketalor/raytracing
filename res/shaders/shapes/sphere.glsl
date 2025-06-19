@@ -24,3 +24,32 @@ bool intersectSphere(Ray ray, vec3 center, float radius, out float t) {//       
 
     return false;
 };
+
+float getDistanceNearestEdgeSphere(Ray ray, vec3 point, vec3 center, float radius) {
+     // 1. Direction depuis la caméra vers le centre
+    vec3 toCenter = center - ray.origin;
+    vec3 viewDir = normalize(toCenter);
+
+     // 2. Vecteur du centre vers le point P
+    vec3 toPoint = point - center;
+
+     // 3. Projection de P sur le plan orthogonal à viewDir
+    float distAlongView = dot(toPoint, viewDir);
+    vec3 projected = point - viewDir * distAlongView;
+
+     // 4. Rayon apparent dans ce plan
+    float centerDistance = length(toCenter);
+    if (centerDistance <= radius) {
+        return 0.0;// Caméra à l'intérieur de la sphère : tout est "bord"
+    }
+
+     // Calcul du rayon apparent de la sphère dans le plan
+    float sinTheta = radius / centerDistance;
+    float apparentRadius = sqrt(length(toCenter)*length(toCenter) - radius*radius) * sinTheta;
+
+     // 5. Distance dans le plan
+    float distanceInPlane = length(projected - center);
+
+     // 6. Distance au bord visible (disque)
+     return abs(distanceInPlane - apparentRadius);
+}

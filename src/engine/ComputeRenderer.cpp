@@ -347,6 +347,9 @@ void ComputeRenderer::updateUniforms() const {
 
     setUniform1f(shaderProgram, "u_time", static_cast<float>(glfwGetTime()));
 
+    setUniform1f(shaderProgram, "wireframeThickness", 0.05);
+    setUniform3f(shaderProgram, "wireframeColor", 0, 1, 0);
+
     glm::vec3 skyColor = scene->getSkyColor();
     glm::vec3 ambient = scene->getAmbient();
     setUniform3f(shaderProgram, "skyColor", skyColor.x, skyColor.y, skyColor.z);
