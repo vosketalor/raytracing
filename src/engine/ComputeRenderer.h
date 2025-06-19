@@ -44,6 +44,8 @@ public:
     bool fresnelEnabled;
     bool roughnessEnabled;
     bool bvhEnabled;
+    bool oversamplingEnabled;
+    int oversamplingFactor;
     int width, height;
     ComputeRenderer(Scene* scene, const Camera& camera, int width, int height);
     ~ComputeRenderer();

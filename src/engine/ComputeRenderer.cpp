@@ -21,6 +21,8 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
     fresnelEnabled     = prefs.get("fresnelEnabled", false);
     roughnessEnabled   = prefs.get("roughnessEnabled", false);
     bvhEnabled         = prefs.get("bvhEnabled", false);
+    oversamplingEnabled = prefs.get("oversamplingEnabled", false);
+    oversamplingFactor = prefs.get("oversamplingFactor", 2);
     this->width        = prefs.get("width", 512);
     this->height       = prefs.get("height", 384);
     std::cout << prefs << std::endl;
@@ -286,6 +288,8 @@ void ComputeRenderer::updateCameraUniforms() const {
     setUniformBool(shaderProgram, "fresnelEnabled", fresnelEnabled);
     setUniformBool(shaderProgram, "roughnessEnabled", roughnessEnabled);
     setUniformBool(shaderProgram, "useBVH", bvhEnabled);
+    setUniformBool(shaderProgram, "oversamplingEnabled", oversamplingEnabled);
+    setUniform1i(shaderProgram, "oversamplingFactor", oversamplingFactor);
 
     setUniform1f(shaderProgram, "u_time", static_cast<float>(glfwGetTime()));
 

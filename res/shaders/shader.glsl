@@ -14,6 +14,7 @@ layout(rgba32f, binding = 0) uniform image2D outputImage;
 #include "shading/fresnel.glsl"
 #include "shading/lighting.glsl"
 #include "core/trace.glsl"
+#include "processing/oversampling.glsl"
 
 void main() {
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
@@ -35,7 +36,12 @@ void main() {
     ray.origin = cameraPos;
     ray.direction = rayDir;
 
-    vec3 color = traceRay(ray);
+    vec3 color;
+    if (oversamplingEnabled && oversamplingFactor > 1) {
+        color = oversample(pixelCoord);
+    } else {
+        color = traceRay(ray);
+    }
 
     imageStore(outputImage, pixelCoord, vec4(color, 1.0));
 }
