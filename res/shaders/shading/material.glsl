@@ -13,7 +13,19 @@ struct GPUMaterial {
     vec3 f0;              // 12 (24-35)
     float pad3;
     vec3 k;
-    float pas4;
+    float pad4;
+    int albedoMapId;
+    int ambientOcclusionMapId;
+    int normalMapId;
+    int roughnessMapId;
+    int metalnessMapId;
+    int heightMapId;
+    int specularMapId;
+    int opacityMapId;
+    int refractionMapId;
+    int selfIlluminationMapId;
+    int reflectionMapId;
+    float pad5;
 };
 
 layout(std430, binding = 3) buffer MaterialData {

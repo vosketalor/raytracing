@@ -219,6 +219,17 @@ void ComputeRenderer::setupBuffers() {
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), nullptr, GL_STATIC_DRAW);
 
     updateSceneData();
+
+    // glGenTextures(1, &textureAtlas);
+    // glBindTexture(GL_TEXTURE_2D, textureAtlas);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlasWidth, atlasHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasPixels);
+
+    // glBindImageTexture(6, textureAtlas, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 }
 
 void ComputeRenderer::updateSceneData() {

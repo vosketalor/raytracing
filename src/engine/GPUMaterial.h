@@ -18,6 +18,18 @@ namespace GPU
         float pad3_=0;
         glm::vec3 etaIm;
         float pad4_=0;
+        int albedoMapId=-1;
+        int ambientOcclusionMapId=-1;
+        int normalMapId=-1;
+        int roughnessMapId=-1;
+        int metalnessMapId=-1;
+        int heightMapId=-1;
+        int specularMapId=-1;
+        int opacityMapId=-1;
+        int refractionMapId=-1;
+        int selfIlluminationMapId=-1;
+        int reflectionMapId=-1;
+        float pad5_=0;
         // Total: 36 octets
     };
 #pragma pack(pop)

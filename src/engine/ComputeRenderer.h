@@ -30,6 +30,8 @@ private:
     GLuint materialDataSSBO;
     GLuint bvhDataSSBO;
     GLuint pickSSBO;
+    GLuint textureAtlas;
+    GLuint textureAtlasSSBO;
 
     Camera camera_;
     BVHNode bvh_;

@@ -13,7 +13,20 @@
 class Texture {
 private:
     /** The loaded texture image data (RGBA format). */
-    std::vector<std::vector<Vector3>> textureData;
+    // std::vector<std::vector<Vector3>> textureData;
+
+    /** The filename of the texture image. */
+    // std::string textureFileName;
+
+    /** Flag indicating if the texture was loaded successfully. */
+    // bool isLoaded;
+
+public:
+    /** Pointer to the texture data */
+    unsigned char* data;
+
+    /** Channel number */
+    int channels;
 
     /** The width of the texture in pixels. */
     int width;
@@ -21,13 +34,6 @@ private:
     /** The height of the texture in pixels. */
     int height;
 
-    /** The filename of the texture image. */
-    std::string textureFileName;
-
-    /** Flag indicating if the texture was loaded successfully. */
-    bool isLoaded;
-
-public:
     /**
      * @brief Constructs a texture by loading an image file.
      * @param textureFileName The name of the texture file to load.
@@ -60,17 +66,17 @@ public:
      */
     float getHeight() const { return static_cast<float>(height); }
 
-    /**
-     * @brief Returns the filename used to load the texture.
-     * @return The texture file name.
-     */
-    const std::string& getTextureFileName() const { return textureFileName; }
+    // /**
+    //  * @brief Returns the filename used to load the texture.
+    //  * @return The texture file name.
+    //  */
+    // const std::string& getTextureFileName() const { return textureFileName; }
 
-    /**
-     * @brief Checks if the texture was loaded successfully.
-     * @return True if the texture is loaded, false otherwise.
-     */
-    bool isTextureLoaded() const { return isLoaded; }
+    // /**
+    //  * @brief Checks if the texture was loaded successfully.
+    //  * @return True if the texture is loaded, false otherwise.
+    //  */
+    // bool isTextureLoaded() const { return isLoaded; }
 
     /**
      * @brief Scales the texture by the given factor.
