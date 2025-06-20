@@ -57,6 +57,7 @@ public:
 
     bool initialize();
     void render(std::vector<Vector3>& frameBuffer);
+    void createFallbackTexture();
     void setCamera(const Camera& camera);
     void cleanup();
     int pick(int mouseX, int mouseY) const;

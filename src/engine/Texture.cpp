@@ -126,16 +126,30 @@ Texture::Texture(const std::string& textureFileName): width(0), height(0) {
 }
 
 bool Texture::loadFromFile(const std::string& filename) {
-    data = stbi_load(filename.c_str(), &width, &height, &channels, 3);
+    int originalChannels;
+    unsigned char* tempData = stbi_load(filename.c_str(), &width, &height, &originalChannels, 0);
 
-    if (!data) {
+    if (!tempData) {
         std::cerr << "Failed to load image: " << filename << " - " << stbi_failure_reason() << std::endl;
         return false;
     }
 
-    // Libérer la mémoire allouée par stb_image
-    stbi_image_free(data);
+    // Maintenant rechargez avec le bon nombre de canaux
+    stbi_image_free(tempData);
+    channels = originalChannels;
+    data = stbi_load(filename.c_str(), &width, &height, &channels, channels);
 
-    // isLoaded = true;
+    if (!data) {
+        std::cerr << "Failed to reload image with correct channels" << std::endl;
+        return false;
+    }
+
     return true;
+}
+
+Texture::~Texture() {
+    if (data) {
+        stbi_image_free(data);
+        data = nullptr;
+    }
 }

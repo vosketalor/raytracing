@@ -40,10 +40,11 @@ public:
      */
     explicit Texture(const std::string& textureFileName);
 
+
     /**
      * @brief Default destructor.
      */
-    ~Texture() = default;
+    ~Texture(); // Destructeur
 
     /**
      * @brief Retrieves the color from the texture at the specified UV coordinates.

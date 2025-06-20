@@ -53,3 +53,11 @@ float getDistanceNearestEdgeSphere(Ray ray, vec3 point, vec3 center, float radiu
      // 6. Distance au bord visible (disque)
      return abs(distanceInPlane - apparentRadius);
 }
+
+vec2 getTextureCoordinatesSphere(vec3 point, vec3 center, float radius) {
+    vec3 P = normalize(point - center);
+    float u = 0.5 + atan(P.z, P.x) / (2.0 * PI);
+    float v = 0.5 - asin(P.y) / PI;
+
+    return vec2(u, v);
+}

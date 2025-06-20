@@ -19,6 +19,7 @@ vec3 traceRay(Ray ray) {
             break;
         }
 
+        //Wireframe
         if (shapes[hit.shapeIndex].wireframeEnabled != 0 && depth == 0) {
             vec3 color;
             if (handleWireframe(ray, hit.point, hit.shapeIndex, color)) {
@@ -27,10 +28,20 @@ vec3 traceRay(Ray ray) {
             }
         }
 
+        vec3 color;
+//        if (shapes[hit.shapeIndex].hasTexture != 0) {
+//            vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
+//            color = getColorTexture(uv);
+//        } else {
+//            color = hit.color;
+//        }
+        vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
+        color = getColorTexture(uv);
+
         GPUMaterial mat = materials[shapes[hit.shapeIndex].materialIndex];
 
-        vec3 localColor = hit.color * ambientColor;
-        localColor += computeLighting(ray, hit.point, hit.normal, hit.color, hit.shapeIndex);
+        vec3 localColor = color * ambientColor;
+        localColor += computeLighting(ray, hit.point, hit.normal, color, hit.shapeIndex);
 
         bool isReflective = reflectionsEnabled && (mat.reflectivity > 0.0);
         bool isTransparent = refractionsEnabled && (mat.transparency > 0.0);

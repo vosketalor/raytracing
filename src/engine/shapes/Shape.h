@@ -19,8 +19,8 @@ protected:
     Material material_;
     bool visible = true;                 ///< Visibility flag
     std::shared_ptr<BoundingBox> boundingBox; ///< Acceleration structure
-    // std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
-    // bool hasTexture_ = false;               ///< Texture presence flag
+    std::shared_ptr<Texture> texture = nullptr; ///< Optional texture
+    bool hasTexture_ = false;               ///< Texture presence flag
     bool wireframeEnabled = false;        ///< Wireframe mode flag
 
 public:
@@ -50,16 +50,16 @@ public:
     // bool isVisible() const { return visible; }
     // void setVisible(const bool isVisible) { visible = isVisible; }
 
-    // std::shared_ptr<Texture> getTexture() const { return texture; }
+    std::shared_ptr<Texture> getTexture() const { return texture; }
     //
-    // void setTexture(std::shared_ptr<Texture> tex) {
-    //     if (tex) {
-    //         texture = tex;
-    //         hasTexture_ = true;
-    //     }
-    // }
+    void setTexture(std::shared_ptr<Texture> tex) {
+        if (tex) {
+            texture = tex;
+            hasTexture_ = true;
+        }
+    }
 
-    // bool hasTexture() const { return hasTexture_; }
+    bool hasTexture() const { return hasTexture_; }
     //
     // virtual double getDistanceNearestEdge(const Vector3& P, const Camera& camera) const = 0;
 
@@ -76,6 +76,7 @@ public:
         data.color = glm::vec3(color_.x, color_.y, color_.z);
         data.materialIndex = Shape::addMaterial(material_);
         data.wireframeEnabled = wireframeEnabled;
+        data.hasTexture = hasTexture_;
         return data;
     }
 

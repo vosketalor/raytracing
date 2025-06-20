@@ -12,7 +12,7 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
       computeShader(0), pickShader(0),
       shaderProgram(0), pickShaderProgram(0), outputTexture(0),
       sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0), bvhDataSSBO(0),
-      pickSSBO(0) {
+      pickSSBO(0), textureAtlas(0) {
     prefs.load();
     reflectionsEnabled = prefs.get("reflectionsEnabled", false);
     refractionsEnabled = prefs.get("refractionsEnabled", false);
@@ -200,37 +200,79 @@ int ComputeRenderer::pick(const int mouseX, const int mouseY) const {
     return pickedID;
 }
 
-
-
 void ComputeRenderer::setupBuffers() {
+    // === Création de la texture de sortie ===
     glGenTextures(1, &outputTexture);
     glBindTexture(GL_TEXTURE_2D, outputTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
+    // === Création des SSBOs ===
     glGenBuffers(1, &sceneDataSSBO);
     glGenBuffers(1, &lightDataSSBO);
     glGenBuffers(1, &materialDataSSBO);
     glGenBuffers(1, &bvhDataSSBO);
     glGenBuffers(1, &pickSSBO);
+
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, pickSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), nullptr, GL_STATIC_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
+    // === Chargement de la texture principale ===
+    Texture tex = Texture("res/textures/basketball.jpg");
+
+    if (!tex.data || tex.width == 0 || tex.height == 0) {
+        std::cerr << "ERREUR: Données de texture invalides" << std::endl;
+        return;
+    }
+
+    // === Création de la texture atlas ===
+    glGenTextures(1, &textureAtlas);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+
+    // Déterminer le format basé sur les canaux réels
+    GLenum format, internalFormat;
+    switch(tex.channels) {
+    case 1:
+        format = GL_RED;
+        internalFormat = GL_R8;
+        break;
+    case 3:
+        format = GL_RGB;
+        internalFormat = GL_RGB8;
+        break;
+    case 4:
+        format = GL_RGBA;
+        internalFormat = GL_RGBA8;
+        break;
+    default:
+        std::cerr << "Format de texture non supporté: " << tex.channels << " canaux" << std::endl;
+        return;
+    }
+
+    // Configuration des paramètres AVANT glTexImage2D
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Création de la texture
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                 tex.width, tex.height, 0,
+                 format, GL_UNSIGNED_BYTE, tex.data);
+
+    // Vérification des erreurs
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cerr << "ERREUR OpenGL: 0x" << std::hex << error << std::dec << std::endl;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
     updateSceneData();
-
-    // glGenTextures(1, &textureAtlas);
-    // glBindTexture(GL_TEXTURE_2D, textureAtlas);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, atlasWidth, atlasHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, atlasPixels);
-
-    // glBindImageTexture(6, textureAtlas, 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
 }
+
 
 void ComputeRenderer::updateSceneData() {
     std::vector<GPU::GPUShapeData> gpuShapes;
@@ -368,6 +410,21 @@ void ComputeRenderer::updateUniforms() const {
 }
 
 void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
+    if (textureAtlas != 0 && glIsTexture(textureAtlas)) {
+        glBindTexture(GL_TEXTURE_2D, textureAtlas);
+
+        GLint width, height, internalFormat;
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else {
+        std::cerr << "ERREUR: Texture atlas invalide!" << std::endl;
+        return;
+    }
+
+    // === Recréation de la texture de sortie ===
     if (outputTexture) {
         glDeleteTextures(1, &outputTexture);
     }
@@ -377,31 +434,55 @@ void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);  // détacher texture
-
-    // Bind l'image pour le compute shader
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
+    // === Mise à jour des uniforms ===
     updateUniforms();
 
-    glUseProgram(shaderProgram);
+    // === Activation du programme shader ===
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 
+    // === 5. Configuration de la texture atlas ===
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+
+    // Vérifier le binding
+    GLint boundTexture = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTexture);
+
+    // === 6. Configuration de l'uniform ===
+    GLint uniformLoc = glGetUniformLocation(shaderProgram, "textureAtlas");
+
+    if (uniformLoc != -1) {
+        glUniform1i(uniformLoc, 0);
+
+        // Vérifier la valeur de l'uniform
+        GLint uniformValue;
+        glGetUniformiv(shaderProgram, uniformLoc, &uniformValue);
+    } else {
+        std::cerr << "ERREUR: Uniform 'textureAtlas' non trouvé dans le shader!" << std::endl;
+    }
+
+    // === 7. Vérification avant dispatch ===
+    glActiveTexture(GL_TEXTURE0);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTexture);
+
+    // === Dispatch du compute shader ===
     int groupsX = (width + 15) / 16;
     int groupsY = (height + 15) / 16;
-    glBindImageTexture(0, outputTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     glDispatchCompute(groupsX, groupsY, 1);
-
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+    // === Lecture des résultats ===
     glBindTexture(GL_TEXTURE_2D, outputTexture);
     std::vector<float> pixels(width * height * 4);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, pixels.data());
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // === Conversion des données ===
     frameBuffer.resize(width * height);
-    // for (int i = 0; i < width * height; i++) {
-    //     frameBuffer[i] = Vector3(pixels[i*4], pixels[i*4+1], pixels[i*4+2]);
-    // }
     std::for_each(
         std::execution::par,
         frameBuffer.begin(),
@@ -409,8 +490,10 @@ void ComputeRenderer::render(std::vector<Vector3>& frameBuffer) {
         [&](Vector3& color) {
             const size_t i = &color - frameBuffer.data();
             color = Vector3(pixels[i*4], pixels[i*4+1], pixels[i*4+2]);
-        }
-    );
+    });
+
+    // === Nettoyage ===
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void ComputeRenderer::setCamera(const Camera& camera) {
@@ -419,6 +502,7 @@ void ComputeRenderer::setCamera(const Camera& camera) {
 
 void ComputeRenderer::cleanup() {
     if (outputTexture) glDeleteTextures(1, &outputTexture);
+    if (textureAtlas) glDeleteTextures(1, &textureAtlas);
     if (sceneDataSSBO) glDeleteBuffers(1, &sceneDataSSBO);
     if (lightDataSSBO) glDeleteBuffers(1, &lightDataSSBO);
     if (materialDataSSBO) glDeleteBuffers(1, &materialDataSSBO);

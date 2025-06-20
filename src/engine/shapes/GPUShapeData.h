@@ -15,7 +15,7 @@ namespace GPU
 
         int materialIndex;      // 4 octets
         int wireframeEnabled; // 4 octets
-        float _pad4 = 0;            // 4 octets
+        int hasTexture;           // 4 octets
         float _pad5 = 0;            // 4 octets
 
         glm::vec3 center=glm::vec3(0,0,0);       // 12 octets

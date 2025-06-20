@@ -27,15 +27,11 @@ The raytracer simulates light transport to generate realistic images from 3D sce
   - Roughness map
   - Bump map
   - Reflection map
-- Acceleration
-  - BVH
 - GUI
-  - Selection object by clicking 
   - Zoom
   - Inspector menu for objects clicked
   - Scenes switching in real time
-- Antialiasing 
-  - Oversampling (SSAA)
+- Antialiasing
   - MSAA
   - FXAA
 - True HDR

@@ -7,3 +7,4 @@
 #include "shapes/shapes.glsl"
 #include "shading/material.glsl"
 #include "shading/light.glsl"
+#include "shading/texture.glsl"

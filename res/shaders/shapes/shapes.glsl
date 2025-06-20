@@ -7,7 +7,7 @@ struct GPUShape {
 
     int materialIndex;  // 4 octets
     int wireframeEnabled;
-    float _pad4;        // 4 octets
+    int hasTexture;       // 4 octets
     float _pad5;        // 4 octets
     // Fin bloc 2: 16 octets
 
@@ -53,6 +53,14 @@ float getDistanceNearestEdge(Ray ray, vec3 point, int shapeIndex) {
     } else if (shape.type == 1) {
         return wireframeThickness +1;
     }
+}
 
+vec2 getTextureCoordinates(vec3 point, int shapeIndex) {
+    GPUShape shape = shapes[shapeIndex];
+    if (shape.type == 0) {
+        return getTextureCoordinatesSphere(point, shape.center, shape.radius);
+    } else if (shape.type == 1) {
+        return getTextureCoordinatesPlane(point, shape.normal, shape.dist);
+    }
 }
 
