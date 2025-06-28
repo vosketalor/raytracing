@@ -311,8 +311,61 @@ void ComputeRenderer::updateSceneData() {
 
     std::vector<GPU::GPUMaterial> gpuMaterials;
     for (const auto& mat : Shape::materials) {
-            gpuMaterials.push_back(mat.toGPU());
+            gpuMaterials.push_back(mat.toGPU(scene));
+        if (mat.hasAlbedoMap())
+        {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getAlbedoMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
         }
+
+        // Pour l'Ambient Occlusion Map
+        if (mat.hasAmbientOcclusionMap()) {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getAmbientOcclusionMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
+
+        // Pour la Normal Map
+        if (mat.hasNormalMap()) {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getNormalMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
+
+        // Pour la Roughness Map
+        if (mat.hasRoughnessMap()) {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getRoughnessMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
+
+        // Pour la Metalness Map
+        if (mat.hasMetalnessMap()) {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getMetalnessMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
+
+        // Pour la Height Map
+        if (mat.hasHeightMap()) {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(mat.getHeightMap());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
+    }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, materialDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuMaterials.size() * sizeof(GPU::GPUMaterial),

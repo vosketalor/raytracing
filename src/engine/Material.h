@@ -5,6 +5,8 @@
 
 #include "GPUMaterial.h"
 
+class Scene;
+
 #ifdef _WIN32
   #include <corecrt_math_defines.h>  // Windows (Visual Studio)
 #endif
@@ -23,6 +25,18 @@ protected:
     float metallic = 0.0;                ///< [0-1] métallique (0=diélectrique, 1=conducteur)
     glm::vec3 f0 = glm::vec3{0.04, 0.04, 0.04}; ///< Réflectance à incidence normale (pour diélectriques)
 
+    std::string albedoMap;
+    bool hasAlbedoMap_ = false;
+    std::string ambientOcclusionMap;
+    bool hasAmbientOcclusionMap_ = false;
+    std::string normalMap;
+    bool hasNormalMap_ = false;
+    std::string roughnessMap;
+    bool hasRoughnessMap_ = false;
+    std::string metalnessMap;
+    bool hasMetalnessMap_ = false;
+    std::string heightMap;
+    bool hasHeightMap_ = false;
 public:
     Material() = default;
 
@@ -55,7 +69,75 @@ public:
     float getTransparency() const { return transparency; }
     void setTransparency(const float trans) { transparency = trans; }
 
-    GPU::GPUMaterial toGPU() const;
+    std::string getAlbedoMap() const { return albedoMap; }
+    void setAlbedoMap(const std::string& tex) {
+        if (!tex.empty()) {
+            albedoMap = tex;
+            hasAlbedoMap_ = true;
+        }
+    }
+
+    bool hasAlbedoMap() const { return hasAlbedoMap_; }
+
+    std::string getAmbientOcclusionMap() const { return ambientOcclusionMap; }
+    void setAmbientOcclusionMap(const std::string& tex) {
+        if (!tex.empty()) {
+            albedoMap = tex;
+            hasAlbedoMap_ = true;
+        }
+    }
+
+    bool hasAmbientOcclusionMap() const { return hasAmbientOcclusionMap_; }
+
+    std::string getNormalMap() const { return normalMap; }
+    void setNormalMap(const std::string& tex) {
+        if (!tex.empty()) {
+            normalMap = tex;
+            hasNormalMap_ = true;
+        } else {
+            normalMap = "";
+            hasNormalMap_ = false;
+        }
+    }
+    bool hasNormalMap() const { return hasNormalMap_; }
+
+    std::string getRoughnessMap() const { return roughnessMap; }
+    void setRoughnessMap(const std::string& tex) {
+        if (!tex.empty()) {
+            roughnessMap = tex;
+            hasRoughnessMap_ = true;
+        } else {
+            roughnessMap = "";
+            hasRoughnessMap_ = false;
+        }
+    }
+    bool hasRoughnessMap() const { return hasRoughnessMap_; }
+
+    std::string getMetalnessMap() const { return metalnessMap; }
+    void setMetalnessMap(const std::string& tex) {
+        if (!tex.empty()) {
+            metalnessMap = tex;
+            hasMetalnessMap_ = true;
+        } else {
+            metalnessMap = "";
+            hasMetalnessMap_ = false;
+        }
+    }
+    bool hasMetalnessMap() const { return hasMetalnessMap_; }
+
+    std::string getHeightMap() const { return heightMap; }
+    void setHeightMap(const std::string& tex) {
+        if (!tex.empty()) {
+            heightMap = tex;
+            hasHeightMap_ = true;
+        } else {
+            heightMap = "";
+            hasHeightMap_ = false;
+        }
+    }
+    bool hasHeightMap() const { return hasHeightMap_; }
+
+    GPU::GPUMaterial toGPU(const Scene* scene) const;
 
     static const Material IronRusty;
     static const Material GoldBrushed;

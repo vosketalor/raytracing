@@ -4,7 +4,7 @@
 
 
 
-GPU::GPUMaterial Material::toGPU() const
+GPU::GPUMaterial Material::toGPU(const Scene* scene) const
 {
     GPU::GPUMaterial data;
     data.reflectivity = reflectivity;
@@ -15,6 +15,37 @@ GPU::GPUMaterial Material::toGPU() const
     data.metallic = metallic;
     data.f0 = f0;
     data.etaIm = etaIm;
+
+    if (hasAlbedoMap())
+    {
+        data.albedoMapId = scene->texture_atlas.getIndex(albedoMap);
+    }
+
+    // Pour l'Ambient Occlusion Map
+    if (hasAmbientOcclusionMap()) {
+        data.ambientOcclusionMapId = scene->texture_atlas.getIndex(ambientOcclusionMap);
+    }
+
+    // Pour la Normal Map
+    if (hasNormalMap()) {
+        data.normalMapId = scene->texture_atlas.getIndex(normalMap);
+    }
+
+    // Pour la Roughness Map
+    if (hasRoughnessMap()) {
+        data.roughnessMapId = scene->texture_atlas.getIndex(roughnessMap);
+    }
+
+    // Pour la Metalness Map
+    if (hasMetalnessMap()) {
+        data.metalnessMapId = scene->texture_atlas.getIndex(metalnessMap);
+    }
+
+    // Pour la Height Map
+    if (hasHeightMap()) {
+        data.heightMapId = scene->texture_atlas.getIndex(heightMap);
+    }
+
     return data;
 }
 

@@ -20,12 +20,13 @@ struct GPUMaterial {
     int roughnessMapId;
     int metalnessMapId;
     int heightMapId;
-    int specularMapId;
-    int opacityMapId;
-    int refractionMapId;
-    int selfIlluminationMapId;
-    int reflectionMapId;
+//    int specularMapId;
+//    int opacityMapId;
+//    int refractionMapId;
+//    int selfIlluminationMapId;
+//    int reflectionMapId;
     float pad5;
+    float pad6;
 };
 
 layout(std430, binding = 3) buffer MaterialData {

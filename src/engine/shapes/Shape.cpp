@@ -7,7 +7,9 @@ GPU::GPUShapeData Shape::toGPU(Scene* scene) const {
     data.color = glm::vec3(color_.x, color_.y, color_.z);
     data.materialIndex = Shape::addMaterial(material_);
     data.wireframeEnabled = wireframeEnabled;
-    data.hasTexture = hasTexture_;
-    data.textureIndex = scene->texture_atlas.getIndex(texture);
+    if (hasTexture())
+    {
+        data.textureIndex = scene->texture_atlas.getIndex(texture);
+    }
     return data;
 }

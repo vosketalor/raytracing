@@ -30,7 +30,7 @@ vec3 traceRay(Ray ray) {
 
         //Texture
         vec3 color;
-        if (shapes[hit.shapeIndex].hasTexture != 0) {
+        if (shapes[hit.shapeIndex].textureIndex != -1) {
             vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
             color = getColorTexture(uv, shapes[hit.shapeIndex].textureIndex);
         } else {

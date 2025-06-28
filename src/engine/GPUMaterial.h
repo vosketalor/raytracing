@@ -24,12 +24,13 @@ namespace GPU
         int roughnessMapId=-1;
         int metalnessMapId=-1;
         int heightMapId=-1;
-        int specularMapId=-1;
-        int opacityMapId=-1;
-        int refractionMapId=-1;
-        int selfIlluminationMapId=-1;
-        int reflectionMapId=-1;
+        // int specularMapId=-1;
+        // int opacityMapId=-1;
+        // int refractionMapId=-1;
+        // int selfIlluminationMapId=-1;
+        // int reflectionMapId=-1;
         float pad5_=0;
+        float pad6_=0;
         // Total: 36 octets
     };
 #pragma pack(pop)
