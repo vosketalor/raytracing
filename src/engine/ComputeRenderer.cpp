@@ -12,7 +12,7 @@ ComputeRenderer::ComputeRenderer(Scene* scene, const Camera& camera, int width, 
       computeShader(0), pickShader(0),
       shaderProgram(0), pickShaderProgram(0), outputTexture(0),
       sceneDataSSBO(0), lightDataSSBO(0), materialDataSSBO(0), bvhDataSSBO(0),
-      pickSSBO(0), textureAtlas(0) {
+      pickSSBO(0), textureSSBO(0), textureAtlas(0) {
     prefs.load();
     reflectionsEnabled = prefs.get("reflectionsEnabled", false);
     refractionsEnabled = prefs.get("refractionsEnabled", false);
@@ -177,6 +177,7 @@ int ComputeRenderer::pick(const int mouseX, const int mouseY) const {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, materialDataSSBO);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, bvhDataSSBO);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, pickSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, textureSSBO);
 
     // 2) Choix du programme de picking
     glUseProgram(pickShaderProgram);
@@ -215,15 +216,14 @@ void ComputeRenderer::setupBuffers() {
     glGenBuffers(1, &materialDataSSBO);
     glGenBuffers(1, &bvhDataSSBO);
     glGenBuffers(1, &pickSSBO);
+    glGenBuffers(1, &textureSSBO);
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, pickSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), nullptr, GL_STATIC_DRAW);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // === Chargement de la texture principale ===
-    Texture tex = Texture("res/textures/basketball.jpg");
-
-    if (!tex.data || tex.width == 0 || tex.height == 0) {
+    if (!scene->texture_atlas.data || scene->texture_atlas.width == 0 || scene->texture_atlas.height == 0) {
         std::cerr << "ERREUR: Données de texture invalides" << std::endl;
         return;
     }
@@ -234,7 +234,7 @@ void ComputeRenderer::setupBuffers() {
 
     // Déterminer le format basé sur les canaux réels
     GLenum format, internalFormat;
-    switch(tex.channels) {
+    switch(scene->texture_atlas.channels) {
     case 1:
         format = GL_RED;
         internalFormat = GL_R8;
@@ -248,7 +248,7 @@ void ComputeRenderer::setupBuffers() {
         internalFormat = GL_RGBA8;
         break;
     default:
-        std::cerr << "Format de texture non supporté: " << tex.channels << " canaux" << std::endl;
+        std::cerr << "Format de texture non supporté: " << scene->texture_atlas.channels << " canaux" << std::endl;
         return;
     }
 
@@ -260,8 +260,8 @@ void ComputeRenderer::setupBuffers() {
 
     // Création de la texture
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
-                 tex.width, tex.height, 0,
-                 format, GL_UNSIGNED_BYTE, tex.data);
+                 scene->texture_atlas.width, scene->texture_atlas.height, 0,
+                 format, GL_UNSIGNED_BYTE, scene->texture_atlas.data);
 
     // Vérification des erreurs
     GLenum error = glGetError();
@@ -276,14 +276,28 @@ void ComputeRenderer::setupBuffers() {
 
 void ComputeRenderer::updateSceneData() {
     std::vector<GPU::GPUShapeData> gpuShapes;
+    std::vector<SubTexture> gpuTextures;
     for (const auto& shape : scene->getShapes()) {
-        gpuShapes.push_back(shape->toGPU());
+        gpuShapes.push_back(shape->toGPU(this->scene));
+        if (shape->hasTexture())
+        {
+            const SubTexture* subTex = scene->texture_atlas.getSubTexture(shape->getTexture());
+            if (subTex != nullptr)
+            {
+                gpuTextures.push_back(*subTex);
+            }
+        }
     }
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, sceneDataSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, gpuShapes.size() * sizeof(GPU::GPUShapeData),
                  gpuShapes.data(), GL_STATIC_DRAW);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, sceneDataSSBO);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, textureSSBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, gpuTextures.size() * sizeof(SubTexture),
+                 gpuTextures.data(), GL_STATIC_DRAW);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, textureSSBO);
 
     std::vector<GPU::GPULightSource> gpuLights;
     for (const auto& light : scene->getLightSources()) {
@@ -320,6 +334,15 @@ void ComputeRenderer::setUniform3f(GLuint program, const char* name, float x, fl
         std::cerr << "Uniform '" << name << "' not found!" << std::endl;
     } else {
         glUniform3f(loc, x, y, z);
+    }
+}
+
+void ComputeRenderer::setUniform2f(GLuint program, const char* name, float x, float y) const {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found!" << std::endl;
+    } else {
+        glUniform2f(loc, x, y);
     }
 }
 
@@ -386,6 +409,7 @@ void ComputeRenderer::updateUniforms() const {
     setUniform1i(shaderProgram, "numLights", static_cast<int>(scene->getLightSources().size()));
     //TODO : do better later
     setUniform1i(shaderProgram, "numBVHNodes", static_cast<int>(this->bvh_.toGPU(scene->getShapes()).size()));
+    setUniform2f(shaderProgram, "textureAtlasSize", static_cast<float>(scene->texture_atlas.width), static_cast<float>(scene->texture_atlas.height));
 
     setUniformBool(shaderProgram, "reflectionsEnabled", reflectionsEnabled);
     setUniformBool(shaderProgram, "refractionsEnabled", refractionsEnabled);
@@ -508,6 +532,7 @@ void ComputeRenderer::cleanup() {
     if (materialDataSSBO) glDeleteBuffers(1, &materialDataSSBO);
     if (bvhDataSSBO) glDeleteBuffers(1, &bvhDataSSBO);
     if (pickSSBO) glDeleteBuffers(1, &pickSSBO);
+    if (textureSSBO) glDeleteBuffers(1, &textureSSBO);
     if (shaderProgram) glDeleteProgram(shaderProgram);
     if (pickShaderProgram) glDeleteProgram(pickShaderProgram);
     if (computeShader) glDeleteShader(computeShader);

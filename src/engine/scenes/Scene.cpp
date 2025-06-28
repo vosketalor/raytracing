@@ -1,6 +1,9 @@
 #include "Scene.h"
 
 void Scene::addShape(const std::shared_ptr<Shape>& shape) {
+    if (shape->hasTexture())
+        this->texture_atlas.addTexture(shape->getTexture());
+    //TODO : do the same for material textures
     shapes.push_back(shape);
 }
 

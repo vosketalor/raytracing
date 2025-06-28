@@ -30,6 +30,6 @@ private:
 
 public:
     Sphere(const glm::vec3& P, float radius);
-    GPU::GPUShapeData toGPU() const override;
+    GPU::GPUShapeData toGPU(Scene* scene) const override;
     void setBoundingBox() override;
 };

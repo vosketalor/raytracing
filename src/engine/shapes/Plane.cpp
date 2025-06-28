@@ -18,9 +18,9 @@ Plane::Plane(const Vector3& P, const Vector3& n)
 Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
     : Plane(C, v1.cross(v2).normalized()) {}
 
-GPU::GPUShapeData Plane::toGPU() const
+GPU::GPUShapeData Plane::toGPU(Scene* scene) const
 {
-    GPU::GPUShapeData data = Shape::toGPU();
+    GPU::GPUShapeData data = Shape::toGPU(scene);
     data.type = GPU::GPUShapeEnum::Plane;
     data.normal = glm::vec3(normal.x(), normal.y(), normal.z());
     data.dist = distance;

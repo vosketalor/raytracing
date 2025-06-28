@@ -12,6 +12,7 @@ void SceneGPU::createShapes()
 
     auto sphere = std::make_shared<Sphere>(glm::vec3{0, 0, -3}, 1);
     sphere->setColor(Scene::YELLOW);
+    sphere->setTexture("res/textures/basketball.jpg");
     sphere->setMaterial(Material(0.3,0.7,1000,ETA_WATER, glm::vec3(2.95f, 2.38f, 1.71f), 0.1));
     this->addShape(sphere);
 
@@ -22,6 +23,7 @@ void SceneGPU::createShapes()
 
     sphere = std::make_shared<Sphere>(glm::vec3{2, 0, -4}, 1);
     sphere->setColor(Scene::BLUE);
+    sphere->setTexture("res/textures/beachball.jpg");
     sphere->setMaterial(Material(0.3,0,1000,1.8, glm::vec3(0.0),0.1, 0.5));
     this->addShape(sphere);
 

@@ -28,15 +28,16 @@ vec3 traceRay(Ray ray) {
             }
         }
 
+        //Texture
         vec3 color;
-//        if (shapes[hit.shapeIndex].hasTexture != 0) {
-//            vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
-//            color = getColorTexture(uv);
-//        } else {
-//            color = hit.color;
-//        }
-        vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
-        color = getColorTexture(uv);
+        if (shapes[hit.shapeIndex].hasTexture != 0) {
+            vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
+            color = getColorTexture(uv, shapes[hit.shapeIndex].textureIndex);
+        } else {
+            color = hit.color;
+        }
+//        vec2 uv = getTextureCoordinates(hit.point, hit.shapeIndex);
+//        color = getColorTexture(uv);
 
         GPUMaterial mat = materials[shapes[hit.shapeIndex].materialIndex];
 

@@ -5,6 +5,7 @@
 #include "Vector.h"
 #include "LightSource.h"
 #include "shapes/Shape.h"
+#include "textures/TextureAtlas.h"
 
 // Forward declarations
 // class Shape;
@@ -66,6 +67,8 @@ public:
 
     void setSkyColor(const glm::vec3& color);
     void setAmbient(const glm::vec3& ambient);
+
+    TextureAtlas texture_atlas;
 
     std::vector<std::shared_ptr<Shape>> getShapes() const { return shapes; }
     std::vector<std::shared_ptr<LightSource>> getLightSources() const { return lightSources; }

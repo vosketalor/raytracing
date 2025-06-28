@@ -31,7 +31,7 @@ private:
     GLuint bvhDataSSBO;
     GLuint pickSSBO;
     GLuint textureAtlas;
-    GLuint textureAtlasSSBO;
+    GLuint textureSSBO;
 
     Camera camera_;
     BVHNode bvh_;
@@ -72,6 +72,7 @@ private:
     std::string loadShaderWithIncludes(const std::string& filePath, const std::string& basePath, std::unordered_set<std::string>* includedFiles);
     void setupBuffers();
     void setUniform3f(GLuint program, const char* name, float x, float y, float z) const;
+    void setUniform2f(GLuint program, const char* name, float x, float y) const;
     void setUniform1f(GLuint program, const char* name, float value) const;
     void setUniform1i(GLuint program, const char* name, int value) const;
     void setUniform2i(GLuint program, const char* name, int x, int y) const;

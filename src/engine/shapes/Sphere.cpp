@@ -11,9 +11,9 @@ Sphere::Sphere(const glm::vec3& P, const float radius)
     // setBoundingBox();
 }
 
-GPU::GPUShapeData Sphere::toGPU() const
+GPU::GPUShapeData Sphere::toGPU(Scene* scene) const
 {
-    GPU::GPUShapeData data = Shape::toGPU();
+    GPU::GPUShapeData data = Shape::toGPU(scene);
     data.type = GPU::GPUShapeEnum::Sphere;
     data.center = glm::vec3(center.x, center.y, center.z);
     data.radius = radius;

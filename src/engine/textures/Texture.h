@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "Vector.h"
+#include "../Vector.h"
 
 /**
  * @brief Represents a 2D texture loaded from an image file.
@@ -20,6 +20,9 @@ private:
 
     /** Flag indicating if the texture was loaded successfully. */
     // bool isLoaded;
+
+protected:
+    explicit Texture() : data(nullptr), channels(0), width(0), height(0){};
 
 public:
     /** Pointer to the texture data */

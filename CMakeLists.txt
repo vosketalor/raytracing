@@ -97,14 +97,19 @@ add_executable(Raytracing
     ${IMGUI_SOURCES}
         src/engine/scenes/SceneFresnel.cpp
         src/engine/scenes/SceneFresnel.h
-        src/engine/Texture.cpp
-        src/engine/Texture.h
+        src/engine/textures/Texture.cpp
+        src/engine/textures/Texture.h
         src/engine/shapes/GPUShapeData.h
         src/engine/scenes/SceneGPU.cpp
         src/engine/scenes/SceneGPU.h
         src/engine/GPULightSource.h
         src/engine/GPUMaterial.h
         src/engine/acceleration/GPUBVHNode.h
+        src/engine/textures/SubTexture.h
+        src/engine/textures/TextureAtlas.cpp
+        src/engine/textures/TextureAtlas.h
+        external/stb_image.h
+        external/stb_image.cpp
 
 )
 

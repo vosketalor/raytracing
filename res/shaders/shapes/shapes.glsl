@@ -8,7 +8,7 @@ struct GPUShape {
     int materialIndex;  // 4 octets
     int wireframeEnabled;
     int hasTexture;       // 4 octets
-    float _pad5;        // 4 octets
+    int textureIndex;        // 4 octets
     // Fin bloc 2: 16 octets
 
     vec3 center;        // 12 octets
