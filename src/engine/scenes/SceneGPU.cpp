@@ -1,12 +1,13 @@
 #include "SceneGPU.h"
 
-#include "shapes/Plane.h"
+// #include "shapes/Plane.h"
 #include "shapes/Sphere.h"
+#include "shapes/Triangle.h"
 
 
 void SceneGPU::createShapes()
 {
-    auto plane = std::make_shared<Plane>(Vector3(0, 1, 0), 1);
+    auto plane = std::make_shared<Plane>(glm::vec3{0, 1, 0}, 1);
     plane->setMaterial(Material::PlasticRough);
     this->addShape(plane);
 
@@ -26,6 +27,13 @@ void SceneGPU::createShapes()
     sphere->setTexture("res/textures/beachball.jpg");
     sphere->setMaterial(Material(0.3,0,1000,1.8, glm::vec3(0.0),0.1, 0.5));
     this->addShape(sphere);
+
+    auto triangle = std::make_shared<Triangle>(
+        glm::vec3{-1, 0, -4},
+        glm::vec3{0, 3, -4},
+        glm::vec3{1, 0, -4});
+    triangle->setColor(Scene::ORANGE);
+    this->addShape(triangle);
 
     // int nb = 10;
     // for (int i = -nb; i < nb; ++i)

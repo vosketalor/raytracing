@@ -1,28 +1,30 @@
 #include "Plane.h"
 
 #include "acceleration/BoundingBox.h"
-//
-// #include "../acceleration/BoundingBox.h"
-// #include "../scenes/Scene.h"
-//
-Plane::Plane(const Vector3& n, const float d)
-    : normal(n.normalized()), distance(d) {
-    // setBoundingBox();
+
+#include "../acceleration/BoundingBox.h"
+#include "../scenes/Scene.h"
+
+Plane::Plane(const glm::vec3& n, float d)
+        : normal(glm::normalize(n)), distance(d) {
+    Plane::setBoundingBox();
 }
 
-Plane::Plane(const Vector3& P, const Vector3& n)
-    : normal(n.normalized()), distance(-normal.dot(P)) {
-    // setBoundingBox();
+Plane::Plane(const glm::vec3& P, const glm::vec3& n)
+    : normal(glm::normalize(n)), distance(-glm::dot(glm::normalize(n), P)) {
+    Plane::setBoundingBox();
 }
 
-Plane::Plane(const Vector3& C, const Vector3& v1, const Vector3& v2)
-    : Plane(C, v1.cross(v2).normalized()) {}
+Plane::Plane(const glm::vec3& C, const glm::vec3& v1, const glm::vec3& v2)
+    : Plane(C, glm::normalize(glm::cross(v1, v2))) {
+    // setBoundingBox();
+}
 
 GPU::GPUShapeData Plane::toGPU(Scene* scene) const
 {
     GPU::GPUShapeData data = Shape::toGPU(scene);
     data.type = GPU::GPUShapeEnum::Plane;
-    data.normal = glm::vec3(normal.x(), normal.y(), normal.z());
+    data.normal = glm::vec3(normal.x, normal.y, normal.z);
     data.dist = distance;
     return data;
 }

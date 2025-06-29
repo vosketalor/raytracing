@@ -1,18 +1,28 @@
-// #include "Triangle.h"
-// #include <algorithm> // for std::min/std::max
+#include "Triangle.h"
+#include <algorithm> // for std::min/std::max
+
+#include "acceleration/BoundingBox.h"
+#include "scenes/Scene.h"
 //
-// #include "acceleration/BoundingBox.h"
-// #include "scenes/Scene.h"
+Triangle::Triangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C)
+    : Plane(A, B - A, C - A), A(A), B(B), C(C)//, hasUV(false)
+{
+    Triangle::setBoundingBox();
+}
 //
-// Triangle::Triangle(const Vector3& A, const Vector3& B, const Vector3& C)
-//     : Plane(A, B - A, C - A), A(A), B(B), C(C), hasUV(false)
-// {
-//     Triangle::setBoundingBox();
-// }
-//
-// std::vector<Vector3> Triangle::getVertices() const {
-//     return {A, B, C};
-// }
+std::vector<glm::vec3> Triangle::getVertices() const {
+    return {A, B, C};
+}
+
+GPU::GPUShapeData Triangle::toGPU(Scene* scene) const
+{
+    GPU::GPUShapeData data = Plane::toGPU(scene);
+    data.type = GPU::GPUShapeEnum::Triangle;
+    data.A = A;
+    data.B = B;
+    data.C = C;
+    return data;
+}
 //
 // Intersection Triangle::getIntersection(const Vector3& P, const Vector3& v) const {
 //     if (!visible) return Intersection();
@@ -68,11 +78,12 @@
 // //     Plane::rotate(angle, axis);
 // // }
 //
-// void Triangle::setBoundingBox() {
-//     const Vector3 minV = A.min(B).min(C);
-//     const Vector3 maxV = A.max(B).max(C);
-//     boundingBox = std::make_shared<BoundingBox>(minV, maxV);
-// }
+
+void Triangle::setBoundingBox() {
+    glm::vec3 minV = glm::min(A, glm::min(B, C));
+    glm::vec3 maxV = glm::max(A, glm::max(B, C));
+    boundingBox = std::make_shared<BoundingBox>(minV, maxV);
+}
 //
 // Vector2 Triangle::getTextureCoordinates(const Vector3& intersection) const {
 //     if (!hasUV) {

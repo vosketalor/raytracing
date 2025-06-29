@@ -5,7 +5,7 @@ namespace GPU
 {
     enum GPUShapeEnum
     {
-        Sphere, Plane, Triangle, OBJ, BoundingBox
+        Sphere, Plane, Triangle, OBJ
     };
 
 #pragma pack(push, 1)
@@ -18,11 +18,23 @@ namespace GPU
         float pad1_=0;           // 4 octets
         int textureIndex=-1;            // 4 octets
 
+        //Sphere
         glm::vec3 center=glm::vec3(0,0,0);       // 12 octets
         float radius=0;           // 4 octets
 
+        //Plane
         glm::vec3 normal=glm::vec3(0,0,0);       // 12 octets
         float dist=0;             // 4 octets
+
+        //Triangle
+        glm::vec3 A = glm::vec3(0,0,0);
+        float pad2_=0;
+
+        glm::vec3 B = glm::vec3(0,0,0);
+        float pad3_=0;
+
+        glm::vec3 C = glm::vec3(0,0,0);
+        float pad4_=0;
     };
 #pragma pack(pop)
     static_assert(sizeof(GPUShapeData) % 16 == 0, "Doit être aligné sur 16 octets");

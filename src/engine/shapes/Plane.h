@@ -29,12 +29,12 @@
 
 class Plane : public Shape {
 protected:
-    Vector3 normal;
+    glm::vec3 normal;
     float distance;
 public :
-    Plane(const Vector3& n, const float d);
-    Plane(const Vector3& P, const Vector3& n);
-    Plane(const Vector3& C, const Vector3& v1, const Vector3& v2);
+    Plane(const glm::vec3& n, const float d);
+    Plane(const glm::vec3& P, const glm::vec3& n);
+    Plane(const glm::vec3& C, const glm::vec3& v1, const glm::vec3& v2);
     GPU::GPUShapeData toGPU(Scene* scene) const override;
     void setBoundingBox() override;
 };

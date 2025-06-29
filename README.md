@@ -20,7 +20,6 @@ The raytracer simulates light transport to generate realistic images from 3D sce
 - Shape
   - OBJ
   - Triangle
-- Textures
 - Animations
 - Multiple types of maps: https://3dstudio.co/3d-texture-mapping/
   - Height map
@@ -35,11 +34,11 @@ The raytracer simulates light transport to generate realistic images from 3D sce
   - MSAA
   - FXAA
 - True HDR
-- Global Illumnation
+- Global Illumination
 - Multiple types of lights
-  - Spot Light
+  - Spotlight
   - Ambient Light
-  - Sun Light
+  - Sunlight
   
 ## Build Instructions
 
