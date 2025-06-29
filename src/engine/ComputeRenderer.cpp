@@ -197,6 +197,7 @@ int ComputeRenderer::pick(const int mouseX, const int mouseY) const {
 
     // 4) Lecture CPU
     int pickedID = -1;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, pickSSBO);
     glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &pickedID);
     return pickedID;
 }
