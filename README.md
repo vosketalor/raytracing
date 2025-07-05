@@ -19,7 +19,6 @@ The raytracer simulates light transport to generate realistic images from 3D sce
 ## Possibles extensions
 - Shape
   - OBJ
-  - Triangle
 - Animations
 - Multiple types of maps: https://3dstudio.co/3d-texture-mapping/
   - Height map

@@ -280,15 +280,35 @@ int main(const int argc, char *argv[])
             const int shapeId = application.renderer.pick(texX, texY);
             if (shapeId >= 0 && shapeId < application.renderer.scene->getShapes().size())
             {
-                if (lastShape != nullptr)
+                Shape* selectedShape = application.renderer.scene->getShapes()[shapeId].get();
+
+                if (lastShape && lastShape != selectedShape)
+                {
+                    lastShape->setWireframeEnabled(false); // Désactive l'ancien
+                }
+
+                if (lastShape == selectedShape)
+                {
+                    // On re-clique sur le même : toggle off
+                    lastShape->setWireframeEnabled(false);
+                    lastShape = nullptr;
+                }
+                else
+                {
+                    selectedShape->setWireframeEnabled(true);
+                    lastShape = selectedShape;
+                }
+            } else
+            {
+                if (lastShape)
                 {
                     lastShape->setWireframeEnabled(false);
+                    lastShape = nullptr;
                 }
-                lastShape = application.renderer.scene->getShapes()[shapeId].get();
-                lastShape->setWireframeEnabled(true);
-                application.renderer.updateSceneData();
-                performRender(application, application.renderWidth, application.renderHeight);
             }
+
+            application.renderer.updateSceneData();
+            performRender(application, application.renderWidth, application.renderHeight);
 
             leftMousePressed = false;
         }
