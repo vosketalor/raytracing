@@ -69,6 +69,7 @@ public:
     ImVec2 imgScreenOrigin;  // coin haut‑gauche de l'image sur l'écran (pixels GLFW/OS)
     ImVec2 imgScreenSize;    // taille de l'image à l'écran
 
+    Shape* lastShape = nullptr;
 
 private:
 public:

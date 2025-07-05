@@ -60,6 +60,8 @@ set(IMGUI_SOURCES
         src/preferences/PreferenceManager.cpp
         src/preferences/PreferenceManager.h
         external/json.hpp
+        src/gui/windows/InspectorWindow.cpp
+        src/gui/windows/InspectorWindow.h
 )
 
 add_executable(Raytracing

@@ -32,7 +32,6 @@ static double lastMouseX = 0.f;
 static double lastMouseY = 0.f;
 static double mouseXf, mouseYf = 0.f;
 constexpr float mouseSensitivity = 1.f;
-Shape* lastShape = nullptr;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -282,28 +281,28 @@ int main(const int argc, char *argv[])
             {
                 Shape* selectedShape = application.renderer.scene->getShapes()[shapeId].get();
 
-                if (lastShape && lastShape != selectedShape)
+                if (application.lastShape && application.lastShape != selectedShape)
                 {
-                    lastShape->setWireframeEnabled(false); // Désactive l'ancien
+                    application.lastShape->setWireframeEnabled(false); // Désactive l'ancien
                 }
 
-                if (lastShape == selectedShape)
+                if (application.lastShape == selectedShape)
                 {
                     // On re-clique sur le même : toggle off
-                    lastShape->setWireframeEnabled(false);
-                    lastShape = nullptr;
+                    application.lastShape->setWireframeEnabled(false);
+                    application.lastShape = nullptr;
                 }
                 else
                 {
                     selectedShape->setWireframeEnabled(true);
-                    lastShape = selectedShape;
+                    application.lastShape = selectedShape;
                 }
             } else
             {
-                if (lastShape)
+                if (application.lastShape)
                 {
-                    lastShape->setWireframeEnabled(false);
-                    lastShape = nullptr;
+                    application.lastShape->setWireframeEnabled(false);
+                    application.lastShape = nullptr;
                 }
             }
 

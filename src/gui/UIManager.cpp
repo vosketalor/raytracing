@@ -7,6 +7,7 @@
 #include "Application.h"
 #include <algorithm>
 
+#include "windows/InspectorWindow.h"
 #include "windows/MenuBar.h"
 
 
@@ -17,6 +18,7 @@ void UIManager::initialize() {
     addWindow(std::make_unique<StatisticsWindow>(m_renderer));
     addWindow(std::make_unique<ResolutionWindow>(m_renderer));
     addWindow(std::make_unique<RendererWindow>(m_renderer));
+    addWindow(std::make_unique<InspectorWindow>(m_renderer));
     addWindow(std::make_unique<MenuBar>(m_renderer));
 }
 

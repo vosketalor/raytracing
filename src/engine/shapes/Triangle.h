@@ -5,12 +5,12 @@
 // #include "Intersection.h"
 //
 class Triangle : public Plane {
-protected:
+public:
     glm::vec3 A, B, C;
     // glm::vec3 uvA, uvB, uvC;
     // bool hasUV = false;
 
-public:
+
     Triangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C);
 
     std::vector<glm::vec3> getVertices() const;

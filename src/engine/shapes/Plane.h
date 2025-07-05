@@ -28,10 +28,10 @@
 #include "Shape.h"
 
 class Plane : public Shape {
-protected:
+public :
     glm::vec3 normal;
     float distance;
-public :
+
     Plane(const glm::vec3& n, const float d);
     Plane(const glm::vec3& P, const glm::vec3& n);
     Plane(const glm::vec3& C, const glm::vec3& v1, const glm::vec3& v2);
